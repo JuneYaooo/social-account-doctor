@@ -1,6 +1,6 @@
 ---
 name: account-diagnostic
-description: 小红书 / 抖音 / 快手 自媒体「找对标 → 拆爆款 → 套自己」三命令闭环。给我的账号或选题方向，吐出"可发的下一条笔记初稿"。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。
+description: 小红书 / 抖音 / 快手 / 视频号 自媒体「找对标 → 拆爆款 → 套自己」三命令闭环。给我的账号或选题方向，吐出"可发的下一条笔记初稿"。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。
 ---
 
 # account-diagnostic — 找对标 / 拆爆款 / 套自己
@@ -22,7 +22,7 @@ description: 小红书 / 抖音 / 快手 自媒体「找对标 → 拆爆款 →
 [选定对标]
        │
        ▼ ② crack
-[每条 4 行：钩子句 / 三段骨架 / 封面公式 / 标签组合]
+[每条 4 维钩子拆解（视觉/文字/口播/剧情）+ 综合权重 + 骨架 + 封面 + 标签]
        │
        ▼ ③ adapt
 [3 标题 + 3 封面大字 + 1 段首段 + 1 个 CTA]  → 可发
@@ -70,25 +70,30 @@ description: 小红书 / 抖音 / 快手 自媒体「找对标 → 拆爆款 →
 
 #### Step 2 生成搜索词矩阵
 
-5 个本质维度交叉组合 → **4-6 个搜索词组合短语**：
+5 个本质维度交叉组合 → **4-6 个搜索词**：
 
 ```
-维度1 + 维度4：「AI 萌宠 + 传统手工艺」
-维度1 + 维度2：「拟人动物 + 老家美食」
-维度4 + 维度5：「动画角色 + 慢节奏教程」
-维度3 + 维度5：「治愈系 + 反差萌教程」
+维度1：「AI萌宠」  / 「拟人猫」  / 「萌宠成精」
+维度2：「乡村美食」/ 「老家味道」/ 「童年回忆」
+维度3：「治愈」    / 「烟火气」
+维度4：「教程」    / 「手作」
+维度5：「反差萌」  / 「猫师傅」
 ```
 
-⚠️ **铁律**：**禁止用单一关键词**（如"东北大酱"）— 会搜出真人主播假对标。一定是组合。
+⚠️ **铁律**：搜索词 = **单一 2-4 字本质维度词**。
+- 不要用宽泛选题词（"东北大酱"会搜出真人假对标）
+- 不要带空格组合（"猫师傅 美食" 在 V1/V2 接口会 HTTPStatusError，要拆成 4-6 个单词分次搜）
 
 #### Step 3 矩阵词并行搜索
 
 每个矩阵词调一次 search → 按互动量倒序取 top 10 → 汇总到候选池（20-50 条，去重）。
 
 工具：
-- 小红书 `xiaohongshu_app_v2_search_notes`
+- 小红书 `xiaohongshu_app_search_notes`（V1 优先，V2 当 fallback）
 - 抖音 `douyin_app_v3_fetch_video_search_result_v2`
 - 快手 `kuaishou_app_search_video_v2`
+
+**接口失败兜底**：连续 3 次 retry 失败 → 不再硬刚，让用户手甩 3-5 个对标链接 → 直接 `fetch_feed_notes_v2`（这条最稳）→ 跳到 crack。
 
 #### Step 4 多模态相似度过滤（必跑多模态）
 
@@ -119,34 +124,43 @@ description: 小红书 / 抖音 / 快手 自媒体「找对标 → 拆爆款 →
 1 个或 N 个对标爆款链接（一般是 find 勾选出来的）。
 
 ### 输出
-对每条**只**吐 4 行（不写诊断报告，不打分，只罗列**可抄元素**）：
+对每条吐 **4 维钩子拆解 + 3 行结构元素**（不写诊断报告，不打分，只罗列**可抄元素**）：
 
 ```
-对标：@xxx 的「东北橘猫做大酱」(50w 赞)
+对标：@xxx 的「东北橘猫做大酱」(50w 赞 / 1.2k 评 / 30s)
 
-钩子句：「今天咱做东北老酱块子」+ AI 拟人萌宠首帧抓眼
+钩子（4 维拆解）：
+├ 视觉钩：拟人猫脸大特写 + 田间背景，0.5s 内出"猫看着你"的目光
+├ 文字钩：封面中部一行字（OCR bbox 366,604,546x71）+ 标题「人！」感叹号
+├ 口播钩：「人！其实快乐很简单，跟me下乡吧！」— 拟人猫"对人喊话"的反差
+├ 剧情钩：第一秒就破壁（猫张嘴说"人！"）— 把"猫"和"观众"的层级倒过来
+└ 综合：视觉 ×0.4 + 口播 ×0.6 = 治愈系反差钩  ← 主驱动力
+
 骨架：原料展示 → 工艺过程 → 成品 → 情绪升华（4 段，命中骨架 A 场景+冲突+解决）
-封面公式：D 实物展示 + 暖色高对比 + 主体居中（无大字）
+封面公式：D 实物展示 + 暖色高对比 + 主体居中（无大字）  [🟢 跑了 multimodal / ⚪ 推断]
 标签组合：#AI萌宠 #东北美食 #怀旧 #反差萌（4-5 个）
+复用提示：[一句话 — 这条最值得抄的一个具体动作]
 ```
+
+**为什么 4 维**：钩子不是"那一句标题"，而是视觉+文字+口播+剧情的整体开场设计。综合权重决定仿写时的精力分配方向（哪一维占比 ≥ 0.5 = 死磕那一维）。
 
 ### 钩子积累（可选，必须问 — 不要自动存）
 
-crack 跑完所有对标后，把钩子句汇总打给用户看，主动问：
+crack 跑完所有对标后，把**完整 4 维钩子单元**（不是单句）汇总打给用户看，主动问：
 
 ```
-本次 crack 提取了 N 条钩子句：
-  1. 「今天咱做东北老酱块子」(@xxx, 50w 赞, 反差萌)
-  2. 「我的老家就住在这个屯」(@xxx, 32w 赞, 怀旧)
+本次 crack 提取了 N 条 4 维钩子单元：
+  1. @xxx「跟me下乡」(9k 赞, 治愈系反差钩, 主驱动力=口播 0.6)
+  2. @yyy「比熊求职」(13k 赞, 共鸣型反差钩, 主驱动力=文字 0.7)
   ...
 
 要积累到 ./assets/hooks-{platform}.md 吗？
-  - yes：全部追加
-  - no：本次不存（默认）
+  - yes：4 维拆解格式全存
   - "1,3"：只存指定条
+  - no：本次不存（默认）
 ```
 
-**只有用户明确说要存**，才 `mkdir -p ./assets` + 追加（按情绪锚点 / 反差点分类，追加不覆盖）。
+**只有用户明确说要存**，才 `mkdir -p ./assets` + 追加（按**情绪锚点**分类，再按**主驱动力**二级索引；追加不覆盖；首次创建时建好"索引 + 速查"骨架）。
 **不要默认存** — 自动堆出来的钩子库都是垃圾，库的价值在于人工把关。
 
 ### crack 用到的术语
@@ -227,9 +241,9 @@ CTA（命中互动钩子模板）：
 ### tikhub MCP（按平台 × 任务）
 | 任务 | 小红书 | 抖音 | 快手 |
 |---|---|---|---|
-| **find Step 3 关键词搜** | `xiaohongshu_app_v2_search_notes` | `douyin_app_v3_fetch_video_search_result_v2` | `kuaishou_app_search_video_v2` |
+| **find Step 3 关键词搜** | `xiaohongshu_app_search_notes`（V1 优先） | `douyin_app_v3_fetch_video_search_result_v2` | `kuaishou_app_search_video_v2` |
 | **find Step 5 账号信息** | `xiaohongshu_web_v2_fetch_user_info` | `douyin_web_handler_user_profile` | `kuaishou_app_fetch_one_user_v2` |
-| **crack 笔记/视频详情** | `xiaohongshu_web_v2_fetch_feed_notes_v2` | `douyin_app_v3_fetch_one_video` | `kuaishou_app_fetch_one_video` |
+| **crack 笔记/视频详情（最稳兜底）** | `xiaohongshu_web_v2_fetch_feed_notes_v2` | `douyin_app_v3_fetch_one_video` | `kuaishou_app_fetch_one_video` |
 | **crack 拿封面/视频** | `xiaohongshu_web_v2_fetch_note_image` | `douyin_app_v3_fetch_video_high_quality_play_url` | `kuaishou_app_fetch_one_video`（含 play_url） |
 | **crack 拿评论** | `xiaohongshu_web_v2_fetch_note_comments` | `douyin_app_v3_fetch_video_comments` | `kuaishou_app_fetch_one_video_comment` |
 | **解析分享链接** | `xiaohongshu_web_get_note_id_and_xsec_token` | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` |
@@ -247,14 +261,16 @@ CTA（命中互动钩子模板）：
 ## 8. 关键铁律
 
 1. **find 必须 5 步走**：本质识别 → 矩阵搜 → 多模态过滤 → 体量过滤 → 人工勾选。任何一步都不能省。
-2. **不要单关键词搜对标**。永远是 4-6 个组合矩阵。
-3. **crack 不写诊断报告**，只吐 4 行可抄元素清单。
-4. **adapt 必须命中 scoring-vocab.md 公式**，且必须标注"抄了什么 + 改了什么"。
-5. **诊断不主推**。除非用户明确说"为什么不爆"，否则不要走 L2。
-6. **multimodal 不省**：find Step 1 看我的、find Step 4 看候选 — 都要调。token 贵但不能省。
-7. **完整闭环跑完才落盘**，半成品只在对话里说。
-8. **钩子库要问过用户才追加**。crack 完成后主动问"要存吗"，用户答 yes 才写 `assets/hooks-{platform}.md`。**禁止自动追加** — 自动堆出来的库都是垃圾，库价值在人工把关。
-9. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
+2. **不要单一宽泛词搜对标**（如"东北大酱"）。永远是 4-6 个本质维度词矩阵。
+3. **search 关键词必须是单一中文词，2-4 字最稳，禁止空格组合**（带空格的组合词在 V1/V2 接口都易 HTTPStatusError — 拆成多个单词分次搜更稳）。
+4. **crack 输出 4 维钩子拆解**（视觉/文字/口播/剧情 + 综合权重），不是单句钩子。综合权重决定仿写时的精力分配。
+5. **adapt 必须命中 scoring-vocab.md 公式**，且必须标注"抄了什么 + 改了什么"。
+6. **诊断不主推**。除非用户明确说"为什么不爆"，否则不要走 L2。
+7. **multimodal 不省**：find Step 1 看我的、find Step 4 看候选 — 都要调。token 贵但不能省。
+   - 退化兜底：当 `fetch_note_image` 不可用时，可以用 `feed_notes_v2` 返回里的 `video_info_v2.media.video.bbox.ocr_v2/v3` 字段（含封面文字位置）+ desc + 标签推断封面公式，**必须明文标 ⚪ 推断 / 🟢 高可信**。
+8. **完整闭环跑完才落盘**，半成品只在对话里说。
+9. **钩子库要问过用户才追加**。crack 完成后主动问"要存吗"，用户答 yes 才写 `assets/hooks-{platform}.md`，按 4 维拆解格式存（不是单句）。**禁止自动追加**。
+10. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
 
    **开干前必做**：列出本次任务依赖的工具，逐个 ping。
    - `find` 依赖：tikhub MCP（对应平台）+ analyze_image.py + analyze_video.py

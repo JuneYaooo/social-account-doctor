@@ -341,11 +341,14 @@ mcp__tikhub-kuaishou__kuaishou_app_fetch_one_video(photo_id=...)
 > **每个平台都有自己的子手册**，里面有：阈值表、工具映射、6 维评分细则、行动建议清单。
 > Claude 读完本节先跳到对应 platforms/*.md 加载平台细节，再继续报告。
 
-| 平台 | 子手册 | 主逻辑 1 | 主逻辑 2 |
-|---|---|---|---|
-| 抖音 | [platforms/douyin.md](platforms/douyin.md) | **5s完播率诊断**（行业合格线 ~50%） | **钩子诊断**（前 3 帧 + 首句口播） |
-| 小红书 | [platforms/xiaohongshu.md](platforms/xiaohongshu.md) | **CES + 封面 CTR 诊断** | **搜索分发诊断**（近 70% 月活有搜索行为） |
-| 快手 | [platforms/kuaishou.md](platforms/kuaishou.md) | **完播 + 关注转化率诊断**（老铁经济） | **同城分发 + 评论质量诊断** |
+| 平台 | 子手册 | ⭐ 算法核心信号（命门） | 主逻辑 1 | 主逻辑 2 |
+|---|---|---|---|---|
+| 抖音 | [platforms/douyin.md](platforms/douyin.md) | **完播率**（5s → 全程） | 5s完播率诊断（行业合格线 ~50%） | 钩子诊断（前 3 帧 + 首句口播） |
+| 小红书 | [platforms/xiaohongshu.md](platforms/xiaohongshu.md) | **互动率**（CES：评 / 转 / 关高权重） | CES + 封面 CTR 诊断 | 搜索分发诊断（近 70% 月活有搜索行为） |
+| 快手 | [platforms/kuaishou.md](platforms/kuaishou.md) | **跳出 / 留存 + 关注转化** | 完播 + 关注转化率诊断（老铁经济） | 同城分发 + 评论质量诊断 |
+| 视频号 | [platforms/wechat-channels.md](platforms/wechat-channels.md) | **分享率**（社交关系链分发） | 分享率诊断（4 种分享触发点） | 三段式分发诊断（关注页 → 朋友推荐 → 机器推荐） |
+
+⭐ **诊断铁律**：差距 ≥ 1 档时**优先修该平台的核心信号项**，再修其他维度。每个平台 §0.5 顶部有 T0/T1 速查表，第一屏可见。
 
 **⚠️ 阈值数据来源声明**：本 skill 所有平台阈值（完播率/CTR/CES/互动率等）均为 **行业经验值**（来自蝉妈妈/千瓜/新红/新浪财经 COO 公开演讲等多源），**非平台官方公告**。具体出处见各 platforms/*.md 顶部的"数据来源"小节。诊断时用作"方向判断"，不是"绝对死线"。
 
