@@ -254,6 +254,29 @@ CTA（命中互动钩子模板）：
 6. **multimodal 不省**：find Step 1 看我的、find Step 4 看候选 — 都要调。token 贵但不能省。
 7. **完整闭环跑完才落盘**，半成品只在对话里说。
 8. **钩子库要问过用户才追加**。crack 完成后主动问"要存吗"，用户答 yes 才写 `assets/hooks-{platform}.md`。**禁止自动追加** — 自动堆出来的库都是垃圾，库价值在人工把关。
+9. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
+
+   **开干前必做**：列出本次任务依赖的工具，逐个 ping。
+   - `find` 依赖：tikhub MCP（对应平台）+ analyze_image.py + analyze_video.py
+   - `crack` 依赖：tikhub MCP（笔记/视频/评论详情）+ multimodal 脚本
+   - `adapt` 依赖：纯 LLM（无外部依赖）
+   - L2 完整诊断依赖：tikhub MCP（搜对标 + 账号信息）+ multimodal
+
+   **缺哪个明说哪个**（在第一句话就说，不要默默缩范围）：
+
+   ```
+   ⚠️ 本次需要 mcp__tikhub-小红书__* 工具，当前会话没注册。
+
+   两个选择：
+   ① 在 settings.json 加 MCP（README Step 2），重启 Claude 后再来
+   ② 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
+   ```
+
+   **禁止偷工**：
+   - 跑了 1/3 不能说"诊断完成"
+   - 跑完后必须明文标注：「本次只完成 Layer X，因为 Y 工具不可用 / Y 数据缺失」
+   - **半成品不写盘**（不污染 reports/ 目录）
+   - 接口连续 3 次 retry 失败 → 视同工具不可用 → 进入上面的话术
 
 ---
 
