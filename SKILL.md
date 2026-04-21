@@ -415,6 +415,15 @@ mcp__tikhub-kuaishou__kuaishou_app_fetch_one_video(photo_id=...)
 
 ## 7. 输出格式（严格按这个模板）
 
+> **铁律**：完整诊断必须**同时**做两件事 — ① 在对话里输出报告给用户看；② 落盘到 `./reports/{platform}-{id}-{YYYYMMDD-HHMM}.md`（相对于当前工作目录）。
+>
+> - `{platform}` = `xhs` / `douyin` / `kuaishou`
+> - `{id}` = 笔记 ID（截图诊断用 `screenshot`）/ 账号 ID 末 8 位
+> - 文件路径示例：`./reports/xhs-2800ab54-20260421-1645.md`
+> - 写盘前用 `mkdir -p ./reports` 确保目录在
+> - 报告写完后必须告诉用户文件路径
+> - **半成品诊断不写盘**（接口失败、信息严重不全时只在对话里说明，避免污染报告目录）
+
 ```markdown
 # 账号诊断报告 — @[账号名]
 

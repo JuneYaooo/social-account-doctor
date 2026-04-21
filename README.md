@@ -97,6 +97,34 @@ AUDIO_TRANSCRIPTION_MODEL=sensevoice
 pip install -r requirements.txt
 ```
 
+### 5. 验证安装（smoke test）
+
+```bash
+# 验证 Gemini 多模态通了（拿任意一张本地图片测）
+python3 scripts/analyze_image.py path/to/any.jpg
+
+# 验证 tikhub MCP 通了 — 在 Claude ​Code 里直接说：
+#   "搜小红书 测试"
+# 能返回笔记列表即 OK
+```
+
+---
+
+## 报告输出位置
+
+诊断完成后，Claude 会**同时**做两件事：
+
+1. 在对话里把完整报告打给你看
+2. 落盘到当前工作目录的 `./reports/{platform}-{id}-{YYYYMMDD-HHMM}.md`
+
+例如在 `~/projects/my-xhs-account/` 下问 Claude 诊断一条笔记，报告会存到：
+
+```
+~/projects/my-xhs-account/reports/xhs-2800ab54-20260421-1645.md
+```
+
+**建议**在你项目的 `.gitignore` 加一行 `reports/` — 报告里通常含截图链接或账号 ID，不一定想 commit。
+
 ---
 
 ## 仓库结构
