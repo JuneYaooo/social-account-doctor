@@ -122,7 +122,7 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
    → 拿标题 + 正文 + 标签 + 话题
 3. 提取所有出现的关键词（分词 / 命名实体）
 4. 算"目标关键词"在标题/正文/标签三处的出现次数
-5. 调 mcp__tikhub-xiaohongshu__xiaohongshu_app_v2_search_notes(keyword=目标词, sort_type=hot)
+5. 调 mcp__tikhub-xiaohongshu__xiaohongshu_app_search_notes(keyword=目标词, sort_type=general)
    → 看自己的笔记排在第几位（搜不到 = 关键词埋点失败）
 6. 对照 §3.2 搜索失败的四种典型根因
 ```
@@ -154,12 +154,13 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 > 首选 / Fallback。首选挂时按列依次重试。
 >
-> **⚠️ 硬规则（与 xhs-search skill 对齐）**：
-> - 任一工具返回 `RetryError[HTTPStatusError]` = TikHub 上游某个后端临时挂，**立刻切到 Fallback 列下一个**，**禁止在同一个工具上反复刷**（已经 tenacity 重试过 3 次了，再刷只会浪费时间 + 计费）
-> - 返回 `code != 200` 但有 `message` → 看 `message_zh`，是参数错 / 限流 / 余额不足，按提示改参数；不要当成"接口挂了"切 fallback
-> - 返回 `data.items` 为空 → 关键词无结果或被风控，换近义词、把 `sort_type` 从 `time` 降到 `general` / `popularity_descending`
-> - **app_v2_search_* 系列（走小红书 app `/api/sns/v10/search/*`）最近经常被 461 invalid sign 风控**，对标搜索遇到 RetryError 时优先切到 `xiaohongshu_web_v2_fetch_search_*` web 版（不同后端，故障常常只命中其中一个）
-> - ❌ **不要在搜索失败时立刻报错给用户** —— 先按 fallback 表至少换一次工具再说，三个 fallback 全挂才允许降级到"未实时拉到对标，改用本地经验对标"
+> **⚠️ 硬规则（实测 2026-04-21，与 SKILL.md §9 接口稳定性表对齐）**：
+> - **小红书所有 V2 接口（不论 app v2 还是 web v2）当前全挂**（RetryError[HTTPStatusError]）—— 直接用 V1，**不要再去试 V2,也不要"V2 失败切 web V2"**（旧建议已过时,实测两个都挂）
+> - 关键词搜笔记 = `xiaohongshu_app_search_notes`（App V1，唯一稳定）
+> - 关键词搜用户 = `xiaohongshu_web_search_users`（Web V1，唯一稳定 — 注意 App V1 `search_users` 也挂）
+> - 任一工具返回 `RetryError[HTTPStatusError]` = 直接按 SKILL.md §9 表换可用版本，**禁止在同一接口刷重试**（tenacity 已重试 3 次了，再刷只会浪费时间 + 计费）
+> - 返回 `code != 200` 但有 `message` → 看 `message_zh`，是参数错 / 限流 / 余额不足，按提示改参数；不要当成"接口挂了"换工具
+> - 返回 `data.items` 为空 → 关键词无结果或被风控，换近义词/降低 sort_type
 
 | 任务 | 首选 | Fallback |
 |---|---|---|
@@ -171,8 +172,8 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 | 笔记图片（封面+正文图） | `xiaohongshu_web_v2_fetch_note_image` | 从 `feed_notes_v2` 的 image_list 字段取 |
 | 笔记评论 | `xiaohongshu_web_v2_fetch_note_comments` | `xiaohongshu_web_get_note_comments` → `xiaohongshu_app_v2_get_note_comments` |
 | 评论子回复 | `xiaohongshu_web_v2_fetch_sub_comments` | `xiaohongshu_app_v2_get_note_sub_comments` |
-| 关键词搜笔记（找选题/对标作品） | `xiaohongshu_app_v2_search_notes` | `xiaohongshu_web_v2_fetch_search_notes` → `xiaohongshu_web_search_notes` |
-| 关键词搜用户（找对标账号） | `xiaohongshu_app_v2_search_users` | `xiaohongshu_web_v2_fetch_search_users` → `xiaohongshu_web_search_users` |
+| 关键词搜笔记（找选题/对标作品） | `xiaohongshu_app_search_notes`（App V1，**唯一稳**） | `xiaohongshu_web_search_notes`（Web V1，备用） — ❌ 不要试 V2 全挂 |
+| 关键词搜用户（找对标账号） | `xiaohongshu_web_search_users`（Web V1，**唯一稳**） | — ❌ App V1/V2 全挂,Web V2 也挂,没有备用 |
 | 热榜（蓝海期选题） | `xiaohongshu_web_v2_fetch_hot_list` | — |
 | 话题信息 + 话题笔记 | `xiaohongshu_app_v2_get_topic_info` + `_get_topic_feed` | — |
 | 分享链接解析 | `xiaohongshu_app_extract_share_info` | `xiaohongshu_web_get_note_id_and_xsec_token` |
@@ -198,7 +199,7 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 | 维度 | 小红书特化指引 |
 |---|---|
 | **账号定位** | 主页 9 宫格风格统一性 + 简介人群锁定 + 是否有"专攻 XX"的标签词 |
-| **选题角度** | **必须有搜索量背书**：调 `xiaohongshu_app_v2_search_notes` 验证目标词是否有 ≥ 100 笔记，避免无人搜的伪需求 |
+| **选题角度** | **必须有搜索量背书**：调 `xiaohongshu_app_search_notes` 验证目标词是否有 ≥ 100 笔记，避免无人搜的伪需求 |
 | **封面公式** | 套 SKILL.md §5.1 五种封面（A 大字报 / B 对比 / C 真人出镜 / D 实物展示 / E 表格截图）。**3:4 竖版 + 大字 ≥ 1/4 + 高对比** 是基本功 |
 | **标题钩子** | 套 SKILL.md §5.2 10 公式 + **强制带核心关键词**（前 10 字内）+ 数字/emoji/【】 |
 | **正文骨架** | **首段 30 字内出钩子**（提问/承诺/反差）→ 3-5 个分点（emoji 分隔）→ 结尾互动引导 + 标签 |
@@ -218,7 +219,7 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 ### P1（本月调 — 系统性短板）
 
 - [ ] 封面 5 变量评分对标差距 ≥ 2 → 全账号封面统一改造（用 analyze_image 跑 top 3 对标，提炼共性模板）
-- [ ] 选题维度差距 ≥ 2 → 用 `xiaohongshu_app_v2_search_notes` 扫赛道 top 50，提炼 10 个搜索量 ≥ 1000 的选题模板
+- [ ] 选题维度差距 ≥ 2 → 用 `xiaohongshu_app_search_notes` 扫赛道 top 50，提炼 10 个搜索量 ≥ 1000 的选题模板
 - [ ] CES 分项诊断：转发 < 点赞 × 0.05 → 改句式为"避坑/拯救/我帮你做完了"
 
 ### P2（季度沉淀）

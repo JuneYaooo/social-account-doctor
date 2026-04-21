@@ -1,6 +1,45 @@
 # Changelog
 
+## v0.2.4 — 2026-04-21
+
+实战发现并修复:**小红书所有 V2 接口当前全挂,只用 V1**。整套 skill 内部口径不一致问题彻底解决。
+
+### 修复 — 小红书接口稳定性（实证 2026-04-21）
+
+实证结果（4 个搜索接口 × 笔记/用户两类 = 8 次 ping）:
+
+| 工具 | 状态 |
+|---|---|
+| `xiaohongshu_app_search_notes` (App V1) | ✅ 稳 |
+| `xiaohongshu_web_search_notes` (Web V1) | ✅ 稳 |
+| `xiaohongshu_web_search_users` (Web V1) | ✅ 稳 |
+| `xiaohongshu_app_v2_search_notes` (V2) | ❌ RetryError |
+| `xiaohongshu_web_v2_fetch_search_notes` (V2) | ❌ RetryError |
+| `xiaohongshu_app_v2_search_users` (V2) | ❌ RetryError |
+| `xiaohongshu_web_v2_fetch_search_users` (V2) | ❌ RetryError |
+| `xiaohongshu_app_search_users` (App V1) | ❌ RetryError（特例） |
+
+**根因**：原 skill 内部口径不一致 — SKILL.md 写"V1 优先",但 `references/platforms/xiaohongshu.md` 和 `scripts/dispatch_account.py` 都默认 V2; platforms 里还有"V2 失败切 web V2"的过时建议。诊断时容易误判"接口全挂"。
+
+### 改动
+
+- **SKILL.md 新增 §9 接口稳定性表** — 集中维护小红书可用/禁用接口清单 + 实测日期 + 复核周期（每月一次）。这是未来的唯一真相源。
+- **SKILL.md §3 / §7 接口名修正**：搜索默认 `xiaohongshu_app_search_notes`(V1),不再标"V2 fallback"
+- **`references/platforms/xiaohongshu.md`** 重写过时硬规则（删掉"V2 失败切 web V2"），fallback 表 search_notes / search_users 全改 V1
+- **`references/diagnostic-mode.md`** 4 处接口名 V2 → V1
+- **`scripts/dispatch_account.py`** 路由 search_notes V2→App V1,search_users V2→Web V1
+
+### 新增 — 限流注释
+
+- **当前 tikhub RPS 上限 = 10/s**（用户提供）
+- **建议并发 ≤ 3,串行更稳**
+- 触发限流时返回 `RetryError[HTTPStatusError]`,**与"接口本身不稳"报错一样,容易误判**
+- App V1 限流后冷却时间长；**Web V1 抗限流更强**,App V1 被限时优先切 Web V1（同样是 V1,不是 V2）
+
+---
+
 ## v0.2.3 — 2026-04-21
+
 
 3 处迭代 — 都来自实战暴露的盲区。
 

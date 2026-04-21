@@ -96,8 +96,8 @@
 
 | 方法 | 怎么用（直接调 tikhub MCP） |
 |---|---|
-| 同领域博主搜索 | `xiaohongshu_app_v2_search_users` / `douyin_app_v3_fetch_user_search_result` / `kuaishou_app_search_user_v2` |
-| 行业关键词搜笔记反查作者 | `xiaohongshu_app_v2_search_notes` / `douyin_app_v3_fetch_video_search_result_v2` / `kuaishou_app_search_video_v2` 按互动量倒序 |
+| 同领域博主搜索 | `xiaohongshu_web_search_users` / `douyin_app_v3_fetch_user_search_result` / `kuaishou_app_search_user_v2` |
+| 行业关键词搜笔记反查作者 | `xiaohongshu_app_search_notes` / `douyin_app_v3_fetch_video_search_result_v2` / `kuaishou_app_search_video_v2` 按互动量倒序 |
 | 平台热榜锁定头部 | `xiaohongshu_web_v2_fetch_hot_list` / `douyin_app_v3_fetch_hot_search_list` / `kuaishou_web_fetch_kuaishou_hot_list_v2` |
 | 关注页 + 推荐小三角 | 看自己/已知对标账号的"相似推荐",抖音用 `douyin_xingtu_v2_get_recommend_for_star_authors` |
 | 第三方数据工具 | 蝉小红 / 新红 / 灰豚数据,查赛道 top 100（人工） |
@@ -560,8 +560,8 @@ mcp__tikhub-kuaishou__kuaishou_app_fetch_one_video(photo_id=...)
 | 笔记图片 | `xiaohongshu_web_v2_fetch_note_image` | `note_id` |
 | 笔记评论 | `xiaohongshu_web_v2_fetch_note_comments` | `note_id` + `cursor` |
 | 评论子回复 | `xiaohongshu_web_v2_fetch_sub_comments` | `note_id` + `comment_id` |
-| 关键词搜笔记 | `xiaohongshu_app_v2_search_notes` | `keyword` + `sort_type` |
-| 关键词搜用户 | `xiaohongshu_app_v2_search_users` | `keyword` |
+| 关键词搜笔记 | `xiaohongshu_app_search_notes` | `keyword` + `sort_type` |
+| 关键词搜用户 | `xiaohongshu_web_search_users` | `keyword` + `page` |
 | 热榜 | `xiaohongshu_web_v2_fetch_hot_list` | — |
 | 话题信息 + 笔记 | `xiaohongshu_app_v2_get_topic_info` + `_get_topic_feed` | `page_id` |
 | 分享链接解析 | `xiaohongshu_app_get_user_id_and_xsec_token` / `xiaohongshu_web_get_note_id_and_xsec_token` | `share_link` |
