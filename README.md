@@ -1,10 +1,12 @@
 # social-account-doctor
 
-> 小红书 / 抖音 / 快手 自媒体「**找对标 → 拆爆款 → 套自己**」三命令闭环。
+> 小红书 / 抖音 / 快手 / 视频号 自媒体「**找对标 → 拆爆款 → 套自己**」三命令闭环。
 > 输入我的账号 / 选题方向 → 输出**可发的下一条笔记初稿**（标题 + 封面大字 + 首段 + CTA）。
 
 **不写诊断报告**（那是兜底）。**不挖钩子建仓库**（那是副产品）。
 直接对着具体爆款，告诉你下一条该怎么写。
+
+> **平台覆盖度**：小红书 ✅ / 抖音 ✅ / 快手 ✅ / 视频号 ✅（v0.2.5 加入，含 user_search 503 fallback、冷启失败号判定、赛道错位诊断；视频号没有可分享的链接/ID，入口只能走账号名搜索 — 详见 SKILL.md §7「视频号独立路径」）。
 
 ---
 
@@ -64,7 +66,31 @@ git clone https://github.com/JuneYaooo/social-account-doctor.git \
 
 申请 key：https://tikhub.io/
 
-在 Claude ​Code `settings.json` 的 `mcpServers` 里添加：
+**用 Claude Code CLI 一次性挂 4 个**（推荐）：
+
+```bash
+claude mcp add tikhub-xiaohongshu -- npx mcp-remote \
+  https://mcp.tikhub.io/xiaohongshu/mcp \
+  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+
+claude mcp add tikhub-douyin -- npx mcp-remote \
+  https://mcp.tikhub.io/douyin/mcp \
+  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+
+claude mcp add tikhub-kuaishou -- npx mcp-remote \
+  https://mcp.tikhub.io/kuaishou/mcp \
+  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+
+claude mcp add tikhub-wechat -- npx mcp-remote \
+  https://mcp.tikhub.io/wechat/mcp \
+  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+```
+
+挂完**重启 Claude** 才能看到工具。`tikhub-wechat` 同时覆盖**视频号 + 公众号**两套接口。
+
+> 💡 **省工具列污染**：如果你只做单平台诊断，按当前任务平台只挂对应那个 MCP（按需挂载），4 个全挂会污染其他任务的工具列表。
+
+或者直接编辑 `settings.json` 的 `mcpServers`：
 
 ```json
 {
@@ -82,6 +108,11 @@ git clone https://github.com/JuneYaooo/social-account-doctor.git \
     "tikhub-kuaishou": {
       "type": "http",
       "url": "https://mcp.tikhub.io/kuaishou/mcp",
+      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
+    },
+    "tikhub-wechat": {
+      "type": "http",
+      "url": "https://mcp.tikhub.io/wechat/mcp",
       "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
     }
   }
@@ -133,7 +164,7 @@ python3 scripts/analyze_image.py path/to/any.jpg
   {YYYYMMDD-HHMM}-adapt-{选题短码}.md          # 标题 + 封面 + 首段 + CTA → 可发
 
 ./assets/                                     # 副产品，跨任务累积
-  hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md
+  hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md / hooks-wechat-channels.md
 ```
 
 **建议**在你项目的 `.gitignore` 加 `reports/` — 报告里通常含账号/选题信息，不一定想 commit。
@@ -150,7 +181,7 @@ social-account-doctor/
 │   ├── scoring-vocab.md                # L3 评分词典（5 封面 / 10 标题 / 3 骨架 / 7 钩子）
 │   ├── diagnostic-mode.md              # L2 兜底诊断（"为什么不爆"才走这里）
 │   └── platforms/                      # 平台阈值数据（被 L2 调用）
-│       ├── xiaohongshu.md / douyin.md / kuaishou.md
+│       ├── xiaohongshu.md / douyin.md / kuaishou.md / wechat-channels.md
 └── scripts/                            # 多模态脚本
     ├── analyze_image.py                # 封面 → 5 变量 + 模板归类 + 钩子识别
     ├── analyze_video.py                # 视频 → talking/visual/keyframe 三模式自动路由
@@ -179,4 +210,4 @@ MIT © 2026 JuneYaooo
 ## 反馈与贡献
 
 - Issues：https://github.com/JuneYaooo/social-account-doctor/issues
-- 数字漂移上报 / 平台 API 失效 / 新平台贡献（B 站 / 视频号 / 公众号）都欢迎
+- 数字漂移上报 / 平台 API 失效 / 新平台贡献（B 站 / 公众号专项）都欢迎

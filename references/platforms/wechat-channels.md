@@ -129,30 +129,93 @@
 
 > tikhub-wechat MCP 同时覆盖**公众号（mp）+ 视频号（channels）**，接口齐全（视频详情 / 下载 / 搜索 / 用户 / 评论 / 公众号文章 / 阅读量）。
 
-| 任务 | 工具（端点路径） |
-|---|---|
-| 视频号视频详情 | `mcp__tikhub-wechat__*`（端点 `/api/v1/wechat_channels/fetch_video_detail`） |
-| 视频号下载链接 | `mcp__tikhub-wechat__*`（视频号下载 URL 生成） |
-| 视频号关键词搜索 | `mcp__tikhub-wechat__*`（视频号关键词搜索） |
-| 视频号用户主页 | `mcp__tikhub-wechat__*`（视频号用户信息 + 作品列表） |
-| 视频号视频评论 | `mcp__tikhub-wechat__*`（视频号评论 + 子评论） |
-| 视频号热门话题 | `mcp__tikhub-wechat__*`（视频号热榜） |
-| 公众号文章详情 + 阅读量 | `mcp__tikhub-wechat__*`（关联公众号变现链路诊断必查） |
-| 公众号文章评论 | `mcp__tikhub-wechat__*`（看私域承接质量） |
+### 4.0 工具一览（实测 2026-04-21）
 
-调用前用 `mcp__tikhub-wechat__*` 探查具体 schema（端点命名按 `wechat_channels_*` / `wechat_mp_*` 区分）。
+| 任务 | 工具 | 稳定性 |
+|---|---|---|
+| 视频号视频详情 | `mcp__tikhub-wechat__wechat_channels_fetch_video_detail`（`id` 优先 `exportId`） | ✅ 稳 |
+| 视频号关键词综合搜索 | `mcp__tikhub-wechat__wechat_channels_fetch_search_ordinary` | ✅ 稳 |
+| 视频号关键词最新搜索 | `mcp__tikhub-wechat__wechat_channels_fetch_search_latest` | 🟡 偶发 503，retry 1 次 |
+| 视频号账号搜索 | `mcp__tikhub-wechat__wechat_channels_fetch_user_search` | ❌ **高频 503**，必须 fallback（见 §4.2） |
+| 视频号用户主页 | `mcp__tikhub-wechat__wechat_channels_fetch_home_page` | 🟡 依赖 user_search，连带挂 |
+| 视频号视频评论 | `mcp__tikhub-wechat__wechat_channels_fetch_comments` | ✅ 稳 |
+| 视频号直播回放 | `mcp__tikhub-wechat__wechat_channels_fetch_live_history` | ✅ 稳（需 `username`） |
+| 视频号热门话题 | `mcp__tikhub-wechat__wechat_channels_fetch_hot_words` | ✅ 稳 |
+| 公众号文章详情（JSON） | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_detail_json` | ✅ 稳 |
+| 公众号文章阅读量 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_read_count` | ✅ 稳（需 `comment_id` 从 detail_json 拿） |
+| 公众号文章评论 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_comment_list` | ✅ 稳 |
+| 公众号文章列表 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_list`（需 `ghid`） | ✅ 稳 |
+| 公众号关联文章 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_related_articles` | ✅ 稳 |
+
+📅 复核周期：3 个月。下次实测：2026-07。
 
 ### 4.1 输入路由（视频号 ≠ 抖音/小红书）
 
 视频号**没有像抖音星图 / 小红书蒲公英那样的开放创作者后台 API** — 个人创作者只能从视频号助手 App 截图拿数据。所以实战中用户给的输入按下面优先级路由：
 
 ```
-1. 视频号链接 / 视频 ID  → 走 tikhub-wechat MCP 拉公开数据（互动数 / 评论 / 视频本体）
-2. 用户给的后台截图     → ocr_screenshot.py 提分享率 / 朋友点赞率 / 关注转化等私有指标
-3. 用户口述描述         → 直接做诊断，标注"未实测，基于描述推断"
+1. 视频号账号名 / 关键词       → 走 §4.2 锁定本号 → 拿 video id → tikhub-wechat MCP
+2. 用户给的后台截图           → ocr_screenshot.py 提分享率 / 朋友点赞率 / 关注转化等私有指标
+3. 用户口述描述               → 直接做诊断，标注"未实测，基于描述推断"
 ```
 
+⚠️ **不要等用户提供"视频号链接"** — 视频号客户端**只支持卡片分享，根本不输出 URL/视频 ID**。任何视频号任务唯一入口都是账号名/关键词搜索。
+
 ⭐ **铁律**：诊断视频号必须**至少拿到分享率**这一个数（命门指标）。如果用户给的截图没有，必须明确问："分享数 / 转发数是多少？" 不要凭点赞/播放反推 — 视频号的算法权重跟其他平台完全不同。
+
+### 4.2 user_search 503 兜底流程（**实战必背**）
+
+`user_search` 是 tikhub-wechat 里**最不稳定**的接口（实测 2026-04-21 高频 503）。锁定本号永远先走 `_search_ordinary`：
+
+```
+输入：账号名（如「哈吉老猫」）
+
+Step 1  wechat_channels_fetch_search_ordinary(keywords=账号名)
+        → 拿到 items[]，每条含 source.title / source.iconUrl
+
+Step 2  本号判定（必须双重校验，缺一不可）：
+        a. 剥掉 source.title 里的 <em class="highlight"> 高亮 HTML
+        b. 剥后字符串与目标账号名 **完全相等**（不是包含）
+        c. iconUrl 在多条本号视频间一致（同一个 finderhead URL）
+        → 满足 a+b+c 的才是真号
+
+Step 3  从该条拿 exportId / hashDocID
+        → wechat_channels_fetch_video_detail(exportId 或 id)
+        → 返回的 contact 节点里就有 nickname / username / feed_count / signature / live_status / ip_region
+
+Step 4  跳过 user_search，直接进诊断
+```
+
+**为什么不能只看 source.title 包含目标名**：搜索"哈吉老猫"会同时出"是哈吉仙人"、"哈基米"、"老猫成仙"等同主题号，包含关键字 ≠ 是本号。**真号常常只有 1 条**（综合搜索 12 条结果里只 1 条匹配）。
+
+### 4.3 冷启失败号秒判公式
+
+`video_detail` 返回里有两个杀手字段，组合使用可在**单次 API 调用**判定账号是否冷启失败：
+
+| 字段 | 来自 | 冷启失败信号 |
+|---|---|---|
+| `data.contact.feed_count` | video_detail | **= 1**（只发了 1 条 = 没有内容矩阵） |
+| `data.like_count` / `comment_count` / `forward_count` / `fav_count` | video_detail | **全 = 0**（21 天 0 互动 = 没进推荐池） |
+| `data.contact.signature` | video_detail | **= ""**（简介空 = 算法/用户都不知你是谁） |
+| `data.contact.live_status` | video_detail | `2` = 可开播但近期无直播 |
+
+**判定规则**：上述 4 项至少**命中 3 项** = 冷启失败号 → 直接出 P0 诊断，不需要再拉别的接口。
+
+### 4.4 赛道错位诊断（账号名 vs 内容预期）
+
+视频号有大量"借势热梗"的账号名（哈基米 / 哈吉 / 耄耋 / 老猫等），用户搜该账号名时**预期是猫梗短视频**。如果账号实际内容与名字暗示的预期错配，**会被算法 + 用户双重抛弃**：
+
+```
+诊断流程：
+1. 用 _search_ordinary(账号名) 看综合搜索 top 12 结果的内容类型分布
+   → 大多数是猫梗 / 耄耋 / AI 萌宠 → 这就是该名字的"赛道预期"
+2. 用 video_detail 看本号实际内容的 description + 标签
+3. 对比：内容主题 vs 赛道预期
+   - 命中 → 正常
+   - 完全错配（如名字暗示猫梗 / 实际发 AI 翻唱）→ P0 警告：要么改名，要么改内容
+```
+
+**实战案例**（2026-04 实测「哈吉老猫」）：账号名暗示猫梗赛道，搜索结果 12 条里 11 条是耄耋/哈基米/AI 胖猫；本号唯一作品是 AI 翻唱歌曲 → 完全错配 → 21 天 0 互动 → 冷启失败。修法：要么去"哈吉"前缀改成 AI 音乐人设，要么改拍真猫 + 哈基米梗。
 
 ---
 
