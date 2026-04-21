@@ -1,43 +1,59 @@
 # social-account-doctor
 
-> 小红书 / 抖音 / 快手「账号 + 内容」诊断引擎 — 截图 / 链接进，**「卡在哪一层 + 怎么调」** 的可执行报告出。
+> 小红书 / 抖音 / 快手 自媒体「**找对标 → 拆爆款 → 套自己**」三命令闭环。
+> 输入我的账号 / 选题方向 → 输出**可发的下一条笔记初稿**（标题 + 封面大字 + 首段 + CTA）。
 
-**不是** "AI 看了下你的账号觉得还行"，**是** **平台专属阈值 × 对标差距 × 可抄模板** 的三段式判决书。
-
-## 它能做什么
-
-| 输入 | 产出 |
-|---|---|
-| **一张笔记后台数据截图** | 漏斗自检 + 短板定位 + P0 行动清单 |
-| **截图 + 笔记/视频链接** | + 多模态拆解封面/视频 + CES 健康度 + 关键词搜索诊断 |
-| **账号链接（自己 + 对标）** | + 6 维评分 + 同赛道差距矩阵 + 可抄清单 |
-| **只给账号链接（没对标）** | 自动按"5k-50k 粉、同赛道、活跃"找候选 |
-
-覆盖三平台两大主诊断逻辑：
-- **抖音**：5s 完播率（行业合格线 ~50%）+ 钩子诊断（前 3 帧 + 首句口播）
-- **小红书**：CES + 封面 CTR + 搜索分发（COO 公开"近 70% 月活有搜索行为"）
-- **快手**：完播 + 关注转化率（老铁经济）+ 同城 + 评论质量
+**不写诊断报告**（那是兜底）。**不挖钩子建仓库**（那是副产品）。
+直接对着具体爆款，告诉你下一条该怎么写。
 
 ---
 
-## 怎么用
-
-这个 repo 是一个 **Claude Code skill**，挂载后用自然语言触发：
+## 闭环
 
 ```
-"帮我诊断这条笔记" + 截图 + 链接
-"看看我这个号该往哪个方向调" + 主页链接
-"我和这个对标账号差在哪" + 两个链接
-"帮我找几个对标账号分析" + 我方账号链接
+[我的账号 / 选题方向]
+       │
+       ▼ ① find  (多模态识别本质 → 矩阵搜 → 相似度过滤 → 人工勾选)
+[5-10 个真对标爆款]
+       │
+       ▼ ② crack  (每条 4 行：钩子 / 骨架 / 封面 / 标签)
+[可抄元素清单]
+       │
+       ▼ ③ adapt  (3 标题 + 3 封面大字 + 1 首段 + 1 CTA)
+[我的下一条笔记初稿]  →  发布  →  数据回收
 ```
 
-Claude 会自动跑：**输入路由 → tikhub 数据抓取 → Gemini 多模态拆解 → 三层诊断 → 行动建议**。
+---
+
+## 三个命令在 Claude 里怎么用
+
+| 你说 | Claude 走哪条 |
+|---|---|
+| "找对标"/"扫一下同赛道" + 我的账号链接 | **find** |
+| "拆这条爆款" + 笔记/视频链接 | **crack** |
+| "对着这条仿写" / "下一条该怎么写" | **crack + adapt** |
+| "我想发 XX 主题，缺爆款选题" | **find + crack + adapt**（全闭环） |
+| "为什么我这条不爆"/"完整诊断" | L2 兜底诊断（按需，不主推） |
+
+---
+
+## find 的 5 步（关键差异）
+
+| Step | 干什么 | 不能省 |
+|---|---|---|
+| 1 | 多模态识别我的"内容本质"（5 个抽象维度，不是表面词） | 必须 |
+| 2 | 5 维交叉生成 4-6 个搜索词矩阵（**禁止单关键词**） | 必须 |
+| 3 | 矩阵词并行 search → 候选池 20-50 条 | 必须 |
+| 4 | 候选池每条多模态过相似度（≥ 3 维相似才留） | 必须（这一步省了 = 表面假对标污染） |
+| 5 | 体量 + 活跃度过滤 → 5-10 个真对标 → 人工勾 3-5 条 | 必须 |
+
+**为什么这样**：单搜"东北大酱"会出一堆真人主播，和 AI 萌宠橘猫做大酱**形不像神不像**。本质识别才能找到"AI 拟人 + 怀旧 + 反差"的真同行。
 
 ---
 
 ## 安装
 
-### 1. 克隆为 Claude Code skill
+### 1. 克隆为 Claude ​Code skill
 
 ```bash
 git clone https://github.com/JuneYaooo/social-account-doctor.git \
@@ -48,19 +64,19 @@ git clone https://github.com/JuneYaooo/social-account-doctor.git \
 
 申请 key：https://tikhub.io/
 
-在 Claude Code `settings.json` 的 `mcpServers` 里添加（任选你需要的平台）：
+在 Claude ​Code `settings.json` 的 `mcpServers` 里添加：
 
 ```json
 {
   "mcpServers": {
-    "tikhub-douyin": {
-      "type": "http",
-      "url": "https://mcp.tikhub.io/douyin/mcp",
-      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
-    },
     "tikhub-xiaohongshu": {
       "type": "http",
       "url": "https://mcp.tikhub.io/xiaohongshu/mcp",
+      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
+    },
+    "tikhub-douyin": {
+      "type": "http",
+      "url": "https://mcp.tikhub.io/douyin/mcp",
       "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
     },
     "tikhub-kuaishou": {
@@ -72,17 +88,17 @@ git clone https://github.com/JuneYaooo/social-account-doctor.git \
 }
 ```
 
-### 3. 配置多模态分析（封面 / 视频 / 截图 OCR）
+### 3. 配置多模态分析
 
-复制 `.env.example` 为 `.env` 并填入：
+复制 `.env.example` 为 `.env`：
 
 ```bash
-# Gemini 3.1 Pro（OpenAI 兼容协议代理）— 视觉 / 视频 / 截图 OCR 都用它
+# Gemini 3.1 Pro (OpenAI 兼容协议) — 封面/视频/截图都用它
 VIDEO_ANALYSIS_API_KEY=sk-xxx
 VIDEO_ANALYSIS_BASE_URL=https://your-gemini-proxy.com/v1
 VIDEO_ANALYSIS_MODEL_NAME=gemini-3-pro
 
-# SenseVoice / Whisper 兼容协议 — 仅 talking 模式（口播视频转写）需要
+# SenseVoice / Whisper — 仅视频 talking 模式需要
 AUDIO_TRANSCRIPTION_API_KEY=sk-xxx
 AUDIO_TRANSCRIPTION_BASE_URL=https://your-asr-proxy.com/v1
 AUDIO_TRANSCRIPTION_MODEL=sensevoice
@@ -97,33 +113,31 @@ AUDIO_TRANSCRIPTION_MODEL=sensevoice
 pip install -r requirements.txt
 ```
 
-### 5. 验证安装（smoke test）
+### 5. 验证安装
 
 ```bash
-# 验证 Gemini 多模态通了（拿任意一张本地图片测）
 python3 scripts/analyze_image.py path/to/any.jpg
-
-# 验证 tikhub MCP 通了 — 在 Claude ​Code 里直接说：
-#   "搜小红书 测试"
-# 能返回笔记列表即 OK
+# 在 Claude 里说"搜小红书 测试" — 能返回结果即 tikhub MCP OK
 ```
 
 ---
 
-## 报告输出位置
+## 输出位置
 
-诊断完成后，Claude 会**同时**做两件事：
-
-1. 在对话里把完整报告打给你看
-2. 落盘到当前工作目录的 `./reports/{platform}-{id}-{YYYYMMDD-HHMM}.md`
-
-例如在 `~/projects/my-xhs-account/` 下问 Claude 诊断一条笔记，报告会存到：
+完整闭环跑完，文件落到当前工作目录：
 
 ```
-~/projects/my-xhs-account/reports/xhs-2800ab54-20260421-1645.md
+./reports/
+  {YYYYMMDD-HHMM}-find-{我的账号末8位}.md      # 5-10 对标 + 为什么是真对标
+  {YYYYMMDD-HHMM}-crack-{对标末8位}.md         # 每条 4 行清单
+  {YYYYMMDD-HHMM}-adapt-{选题短码}.md          # 标题 + 封面 + 首段 + CTA → 可发
+
+./assets/                                     # 副产品，跨任务累积
+  hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md
 ```
 
-**建议**在你项目的 `.gitignore` 加一行 `reports/` — 报告里通常含截图链接或账号 ID，不一定想 commit。
+**建议**在你项目的 `.gitignore` 加 `reports/` — 报告里通常含账号/选题信息，不一定想 commit。
+`assets/` 是你长期资产，建议 commit 进去。
 
 ---
 
@@ -131,27 +145,28 @@ python3 scripts/analyze_image.py path/to/any.jpg
 
 ```
 social-account-doctor/
-├── SKILL.md               # 主入口 — Claude 加载这个
-├── platforms/             # 三大平台子手册（阈值 + 工具映射 + 6 维评分细则）
-│   ├── xiaohongshu.md
-│   ├── douyin.md
-│   └── kuaishou.md
-└── scripts/               # 多模态分析脚本
-    ├── ocr_screenshot.py    # 后台截图 → 结构化指标
-    ├── dispatch_account.py  # 账号链接 → platform + user_id
-    ├── analyze_image.py     # 封面 / 首帧 → 5 变量 + 模板归类 + 钩子
-    └── analyze_video.py     # 视频 → talking / visual / keyframe 三模式自动路由
+├── SKILL.md                            # L1 主入口 — Claude 加载这个（三命令 SOP）
+├── references/
+│   ├── scoring-vocab.md                # L3 评分词典（5 封面 / 10 标题 / 3 骨架 / 7 钩子）
+│   ├── diagnostic-mode.md              # L2 兜底诊断（"为什么不爆"才走这里）
+│   └── platforms/                      # 平台阈值数据（被 L2 调用）
+│       ├── xiaohongshu.md / douyin.md / kuaishou.md
+└── scripts/                            # 多模态脚本
+    ├── analyze_image.py                # 封面 → 5 变量 + 模板归类 + 钩子识别
+    ├── analyze_video.py                # 视频 → talking/visual/keyframe 三模式自动路由
+    ├── ocr_screenshot.py               # 后台截图 → 结构化指标
+    └── dispatch_account.py             # 账号链接 → platform + user_id
 ```
 
 ---
 
-## 数据时效性说明
+## 数据时效性
 
-本 skill 内所有平台阈值（完播率 / CTR / CES / 互动率等）均为**行业经验值**（蝉妈妈 / 千瓜 / 新红 / COO 公开发言等多源），**非平台官方公告**。
+`references/platforms/*.md` 里所有阈值（完播率 / CTR / CES 等）均为**行业经验值**，**非平台官方公告**。
 
-📅 **数据采集日期：2026-04 / 建议复核周期：6 个月**
+📅 **采集日期：2026-04**｜**建议复核：每 6 个月**
 
-每个 `platforms/*.md` 顶部都有"数据来源"小节，列出原始链接。诊断时用作"方向判断"，**不是"绝对死线"**。
+主流程（find/crack/adapt）**不依赖这些数字** — 只用作 L2 诊断时的方向判断。
 
 ---
 
@@ -163,6 +178,5 @@ MIT © 2026 JuneYaooo
 
 ## 反馈与贡献
 
-- 数字漂移上报：[Issues](https://github.com/JuneYaooo/social-account-doctor/issues)
-- 平台 API 失效：[Issues](https://github.com/JuneYaooo/social-account-doctor/issues)
-- PR 欢迎，特别是新平台的子手册（B 站 / 视频号 / 公众号）
+- Issues：https://github.com/JuneYaooo/social-account-doctor/issues
+- 数字漂移上报 / 平台 API 失效 / 新平台贡献（B 站 / 视频号 / 公众号）都欢迎
