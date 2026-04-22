@@ -16,6 +16,12 @@ eggs/
 .eggs/
 lib/
 lib64/
+
+# Vendored CLI lib (本仓库自带, 不能被上面的 lib/ 规则过滤掉)
+!tikhub/lib/
+!tikhub/lib/**
+# 但 lib/ 下的 __pycache__ / .pyc 仍要忽略 (上面 *.py[codz] 已覆盖)
+tikhub/lib/__pycache__/
 parts/
 sdist/
 var/
