@@ -7,7 +7,7 @@
 直接对着具体爆款，告诉你下一条该怎么写。
 
 > **平台覆盖度**：小红书 ✅ / 抖音 ✅ / 快手 ✅ / 视频号 ✅ / B 站 ✅
-> （v0.4.0：B 站加入 + 自包含 tikhub HTTP CLI；v0.2.5：视频号 user_search 503 fallback / 冷启失败号判定 / 赛道错位诊断；视频号没有可分享的链接/ID，入口只能走账号名搜索 — 详见 SKILL.md §7「视频号独立路径」）。
+> （视频号没有可分享的链接/ID，入口只能走账号名搜索 — 详见 SKILL.md §7「视频号独立路径」）。
 
 ---
 
@@ -171,7 +171,7 @@ social-account-doctor/
 │   ├── analyze_video.py                # 视频 → talking/visual/keyframe 三模式自动路由
 │   ├── ocr_screenshot.py               # 后台截图 → 结构化指标
 │   └── dispatch_account.py             # 账号链接 → platform + user_id + tikhub CLI 命令
-└── tikhub/                             # 自包含 tikhub HTTP CLI（v0.4.0 加入）
+└── tikhub/                             # 自包含 tikhub HTTP CLI
     ├── README.md                       # CLI 用法 + 协议细节
     ├── bin/tikhub                      # CLI 入口（chmod +x）
     ├── lib/tikhub_client.py            # HTTP JSON-RPC + SSE + session 管理（纯 stdlib）
