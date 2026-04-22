@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.4.1 — 2026-04-22
+
+吸收 tikhub 官方支持反馈 + 实测复核小红书 V2 状态。
+
+### 修改 — 小红书接口稳定性表（实测 2026-04-22）
+
+V2 接口**复测仍然全挂**（tikhub 官方支持 2026-04 称 V2 应可用，但实测 RetryError，**以实测为准**）：
+
+| 工具 | 实测结果 | 来源 |
+|---|---|---|
+| `xiaohongshu_app_search_notes` (App V1) | ✅ code 200 | 实测 |
+| `xiaohongshu_web_search_notes` (Web V1) | ✅ code 200 | 实测 |
+| `xiaohongshu_app_v2_search_notes` (App V2) | ❌ RetryError | 实测（与官方说法不符） |
+| `xiaohongshu_web_v2_fetch_search_notes` (Web V2) | ❌ RetryError | 实测 |
+| `xiaohongshu_app_search_notes_v2` | ❌ RetryError | 实测 + tikhub 官方明确弃用 |
+
+### 新增 — 注意命名差异 + 弃用说明
+
+`xiaohongshu_app_search_notes_v2` ≠ `xiaohongshu_app_v2_search_notes`，前者是**官方明确弃用**的旧端点（tikhub 官方支持 2026-04 确认），后者是 V2 的新位置（虽然实测仍挂）。两者都不要用。
+
+### 新增 — 小红书话题标签搜索限制
+
+tikhub 官方确认 2026-04：**小红书不支持按话题标签（hashtag）搜笔记，只支持关键词**。用户问"搜 #XX 标签下的爆款"时，明确告知"只能搜关键词，标签搜索小红书没开放"。
+
+### 修改文件
+
+- `SKILL.md` §9.1 小红书接口稳定性表：标题改为「复测 2026-04-22」，加 V2 实测对比官方说法的注脚 + `app_search_notes_v2` 弃用警告 + 话题标签限制铁律
+- `references/platforms/xiaohongshu.md` §4 工具映射表硬规则：同步上述变更
+
+### 不变
+
+- `references/platforms/wechat-channels.md` §4.2 user_search 503 兜底流程已覆盖 tikhub 官方反馈的"视频号搜索精度需结合标题/作者校验"经验，无需改动
+- 其他平台无变更
+
+---
+
 ## v0.4.0 — 2026-04-22
 
 仓库自包含化：把 tikhub HTTP CLI 直接打包进仓库 + 补全 B 站平台支持。

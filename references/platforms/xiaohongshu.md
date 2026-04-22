@@ -154,10 +154,13 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 > 首选 / Fallback。首选挂时按列依次重试。
 >
-> **⚠️ 硬规则（实测 2026-04-21，与 SKILL.md §9 接口稳定性表对齐）**：
-> - **小红书所有 V2 接口（不论 app v2 还是 web v2）当前全挂**（RetryError[HTTPStatusError]）—— 直接用 V1，**不要再去试 V2,也不要"V2 失败切 web V2"**（旧建议已过时,实测两个都挂）
+> **⚠️ 硬规则（复测 2026-04-22，与 SKILL.md §9.1 接口稳定性表对齐）**：
+> - **小红书所有 V2 接口（不论 app v2 还是 web v2）实测仍然全挂**（RetryError[HTTPStatusError]）—— 直接用 V1，**不要再去试 V2,也不要"V2 失败切 web V2"**（旧建议已过时,实测两个都挂）
+> - **官方说法 vs 实测**：tikhub 官方 2026-04 称 V2 应可用，但实测仍 RetryError — **以实测为准**
+> - **官方已弃用接口**：`xiaohongshu_app_search_notes_v2`（注意命名：`app_search_notes_v2` ≠ `app_v2_search_notes`）—— **永远不要用**
 > - 关键词搜笔记 = `xiaohongshu_app_search_notes`（App V1，唯一稳定）
 > - 关键词搜用户 = `xiaohongshu_web_search_users`（Web V1，唯一稳定 — 注意 App V1 `search_users` 也挂）
+> - **小红书官方不开放话题标签搜索**（只支持关键词搜笔记）—— 用户问 "#XX 标签下的笔记" 时，明确告诉他"只能搜关键词"
 > - 任一工具返回 `RetryError[HTTPStatusError]` = 直接按 SKILL.md §9 表换可用版本，**禁止在同一接口刷重试**（tenacity 已重试 3 次了，再刷只会浪费时间 + 计费）
 > - 返回 `code != 200` 但有 `message` → 看 `message_zh`，是参数错 / 限流 / 余额不足，按提示改参数；不要当成"接口挂了"换工具
 > - 返回 `data.items` 为空 → 关键词无结果或被风控，换近义词/降低 sort_type
