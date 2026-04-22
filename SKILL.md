@@ -443,7 +443,19 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    - **半成品不写盘**（不污染 reports/ 目录）
    - 接口连续 3 次 retry 失败 → 视同工具不可用 → 进入上面的话术
 
-11. **tikhub 调用走 CLI，不走 `claude mcp add`**：所有 tikhub 数据抓取通过 `tikhub <platform> <tool> --args` CLI 命令调用。**CLI 自包含在仓库 `tikhub/` 目录**（不依赖外部 skill）。**不要再 `claude mcp add tikhub-*`**：
+11. **脚本层信任、账号资料层保守**（防"AI 自信地把账号带偏"）：
+
+    - **脚本/内容层**（标题 / 封面大字 / 首段 / CTA / 钩子 / 骨架 / 选题 / 单条改写 / 视频脚本）→ 按 find / crack / adapt 流程**直接吐**，不必反复"建议确认"。错了下条改回来成本低。
+    - **账号资料层**（账号定位重写 / 简介改写 / 人设调整 / 赛道切换 / 粉丝画像判定 / 变现模式建议）→ **保守输出，缺数据宁可不说也不编**：
+      - 缺数据时直接写「数据不足，暂不下结论」，**不要凭"行业经验"补一个定位**
+      - 给修改建议**必须标注依据**（哪条数据 / 哪个对标 / 哪条评论证明），没依据就不写
+      - 多给"试一下看反馈"的方向，少给"必须改成 X"的断言
+      - 任何「建议把简介改成 X」/「你应该重新定位为 Y」**先在对话里问用户**「我手里只有 Z 数据，这条结论你觉得靠谱吗」再写盘
+      - 接口失败 / 数据缺失时，账号资料相关诊断**直接跳过**，不要"基于经验推断"凑数
+
+    **Why**：内容层错了下条改回来成本低；账号资料一改影响所有未来推荐 + 标签，反复横跳会污染账号权重。看似自信但其实是 AI 推断的"账号建议"会把整个号带偏。
+
+12. **tikhub 调用走 CLI，不走 `claude mcp add`**：所有 tikhub 数据抓取通过 `tikhub <platform> <tool> --args` CLI 命令调用。**CLI 自包含在仓库 `tikhub/` 目录**（不依赖外部 skill）。**不要再 `claude mcp add tikhub-*`**：
 
     - HTTP 端点是 `https://mcp.tikhub.io/{xiaohongshu|douyin|kuaishou|wechat|bilibili}/mcp`，所有平台共用一个 CLI、一个 API key
     - 不需要重启 claude，不污染全局工具列表
