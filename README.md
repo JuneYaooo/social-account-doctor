@@ -59,65 +59,44 @@
 
 ```bash
 git clone https://github.com/JuneYaooo/social-account-doctor.git \
-  ~/.claude/skills/account-diagnostic
+  ~/.claude/skills/social-account-doctor
 ```
 
-### 2. 配置 tikhub MCP（数据来源）
+### 2. 配置 tikhub HTTP CLI（数据来源）
 
 申请 key：https://tikhub.io/
 
-**用 Claude Code CLI 一次性挂 4 个**（推荐）：
+本 skill 通过 HTTP CLI 调 tikhub（不再用 `claude mcp add`，避免污染全局工具列表）。CLI 是一个独立 skill `tikhub-api`，需要先准备好。
+
+**最小安装**：
 
 ```bash
-claude mcp add tikhub-xiaohongshu -- npx mcp-remote \
-  https://mcp.tikhub.io/xiaohongshu/mcp \
-  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+# 1. API key 写到 ~/.claude/.env (chmod 600)
+mkdir -p ~/.claude
+cat >> ~/.claude/.env <<'EOF'
+TIKHUB_API_KEY=YOUR_TIKHUB_KEY
+EOF
+chmod 600 ~/.claude/.env
 
-claude mcp add tikhub-douyin -- npx mcp-remote \
-  https://mcp.tikhub.io/douyin/mcp \
-  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+# 2. tikhub CLI 包装（独立 skill，纯 Python stdlib，不挂 MCP）
+#    含 bin/tikhub + lib/tikhub_client.py + references/tools-{平台}.json
+#    手动创建：见 docs/install_tikhub_api.md（待整理；纯 Python urllib + SSE 解析 + session 缓存）
 
-claude mcp add tikhub-kuaishou -- npx mcp-remote \
-  https://mcp.tikhub.io/kuaishou/mcp \
-  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+# 3. 让 tikhub 命令在 PATH（bash + fish 都能用）
+ln -sf ~/.claude/skills/tikhub-api/bin/tikhub ~/.local/bin/tikhub
 
-claude mcp add tikhub-wechat -- npx mcp-remote \
-  https://mcp.tikhub.io/wechat/mcp \
-  --header "Authorization: Bearer YOUR_TIKHUB_KEY"
+# 4. 验证
+tikhub --health     # 期望 {"status":"healthy",...}
+tikhub list xiaohongshu search    # 看可用工具
 ```
 
-挂完**重启 Claude** 才能看到工具。`tikhub-wechat` 同时覆盖**视频号 + 公众号**两套接口。
+**调用形式**：`tikhub <platform> <tool> --key1 value1 --key2 value2`（或 `--json '{"k":"v"}'`）
 
-> 💡 **省工具列污染**：如果你只做单平台诊断，按当前任务平台只挂对应那个 MCP（按需挂载），4 个全挂会污染其他任务的工具列表。
+支持平台（5 个默认 + 9 个未缓存）：`xiaohongshu` / `douyin` / `kuaishou` / `wechat` / `bilibili` / 其他 tikhub 16 平台。
 
-或者直接编辑 `settings.json` 的 `mcpServers`：
+> 💡 **为什么不用 `claude mcp add`**：之前每个平台单独 `claude mcp add` 会注入几十~上百个 `mcp__tikhub-*__*` 工具到全局工具列表（4 个平台合计 ~370 个），污染所有跟自媒体无关的任务。HTTP CLI 方式：5 个平台共用一个 key、一个 wrapper、零工具列表污染、不需要重启 claude。
 
-```json
-{
-  "mcpServers": {
-    "tikhub-xiaohongshu": {
-      "type": "http",
-      "url": "https://mcp.tikhub.io/xiaohongshu/mcp",
-      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
-    },
-    "tikhub-douyin": {
-      "type": "http",
-      "url": "https://mcp.tikhub.io/douyin/mcp",
-      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
-    },
-    "tikhub-kuaishou": {
-      "type": "http",
-      "url": "https://mcp.tikhub.io/kuaishou/mcp",
-      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
-    },
-    "tikhub-wechat": {
-      "type": "http",
-      "url": "https://mcp.tikhub.io/wechat/mcp",
-      "headers": { "Authorization": "Bearer YOUR_TIKHUB_KEY" }
-    }
-  }
-}
-```
+> ⚠️ **降级方案（紧急回退）**：如果 wrapper 临时挂了，可以暂用旧 `claude mcp add tikhub-xxx` + 重启 claude 的方式。但这是临时措施，用完 `claude mcp remove`，不要常驻。
 
 ### 3. 配置多模态分析
 
@@ -148,7 +127,7 @@ pip install -r requirements.txt
 
 ```bash
 python3 scripts/analyze_image.py path/to/any.jpg
-# 在 Claude 里说"搜小红书 测试" — 能返回结果即 tikhub MCP OK
+# 在 Claude 里说"搜小红书 测试" — 能返回结果即 tikhub CLI OK
 ```
 
 ---

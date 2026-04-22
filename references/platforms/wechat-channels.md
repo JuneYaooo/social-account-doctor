@@ -1,6 +1,6 @@
 # 视频号账号 / 内容诊断子手册
 
-> 主 skill：`account-diagnostic`。本手册被 §3 平台专属诊断章节调用。
+> 主 skill：`social-account-doctor`。本手册被 §3 平台专属诊断章节调用。
 > **核心特性**：视频号是**社交关系链分发**平台 — 朋友点赞 / 转发 / 在看会推送给微信好友，**冷启动靠分享而不是算法推流**。算法逻辑跟抖音、小红书完全不同。
 
 ---
@@ -60,7 +60,7 @@
 
 ```
 1. 漏斗看到 分享率 < 0.5% 或 朋友点赞率 < 20% → 直接进本节
-2. 调 mcp__tikhub-wechat__* 拿视频详情 + 评论
+2. 调 tikhub wechat * 拿视频详情 + 评论
    → 看转发数 / 在看数 / 朋友圈点赞数
 3. 看视频本身：是否有"金句 / 奇观 / 共鸣 / 实用信息"4 类分享触发点中的至少 1 个
 4. 对照 §2.2 五种分享失败模式定位根因
@@ -133,19 +133,19 @@
 
 | 任务 | 工具 | 稳定性 |
 |---|---|---|
-| 视频号视频详情 | `mcp__tikhub-wechat__wechat_channels_fetch_video_detail`（`id` 优先 `exportId`） | ✅ 稳 |
-| 视频号关键词综合搜索 | `mcp__tikhub-wechat__wechat_channels_fetch_search_ordinary` | ✅ 稳 |
-| 视频号关键词最新搜索 | `mcp__tikhub-wechat__wechat_channels_fetch_search_latest` | 🟡 偶发 503，retry 1 次 |
-| 视频号账号搜索 | `mcp__tikhub-wechat__wechat_channels_fetch_user_search` | ❌ **高频 503**，必须 fallback（见 §4.2） |
-| 视频号用户主页 | `mcp__tikhub-wechat__wechat_channels_fetch_home_page` | 🟡 依赖 user_search，连带挂 |
-| 视频号视频评论 | `mcp__tikhub-wechat__wechat_channels_fetch_comments` | ✅ 稳 |
-| 视频号直播回放 | `mcp__tikhub-wechat__wechat_channels_fetch_live_history` | ✅ 稳（需 `username`） |
-| 视频号热门话题 | `mcp__tikhub-wechat__wechat_channels_fetch_hot_words` | ✅ 稳 |
-| 公众号文章详情（JSON） | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_detail_json` | ✅ 稳 |
-| 公众号文章阅读量 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_read_count` | ✅ 稳（需 `comment_id` 从 detail_json 拿） |
-| 公众号文章评论 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_comment_list` | ✅ 稳 |
-| 公众号文章列表 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_article_list`（需 `ghid`） | ✅ 稳 |
-| 公众号关联文章 | `mcp__tikhub-wechat__wechat_mp_web_fetch_mp_related_articles` | ✅ 稳 |
+| 视频号视频详情 | `tikhub wechat wechat_channels_fetch_video_detail`（`id` 优先 `exportId`） | ✅ 稳 |
+| 视频号关键词综合搜索 | `tikhub wechat wechat_channels_fetch_search_ordinary` | ✅ 稳 |
+| 视频号关键词最新搜索 | `tikhub wechat wechat_channels_fetch_search_latest` | 🟡 偶发 503，retry 1 次 |
+| 视频号账号搜索 | `tikhub wechat wechat_channels_fetch_user_search` | ❌ **高频 503**，必须 fallback（见 §4.2） |
+| 视频号用户主页 | `tikhub wechat wechat_channels_fetch_home_page` | 🟡 依赖 user_search，连带挂 |
+| 视频号视频评论 | `tikhub wechat wechat_channels_fetch_comments` | ✅ 稳 |
+| 视频号直播回放 | `tikhub wechat wechat_channels_fetch_live_history` | ✅ 稳（需 `username`） |
+| 视频号热门话题 | `tikhub wechat wechat_channels_fetch_hot_words` | ✅ 稳 |
+| 公众号文章详情（JSON） | `tikhub wechat wechat_mp_web_fetch_mp_article_detail_json` | ✅ 稳 |
+| 公众号文章阅读量 | `tikhub wechat wechat_mp_web_fetch_mp_article_read_count` | ✅ 稳（需 `comment_id` 从 detail_json 拿） |
+| 公众号文章评论 | `tikhub wechat wechat_mp_web_fetch_mp_article_comment_list` | ✅ 稳 |
+| 公众号文章列表 | `tikhub wechat wechat_mp_web_fetch_mp_article_list`（需 `ghid`） | ✅ 稳 |
+| 公众号关联文章 | `tikhub wechat wechat_mp_web_fetch_mp_related_articles` | ✅ 稳 |
 
 📅 复核周期：3 个月。下次实测：2026-07。
 

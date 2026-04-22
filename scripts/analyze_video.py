@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-account-diagnostic: analyze_video.py
+social-account-doctor: analyze_video.py
 
 输入：本地视频路径
 输出：JSON — 按内容类型走三条分析路径之一：

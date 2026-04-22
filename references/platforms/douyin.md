@@ -1,6 +1,6 @@
 # 抖音账号 / 内容诊断子手册
 
-> 主 skill：`account-diagnostic`。本手册被 §3 平台专属诊断章节调用。
+> 主 skill：`social-account-doctor`。本手册被 §3 平台专属诊断章节调用。
 > **核心特性**：完播率（特别是 5s 完播率）是抖音冷启动的核心权重之一。**注意**：抖音从未公开过"低于 X% 停推"的硬阈值，本手册所有数字都是行业经验值（蝉妈妈/知乎多源），用作方向判断而非绝对死线。
 
 ---
@@ -69,7 +69,7 @@
 
 ```
 1. 漏斗看到 5s完播率 < 40-50% → 直接进本节
-2. 调 mcp__tikhub-douyin__douyin_app_v3_fetch_one_video(aweme_id)
+2. 调 tikhub douyin douyin_app_v3_fetch_one_video(aweme_id)
    → 拿 video_url + cover_url + 完播率 + 5s留存
 3. 把 video_url 下载到 /tmp/account_diagnostic/{aweme_id}/video.mp4
 4. 调 scripts/analyze_video.py（分段裁剪喂 Gemini，**不走抽帧**）
@@ -90,18 +90,18 @@
 ### 2.3 工具调用链（5s完播率诊断专用）
 
 ```
-mcp__tikhub-douyin__douyin_web_fetch_user_post_videos(sec_user_id, count=30)
+tikhub douyin douyin_web_fetch_user_post_videos(sec_user_id, count=30)
   → 拿最近 30 条 aweme_id
 
 # 取 top 3 完播率最高 + bottom 3 完播率最低
-mcp__tikhub-douyin__douyin_app_v3_fetch_one_video(aweme_id)
+tikhub douyin douyin_app_v3_fetch_one_video(aweme_id)
   → 拿单条数据 + 媒体 URL
 
 # 下载视频前 10s
 ffmpeg -i video.mp4 -t 10 -c copy /tmp/.../prefix.mp4
 
 # 让 Gemini 拆前 5s
-python3 ~/.claude/skills/account-diagnostic/scripts/analyze_video.py prefix.mp4
+python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.mp4
   → 输出：首帧描述 / 口播 ASR / 画面切换次数 / 信息密度点位
 
 # 对比 top vs bottom：差距在哪

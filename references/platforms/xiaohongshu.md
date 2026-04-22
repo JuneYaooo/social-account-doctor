@@ -1,6 +1,6 @@
 # 小红书账号 / 内容诊断子手册
 
-> 主 skill：`account-diagnostic`。本手册被 §3 平台专属诊断章节调用。
+> 主 skill：`social-account-doctor`。本手册被 §3 平台专属诊断章节调用。
 > **小红书核心特性**：搜索意图占比高（小红书 COO 柯南 2025 年公开"近 70% 月活用户有主动搜索行为"），**收藏 ≈ 点赞**（长尾根基），CES 是社区流传的笔记健康度指标。
 
 ---
@@ -81,7 +81,7 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 ```
 1. 漏斗看到 CTR < 5% 或 CES 进不了下一档 → 直接进本节
-2. 调 mcp__tikhub-xiaohongshu__xiaohongshu_web_v2_fetch_feed_notes_v2(note_id)
+2. 调 tikhub xiaohongshu xiaohongshu_web_v2_fetch_feed_notes_v2(note_id)
    → 拿封面 url + 标题 + 互动数据（赞/藏/评/转）+ 阅读完成率
 3. 下载封面到 /tmp/account_diagnostic/{note_id}/cover.jpg
 4. 调 scripts/analyze_image.py（拆封面 5 变量 + 模板归类）
@@ -118,11 +118,11 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 ```
 1. 漏斗看到 搜索流量占比 < 30% → 直接进本节
-2. 调 mcp__tikhub-xiaohongshu__xiaohongshu_web_v2_fetch_feed_notes_v2(note_id)
+2. 调 tikhub xiaohongshu xiaohongshu_web_v2_fetch_feed_notes_v2(note_id)
    → 拿标题 + 正文 + 标签 + 话题
 3. 提取所有出现的关键词（分词 / 命名实体）
 4. 算"目标关键词"在标题/正文/标签三处的出现次数
-5. 调 mcp__tikhub-xiaohongshu__xiaohongshu_app_search_notes(keyword=目标词, sort_type=general)
+5. 调 tikhub xiaohongshu xiaohongshu_app_search_notes(keyword=目标词, sort_type=general)
    → 看自己的笔记排在第几位（搜不到 = 关键词埋点失败）
 6. 对照 §3.2 搜索失败的四种典型根因
 ```

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-account-diagnostic: analyze_image.py
+social-account-doctor: analyze_image.py
 
 输入：本地图片路径（小红书 / 抖音 / 快手 封面 / 首帧 / 截图）
 输出：JSON — 封面 5 变量 + 模板归类 + 大字 OCR + 钩子识别 + 标题公式提示

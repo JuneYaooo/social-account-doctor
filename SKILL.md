@@ -1,9 +1,9 @@
 ---
-name: account-diagnostic
+name: social-account-doctor
 description: 小红书 / 抖音 / 快手 / 视频号 自媒体「找对标 → 拆爆款 → 套自己」三命令闭环。给我的账号或选题方向，吐出"可发的下一条笔记初稿"。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。
 ---
 
-# account-diagnostic — 找对标 / 拆爆款 / 套自己
+# social-account-doctor — 找对标 / 拆爆款 / 套自己
 
 > **不挖钩子建仓库，不写诊断报告。**
 > 直接对着具体爆款 → 输出**我的下一条笔记初稿**（标题 + 封面大字 + 首段 + CTA）。
@@ -241,7 +241,10 @@ CTA（命中互动钩子模板）：
 
 ## 7. 工具速查
 
-### tikhub MCP（按平台 × 任务）
+### tikhub CLI（按平台 × 任务）
+
+> 调用走 `tikhub <platform> <tool> --args`（详见 `tikhub-api` skill），底层 HTTP JSON-RPC + session 缓存。不知道工具名时 `tikhub list <platform> <关键词>` 模糊查。
+
 | 任务 | 小红书 | 抖音 | 快手 |
 |---|---|---|---|
 | **find Step 3 关键词搜** | `xiaohongshu_app_search_notes`（**唯一可用**，见 §9.1） | `douyin_app_v3_fetch_video_search_result_v2` | `kuaishou_app_search_video_v2` |
@@ -324,15 +327,16 @@ CTA（命中互动钩子模板）：
 - ✅ `video_detail.contact.feed_count == 1` + `like/comment/forward 全 0` = **冷启失败号**，可直接出诊断结论
 - 📅 实测日期写在标题里，3 个月后重测
 
-### 9.3 抖音（待实测，2026-04-21 当前会话 MCP 未挂载）
+### 9.3 抖音（待实测，2026-04-21 未做接口稳定性实证）
 
 🟡 **状态**：当前 SKILL.md §7 列的抖音工具均按 v0.2.0 经验沉淀，**未在本轮（2026-04）做接口稳定性实证**。视频号实测发现"同 tikhub 平台 V2 接口存在批量崩溃模式"（小红书 V2 全挂），抖音 / 快手是否同样受影响**未知**。
 
-**挂载实测命令**（用户提供）：
+**实测命令**（用 tikhub CLI）：
 ```bash
-claude mcp add tikhub-douyin -- npx mcp-remote \
-  https://mcp.tikhub.io/douyin/mcp \
-  --header "Authorization: Bearer YOUR_API_KEY"
+tikhub --health                                                    # 通连
+tikhub list douyin search                                          # 看可用搜索工具
+tikhub douyin douyin_app_v3_fetch_video_search_result_v2 \
+  --keyword Cursor --offset 0 --count 10                           # 真实调用
 ```
 
 实测后回填这张表：
@@ -353,11 +357,11 @@ claude mcp add tikhub-douyin -- npx mcp-remote \
 
 🟡 **状态**：同 §9.3，未在本轮做接口稳定性实证。
 
-**挂载实测命令**：
+**实测命令**：
 ```bash
-claude mcp add tikhub-kuaishou -- npx mcp-remote \
-  https://mcp.tikhub.io/kuaishou/mcp \
-  --header "Authorization: Bearer YOUR_API_KEY"
+tikhub --health
+tikhub list kuaishou search
+tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
 ```
 
 实测后回填：
@@ -385,18 +389,19 @@ claude mcp add tikhub-kuaishou -- npx mcp-remote \
 10. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
 
    **开干前必做**：列出本次任务依赖的工具，逐个 ping。
-   - `find` 依赖：tikhub MCP（对应平台）+ analyze_image.py + analyze_video.py
-   - `crack` 依赖：tikhub MCP（笔记/视频/评论详情）+ multimodal 脚本
+   - `find` 依赖：tikhub CLI（`tikhub --health`）+ analyze_image.py + analyze_video.py
+   - `crack` 依赖：tikhub CLI（笔记/视频/评论详情）+ multimodal 脚本
    - `adapt` 依赖：纯 LLM（无外部依赖）
-   - L2 完整诊断依赖：tikhub MCP（搜对标 + 账号信息）+ multimodal
+   - L2 完整诊断依赖：tikhub CLI（搜对标 + 账号信息）+ multimodal
 
    **缺哪个明说哪个**（在第一句话就说，不要默默缩范围）：
 
    ```
-   ⚠️ 本次需要 mcp__tikhub-小红书__* 工具，当前会话没注册。
+   ⚠️ 本次需要 tikhub CLI（小红书）调数据，环境检查发现：
+      - tikhub --health 不通 / TIKHUB_API_KEY 没配 / 连续 retry 失败
 
    两个选择：
-   ① 在 settings.json 加 MCP（README Step 2），重启 Claude 后再来
+   ① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或 PATH（详见 tikhub-api skill），再来一次
    ② 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
    ```
 
@@ -405,6 +410,19 @@ claude mcp add tikhub-kuaishou -- npx mcp-remote \
    - 跑完后必须明文标注：「本次只完成 Layer X，因为 Y 工具不可用 / Y 数据缺失」
    - **半成品不写盘**（不污染 reports/ 目录）
    - 接口连续 3 次 retry 失败 → 视同工具不可用 → 进入上面的话术
+
+11. **tikhub 调用走 CLI，不走 `claude mcp add`**：所有 tikhub 数据抓取通过 `tikhub <platform> <tool> --args` CLI 命令调用（详见 `tikhub-api` skill 与 `~/.claude/.env`）。**不要再 `claude mcp add tikhub-*`**：
+
+    - HTTP 端点是 `https://mcp.tikhub.io/{xiaohongshu|douyin|kuaishou|wechat|bilibili}/mcp`，5 个平台共用一个 CLI、一个 API key
+    - 不需要重启 claude，不污染全局工具列表
+    - session id 自动缓存（5 min TTL），不用关心连接管理
+
+    **环境自检**：
+    ```bash
+    tikhub --health                              # {"status":"healthy",...} → OK
+    tikhub list xiaohongshu search               # 工具目录可读
+    ls ~/.claude/.env                            # API key 存这里（chmod 600）
+    ```
 
 ---
 

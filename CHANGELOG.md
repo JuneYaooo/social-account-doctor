@@ -1,5 +1,37 @@
 # Changelog
 
+## v0.3.0 — 2026-04-22
+
+架构重构：tikhub 调用从「`claude mcp add` MCP 注册」改为「HTTP CLI 包装」。skill 自包含、零工具列表污染、不需要重启 claude。
+
+### 重构 — tikhub HTTP CLI 替代 MCP 注册
+
+**问题**：之前每个平台单独 `claude mcp add tikhub-{平台}` 注册 MCP server，每个 server 启动时把几十~上百个 `mcp__tikhub-*__*` 工具注入全局工具列表（4 个平台合计 ~370 个）。带来三个痛点：
+
+1. **工具列表污染**：跟自媒体无关的任务（写代码 / 飞书 / SEO）也带着这一大坨工具
+2. **重启依赖**：装 / 卸 / 改 header 都得 `/exit` 重开 claude
+3. **环境耦合**：换机器要重装 4 次，skill 不自包含
+
+**新方案**：tikhub HTTP 端点（`https://mcp.tikhub.io/{platform}/mcp`）通过独立的 `tikhub-api` skill 的 `tikhub` CLI 命令调用：
+- `tikhub <platform> <tool> --key1 value1 --key2 value2`
+- 5 个平台共用一个 wrapper、一个 API key (`~/.claude/.env`)
+- session id 自动缓存（5min TTL，自动失效重试）
+- 纯 stdlib（urllib + json）+ SSE 解析
+
+### 修改 — 全文档迁移到 CLI 形式
+
+- `SKILL.md`：§7 工具速查表标题 `tikhub MCP` → `tikhub CLI`；§9.3/§9.4 待实测命令从 `claude mcp add` 换成 `tikhub --health` + `tikhub list`；§10 环境自检话术从「在 settings.json 加 MCP」换成「修复 ~/.claude/.env / PATH」；新增 §11 「tikhub 调用走 CLI，不走 `claude mcp add`」铁律
+- `scripts/dispatch_account.py`：PLATFORM_RULES 字典里 34 个工具名字符串从 `mcp__tikhub-PLATFORM__xxx` 换成 `tikhub PLATFORM xxx`（caller 直接复制粘贴就能跑）；输出 JSON 的 `next_step` / `playbook` 也同步改 CLI 形式
+- `references/diagnostic-mode.md`：12 处 `mcp__tikhub-*__*` 引用替换为 `tikhub <platform> *`；环境自检话术更新
+- `references/platforms/{douyin,xiaohongshu,wechat-channels}.md`：所有调用例子从 `调 mcp__tikhub-X__yyy(args)` 改为 `调 tikhub X yyy --args`；wechat-channels.md §4 表头改为 `tikhub wechat *`
+- `README.md`：安装文档 §1 clone 路径改为 `~/.claude/skills/social-account-doctor`（与仓库名一致）；§2 MCP 配置整段改写为 tikhub CLI 安装（`~/.claude/.env` + `~/.local/bin/tikhub` 软链接 + 验证）；附「为什么不用 `claude mcp add`」说明 + 紧急回退方案
+
+### 新增 — 紧急回退方案
+
+老的 `claude mcp add tikhub-xxx` + 重启 claude 的方式仍然可用（同一个 API key）。如果 wrapper 临时挂了可以暂用，但用完立即 `claude mcp remove`，不要常驻。
+
+---
+
 ## v0.2.5 — 2026-04-21
 
 实战拆解视频号「哈吉老猫」暴露三个空洞 → 全部沉淀进文档。

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-account-diagnostic: ocr_screenshot.py
+social-account-doctor: ocr_screenshot.py
 笔记/账号后台截图 → Gemini 3.1 Pro OCR → 结构化 JSON。
 
 输入:本地截图路径(.png / .jpg / .jpeg / .webp)
