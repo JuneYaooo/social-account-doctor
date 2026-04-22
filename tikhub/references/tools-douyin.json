@@ -1,0 +1,7991 @@
+[
+  {
+    "name": "douyin_web_fetch_one_video",
+    "description": "获取单个作品数据/Get single video data",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "need_anchor_info": {
+          "default": true,
+          "title": "Need Anchor Info",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_web_fetch_one_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_one_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_one_video_v2",
+    "description": "获取单个作品数据 V2/Get single video data V2",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_web_fetch_one_video_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_one_video_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_one_video_by_share_url",
+    "description": "根据分享链接获取单个作品数据/Get single video data by sharing link",
+    "inputSchema": {
+      "properties": {
+        "share_url": {
+          "title": "Share Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_url"
+      ],
+      "title": "douyin_web_fetch_one_video_by_share_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_one_video_by_share_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_video_high_quality_play_url",
+    "description": "获取视频的最高画质播放链接/Get the highest quality play URL of the video",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "default": null,
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "share_url": {
+          "default": null,
+          "title": "Share Url",
+          "type": "string"
+        }
+      },
+      "title": "douyin_web_fetch_video_high_quality_play_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_video_high_quality_play_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_multi_video_high_quality_play_url",
+    "description": "批量获取视频的最高画质播放链接/Batch get the highest quality play URL of videos",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_multi_video_high_quality_play_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_multi_video_high_quality_play_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_multi_video",
+    "description": "批量获取视频信息/Batch Get Video Information",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_multi_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_multi_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_one_video_danmaku",
+    "description": "获取单个作品视频弹幕数据/Get single video danmaku data",
+    "inputSchema": {
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "duration": {
+          "title": "Duration",
+          "type": "integer"
+        },
+        "end_time": {
+          "title": "End Time",
+          "type": "integer"
+        },
+        "start_time": {
+          "title": "Start Time",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "duration",
+        "end_time",
+        "start_time"
+      ],
+      "title": "douyin_web_fetch_one_video_danmakuArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_one_video_danmakuOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_home_feed",
+    "description": "获取首页推荐数据/Get home feed data",
+    "inputSchema": {
+      "properties": {
+        "count": {
+          "default": 10,
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 0,
+          "title": "Refresh Index",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_web_fetch_home_feedArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_home_feedOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_related_posts",
+    "description": "获取相关作品推荐数据/Get related posts recommendation data",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_web_fetch_related_postsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_related_postsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_post_videos",
+    "description": "获取用户主页作品数据/Get user homepage video data",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_cursor": {
+          "default": "0",
+          "title": "Max Cursor",
+          "type": "string"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "filter_type": {
+          "default": "0",
+          "title": "Filter Type",
+          "type": "string"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_web_fetch_user_post_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_post_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_like_videos",
+    "description": "获取用户喜欢作品数据/Get user like video data",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_user_like_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_like_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_collection_videos",
+    "description": "获取用户收藏作品数据/Get user collection video data",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_user_collection_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_collection_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_collects",
+    "description": "获取用户收藏夹/Get user collection",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_user_collectsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_collectsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_collects_videos",
+    "description": "获取用户收藏夹数据/Get user collection data",
+    "inputSchema": {
+      "properties": {
+        "collects_id": {
+          "title": "Collects Id",
+          "type": "string"
+        },
+        "max_cursor": {
+          "default": 0,
+          "title": "Max Cursor",
+          "type": "integer"
+        },
+        "counts": {
+          "default": 20,
+          "title": "Counts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "collects_id"
+      ],
+      "title": "douyin_web_fetch_user_collects_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_collects_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_mix_videos",
+    "description": "获取用户合辑作品数据/Get user mix video data",
+    "inputSchema": {
+      "properties": {
+        "mix_id": {
+          "title": "Mix Id",
+          "type": "string"
+        },
+        "max_cursor": {
+          "default": 0,
+          "title": "Max Cursor",
+          "type": "integer"
+        },
+        "counts": {
+          "default": 20,
+          "title": "Counts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mix_id"
+      ],
+      "title": "douyin_web_fetch_user_mix_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_mix_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_live_videos",
+    "description": "获取用户直播流数据/Get user live video data",
+    "inputSchema": {
+      "properties": {
+        "webcast_id": {
+          "title": "Webcast Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "webcast_id"
+      ],
+      "title": "douyin_web_fetch_user_live_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_live_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_live_videos_by_sec_uid",
+    "description": "通过sec_uid获取指定用户的直播流数据/Get live video data of specified user by sec_uid",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_web_fetch_user_live_videos_by_sec_uidArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_live_videos_by_sec_uidOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_live_videos_by_room_id",
+    "description": "通过room_id获取指定用户的直播流数据 V1/Get live video data of specified user by room_id V1",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "room_id"
+      ],
+      "title": "douyin_web_fetch_user_live_videos_by_room_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_live_videos_by_room_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_live_videos_by_room_id_v2",
+    "description": "通过room_id获取指定用户的直播流数据 V2/Gets the live stream data of the specified user by room_id V2",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "room_id"
+      ],
+      "title": "douyin_web_fetch_user_live_videos_by_room_id_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_live_videos_by_room_id_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_live_gift_ranking",
+    "description": "获取直播间送礼用户排行榜/Get live room gift user ranking",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        },
+        "rank_type": {
+          "default": 30,
+          "title": "Rank Type",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "room_id"
+      ],
+      "title": "douyin_web_fetch_live_gift_rankingArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_live_gift_rankingOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_live_room_product_result",
+    "description": "抖音直播间商品信息/Douyin live room product information",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        },
+        "author_id": {
+          "title": "Author Id",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 20,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "room_id",
+        "author_id"
+      ],
+      "title": "douyin_web_fetch_live_room_product_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_live_room_product_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_product_detail",
+    "description": "获取商品详情/Get product detail",
+    "inputSchema": {
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "aweme_id": {
+          "default": "7546956331878501673",
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "room_id": {
+          "default": null,
+          "title": "Room Id",
+          "type": "string"
+        },
+        "sec_user_id": {
+          "default": "MS4wLjABAAAALoWx-cZWuQVWWvvlE-HiKgm9jel_nmwMcjAMIaEAwFq25sskN1Zgqy_T3x4D0Goy",
+          "title": "Sec User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product_id"
+      ],
+      "title": "douyin_web_fetch_product_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_product_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_product_sku_list",
+    "description": "获取商品SKU列表/Get product SKU list",
+    "inputSchema": {
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "author_id": {
+          "title": "Author Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product_id",
+        "author_id"
+      ],
+      "title": "douyin_web_fetch_product_sku_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_product_sku_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_product_coupon",
+    "description": "获取商品优惠券信息/Get product coupon information",
+    "inputSchema": {
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "shop_id": {
+          "title": "Shop Id",
+          "type": "string"
+        },
+        "price": {
+          "title": "Price",
+          "type": "string"
+        },
+        "author_id": {
+          "title": "Author Id",
+          "type": "string"
+        },
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product_id",
+        "shop_id",
+        "price",
+        "author_id",
+        "sec_user_id"
+      ],
+      "title": "douyin_web_fetch_product_couponArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_product_couponOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_product_review_score",
+    "description": "获取商品评价评分/Get product review score",
+    "inputSchema": {
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "shop_id": {
+          "title": "Shop Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product_id",
+        "shop_id"
+      ],
+      "title": "douyin_web_fetch_product_review_scoreArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_product_review_scoreOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_product_review_list",
+    "description": "获取商品评价列表/Get product review list",
+    "inputSchema": {
+      "properties": {
+        "product_id": {
+          "title": "Product Id",
+          "type": "string"
+        },
+        "shop_id": {
+          "title": "Shop Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": 0,
+          "title": "Sort Type",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "product_id",
+        "shop_id"
+      ],
+      "title": "douyin_web_fetch_product_review_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_product_review_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_profile_by_uid",
+    "description": "使用UID获取用户信息/Get user information by UID",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "douyin_web_fetch_user_profile_by_uidArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_profile_by_uidOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_batch_user_profile_v1",
+    "description": "获取批量用户信息(最多10个)/Get batch user profile (up to 10)",
+    "inputSchema": {
+      "properties": {
+        "sec_user_ids": {
+          "title": "Sec User Ids",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_ids"
+      ],
+      "title": "douyin_web_fetch_batch_user_profile_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_batch_user_profile_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_batch_user_profile_v2",
+    "description": "获取批量用户信息(最多50个)/Get batch user profile (up to 50)",
+    "inputSchema": {
+      "properties": {
+        "sec_user_ids": {
+          "title": "Sec User Ids",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_ids"
+      ],
+      "title": "douyin_web_fetch_batch_user_profile_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_batch_user_profile_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_live_info_by_uid",
+    "description": "使用UID获取用户开播信息/Get user live information by UID",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "douyin_web_fetch_user_live_info_by_uidArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_live_info_by_uidOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_profile_by_short_id",
+    "description": "使用Short ID获取用户信息/Get user information by Short ID",
+    "inputSchema": {
+      "properties": {
+        "short_id": {
+          "title": "Short Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "short_id"
+      ],
+      "title": "douyin_web_fetch_user_profile_by_short_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_profile_by_short_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_handler_shorten_url",
+    "description": "生成短链接",
+    "inputSchema": {
+      "properties": {
+        "target_url": {
+          "title": "Target Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target_url"
+      ],
+      "title": "douyin_web_handler_shorten_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_handler_shorten_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_handler_user_profile",
+    "description": "使用sec_user_id获取指定用户的信息/Get information of specified user by sec_user_id",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_web_handler_user_profileArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_handler_user_profileOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_handler_user_profile_v2",
+    "description": "使用unique_id（抖音号）获取指定用户的信息/Get information of specified user by unique_id",
+    "inputSchema": {
+      "properties": {
+        "unique_id": {
+          "title": "Unique Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unique_id"
+      ],
+      "title": "douyin_web_handler_user_profile_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_handler_user_profile_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_encrypt_uid_to_sec_user_id",
+    "description": "加密用户uid到sec_user_id/Encrypt user uid to sec_user_id",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "douyin_web_encrypt_uid_to_sec_user_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_encrypt_uid_to_sec_user_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_handler_user_profile_v3",
+    "description": "根据抖音uid获取指定用户的信息/Get information of specified user by uid",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "douyin_web_handler_user_profile_v3Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_handler_user_profile_v3Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_handler_user_profile_v4",
+    "description": "根据sec_user_id获取指定用户的信息（性别，年龄，直播等级、牌子）/Get information of specified user by sec_user_id (gender, age, live level、brand)",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_web_handler_user_profile_v4Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_handler_user_profile_v4Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_fans_list",
+    "description": "获取用户粉丝列表/Get user fans list",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "default": "MS4wLjABAAAA9y04iBlVdeMQqTJbqsQZKb-tqWqWW29jPVJqideHT70",
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_time": {
+          "default": "0",
+          "title": "Max Time",
+          "type": "string"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "source_type": {
+          "default": 1,
+          "title": "Source Type",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_web_fetch_user_fans_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_fans_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_following_list",
+    "description": "获取用户关注列表/Get user following list",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "default": "MS4wLjABAAAA9y04iBlVdeMQqTJbqsQZKb-tqWqWW29jPVJqideHT70",
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_time": {
+          "default": "0",
+          "title": "Max Time",
+          "type": "string"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "source_type": {
+          "default": 1,
+          "title": "Source Type",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_web_fetch_user_following_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_following_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_video_comments",
+    "description": "获取单个视频评论数据/Get single video comments data",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_web_fetch_video_commentsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_video_commentsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_video_comment_replies",
+    "description": "获取指定视频的评论回复数据/Get comment replies data of specified video",
+    "inputSchema": {
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "comment_id": {
+          "title": "Comment Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "comment_id"
+      ],
+      "title": "douyin_web_fetch_video_comment_repliesArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_video_comment_repliesOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_general_search_result",
+    "description": "[已弃用/Deprecated] 获取指定关键词的综合搜索结果/Get comprehensive search results of specified keywords",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": "0",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "0",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "filter_duration": {
+          "default": "0",
+          "title": "Filter Duration",
+          "type": "string"
+        },
+        "search_range": {
+          "default": "0",
+          "title": "Search Range",
+          "type": "string"
+        },
+        "content_type": {
+          "default": "0",
+          "title": "Content Type",
+          "type": "string"
+        },
+        "search_id": {
+          "default": "",
+          "title": "Search Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_general_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_general_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_video_search_result",
+    "description": "[已弃用/Deprecated] 获取指定关键词的视频搜索结果/Get video search results of specified keywords",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": "0",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "0",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "filter_duration": {
+          "default": "0",
+          "title": "Filter Duration",
+          "type": "string"
+        },
+        "search_id": {
+          "default": "",
+          "title": "Search Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_video_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_video_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_video_search_result_v2",
+    "description": "获取指定关键词的视频搜索结果 V2 （废弃，替代接口请参考下方文档）/Get video search results of specified keywords V2 (Deprecated, please refer to the following document for replacement interface)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "sort_type": {
+          "default": "_0",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "_0",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "filter_duration": {
+          "default": "_0",
+          "title": "Filter Duration",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "search_id": {
+          "default": "",
+          "title": "Search Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_video_search_result_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_video_search_result_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_search_result",
+    "description": "获取指定关键词的用户搜索结果(废弃，替代接口请参考下方文档)/Get user search results of specified keywords (deprecated, please refer to the following document for replacement interface)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "douyin_user_fans": {
+          "default": "",
+          "title": "Douyin User Fans",
+          "type": "string"
+        },
+        "douyin_user_type": {
+          "default": "",
+          "title": "Douyin User Type",
+          "type": "string"
+        },
+        "search_id": {
+          "default": "",
+          "title": "Search Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_user_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_search_result_v2",
+    "description": "获取指定关键词的用户搜索结果 V2 (已弃用，替代接口请参考下方文档)/Get user search results of specified keywords V2 (deprecated, please refer to the following document for replacement interface)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_user_search_result_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_search_result_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_user_search_result_v3",
+    "description": "获取指定关键词的用户搜索结果 V3 (已弃用，替代接口请参考下方文档)/Get user search results of specified keywords V3 (deprecated, please refer to the following document for replacement interface)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "cursor": {
+          "default": "0",
+          "title": "Cursor",
+          "type": "string"
+        },
+        "douyin_user_type": {
+          "default": "",
+          "title": "Douyin User Type",
+          "type": "string"
+        },
+        "douyin_user_fans": {
+          "default": "",
+          "title": "Douyin User Fans",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_user_search_result_v3Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_user_search_result_v3Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_live_search_result",
+    "description": "[已弃用/Deprecated] 获取指定关键词的直播搜索结果/Get live search results of specified keywords",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "search_id": {
+          "default": "",
+          "title": "Search Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_web_fetch_live_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_live_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_search_challenge",
+    "description": "[已弃用/Deprecated] 搜索话题/Search Challenge",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_search_challengeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_search_challengeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_challenge_posts",
+    "description": "话题作品/Challenge Posts",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_challenge_postsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_challenge_postsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_hot_search_result",
+    "description": "获取抖音热榜数据/Get Douyin hot search results",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_hot_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_hot_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_video_channel_result",
+    "description": "抖音视频频道数据/Douyin video channel data",
+    "inputSchema": {
+      "properties": {
+        "tag_id": {
+          "title": "Tag Id",
+          "type": "integer"
+        },
+        "count": {
+          "default": 10,
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tag_id"
+      ],
+      "title": "douyin_web_fetch_video_channel_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_video_channel_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_douyin_web_guest_cookie",
+    "description": "获取抖音Web的游客Cookie/Get the guest Cookie of Douyin Web",
+    "inputSchema": {
+      "properties": {
+        "user_agent": {
+          "title": "User Agent",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_agent"
+      ],
+      "title": "douyin_web_fetch_douyin_web_guest_cookieArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_douyin_web_guest_cookieOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_real_mstoken",
+    "description": "生成真实msToken/Generate real msToken",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_generate_real_mstokenArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_real_mstokenOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_ttwid",
+    "description": "生成ttwid/Generate ttwid",
+    "inputSchema": {
+      "properties": {
+        "user_agent": {
+          "default": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+          "title": "User Agent",
+          "type": "string"
+        }
+      },
+      "title": "douyin_web_generate_ttwidArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_ttwidOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_query_user",
+    "description": "查询抖音用户基本信息/Query Douyin user basic information",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_fetch_query_userArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_query_userOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_verify_fp",
+    "description": "生成verify_fp/Generate verify_fp",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_generate_verify_fpArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_verify_fpOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_s_v_web_id",
+    "description": "生成s_v_web_id/Generate s_v_web_id",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_generate_s_v_web_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_s_v_web_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_wss_xb_signature",
+    "description": "生成弹幕xb签名/Generate barrage xb signature",
+    "inputSchema": {
+      "properties": {
+        "user_agent": {
+          "title": "User Agent",
+          "type": "string"
+        },
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        },
+        "user_unique_id": {
+          "title": "User Unique Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_agent",
+        "room_id",
+        "user_unique_id"
+      ],
+      "title": "douyin_web_generate_wss_xb_signatureArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_wss_xb_signatureOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_x_bogus",
+    "description": "使用接口网址生成X-Bogus参数/Generate X-Bogus parameter using API URL",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_generate_x_bogusArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_x_bogusOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_generate_a_bogus",
+    "description": "使用接口网址生成A-Bogus参数/Generate A-Bogus parameter using API URL",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_generate_a_bogusArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_generate_a_bogusOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_get_sec_user_id",
+    "description": "提取单个用户id/Extract single user id",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "douyin_web_get_sec_user_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_get_sec_user_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_get_all_sec_user_id",
+    "description": "提取列表用户id/Extract list user id",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_get_all_sec_user_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_get_all_sec_user_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_get_aweme_id",
+    "description": "提取单个作品id/Extract single video id",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "douyin_web_get_aweme_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_get_aweme_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_get_all_aweme_id",
+    "description": "提取列表作品id/Extract list video id",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_get_all_aweme_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_get_all_aweme_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_get_webcast_id",
+    "description": "提取直播间号/Extract webcast id",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "douyin_web_get_webcast_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_get_webcast_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_get_all_webcast_id",
+    "description": "提取列表直播间号/Extract list webcast id",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_web_get_all_webcast_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_get_all_webcast_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_webcast_id_2_room_id",
+    "description": "直播间号转房间号/Webcast id to room id",
+    "inputSchema": {
+      "properties": {
+        "webcast_id": {
+          "title": "Webcast Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "webcast_id"
+      ],
+      "title": "douyin_web_webcast_id_2_room_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_webcast_id_2_room_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_douyin_live_room",
+    "description": "提取直播间弹幕/Extract live room danmaku",
+    "inputSchema": {
+      "properties": {
+        "live_room_url": {
+          "title": "Live Room Url",
+          "type": "string"
+        },
+        "danmaku_type": {
+          "title": "Danmaku Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "live_room_url",
+        "danmaku_type"
+      ],
+      "title": "douyin_web_douyin_live_roomArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_douyin_live_roomOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_live_im_fetch",
+    "description": "抖音直播间弹幕参数获取/Douyin live room danmaku parameters",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        },
+        "user_unique_id": {
+          "title": "User Unique Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "room_id",
+        "user_unique_id"
+      ],
+      "title": "douyin_web_fetch_live_im_fetchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_live_im_fetchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_series_aweme",
+    "description": "短剧作品/Series Video",
+    "inputSchema": {
+      "properties": {
+        "offset": {
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "content_type": {
+          "title": "Content Type",
+          "type": "integer"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "offset",
+        "count",
+        "content_type"
+      ],
+      "title": "douyin_web_fetch_series_awemeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_series_awemeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_knowledge_aweme",
+    "description": "知识作品推荐/Knowledge Video",
+    "inputSchema": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "douyin_web_fetch_knowledge_awemeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_knowledge_awemeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_game_aweme",
+    "description": "游戏作品推荐/Game Video",
+    "inputSchema": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "douyin_web_fetch_game_awemeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_game_awemeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_cartoon_aweme",
+    "description": "二次元作品推荐/Anime Video",
+    "inputSchema": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "douyin_web_fetch_cartoon_awemeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_cartoon_awemeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_music_aweme",
+    "description": "音乐作品推荐/Music Video",
+    "inputSchema": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "douyin_web_fetch_music_awemeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_music_awemeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_web_fetch_food_aweme",
+    "description": "美食作品推荐/Food Video",
+    "inputSchema": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "refresh_index": {
+          "default": 1,
+          "title": "Refresh Index",
+          "type": "integer"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "count"
+      ],
+      "title": "douyin_web_fetch_food_awemeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_web_fetch_food_awemeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_one_video",
+    "description": "获取单个作品数据/Get single video data",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_app_v3_fetch_one_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_one_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_one_video_v2",
+    "description": "获取单个作品数据 V2/Get single video data V2",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_app_v3_fetch_one_video_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_one_video_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_one_video_v3",
+    "description": "获取单个作品数据 V3 (无版权限制)/Get single video data V3 (No copyright restrictions)",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_app_v3_fetch_one_video_v3Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_one_video_v3Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_share_info_by_share_code",
+    "description": "根据分享口令获取分享信息/Get share info by share code",
+    "inputSchema": {
+      "properties": {
+        "share_code": {
+          "title": "Share Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_code"
+      ],
+      "title": "douyin_app_v3_fetch_share_info_by_share_codeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_share_info_by_share_codeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_multi_video",
+    "description": "批量获取视频信息 V1/Batch Get Video Information V1",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_app_v3_fetch_multi_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_multi_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_multi_video_v2",
+    "description": "批量获取视频信息 V2/Batch Get Video Information V2",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_app_v3_fetch_multi_video_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_multi_video_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_one_video_by_share_url",
+    "description": "根据分享链接获取单个作品数据/Get single video data by sharing link",
+    "inputSchema": {
+      "properties": {
+        "share_url": {
+          "title": "Share Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_url"
+      ],
+      "title": "douyin_app_v3_fetch_one_video_by_share_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_one_video_by_share_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_high_quality_play_url",
+    "description": "获取视频的最高画质播放链接/Get the highest quality play URL of the video",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "default": null,
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "share_url": {
+          "default": null,
+          "title": "Share Url",
+          "type": "string"
+        }
+      },
+      "title": "douyin_app_v3_fetch_video_high_quality_play_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_high_quality_play_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_multi_video_high_quality_play_url",
+    "description": "批量获取视频的最高画质播放链接/Batch get the highest quality play URL of videos",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_app_v3_fetch_multi_video_high_quality_play_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_multi_video_high_quality_play_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_statistics",
+    "description": "根据视频ID获取作品的统计数据（点赞数、下载数、播放数、分享数）/Get the statistical data of the Post according to the video ID (like count, download count, play count, share count)",
+    "inputSchema": {
+      "properties": {
+        "aweme_ids": {
+          "title": "Aweme Ids",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_ids"
+      ],
+      "title": "douyin_app_v3_fetch_video_statisticsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_statisticsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_multi_video_statistics",
+    "description": "根据视频ID批量获取作品的统计数据（点赞数、下载数、播放数、分享数）/Get the statistical data of the Post according to the video ID (like count, download count, play count, share count)",
+    "inputSchema": {
+      "properties": {
+        "aweme_ids": {
+          "title": "Aweme Ids",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_ids"
+      ],
+      "title": "douyin_app_v3_fetch_multi_video_statisticsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_multi_video_statisticsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_add_video_play_count",
+    "description": "根据视频ID来增加作品的播放数/Increase the number of plays of the work according to the video ID",
+    "inputSchema": {
+      "properties": {
+        "aweme_type": {
+          "title": "Aweme Type",
+          "type": "integer"
+        },
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "cookie": {
+          "default": null,
+          "title": "Cookie",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_type",
+        "item_id"
+      ],
+      "title": "douyin_app_v3_add_video_play_countArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_add_video_play_countOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_handler_user_profile",
+    "description": "获取指定用户的信息/Get information of specified user",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_app_v3_handler_user_profileArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_handler_user_profileOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_user_fans_list",
+    "description": "获取用户粉丝列表/Get user fans list",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "default": "MS4wLjABAAAA9y04iBlVdeMQqTJbqsQZKb-tqWqWW29jPVJqideHT70",
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_time": {
+          "default": "0",
+          "title": "Max Time",
+          "type": "string"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_app_v3_fetch_user_fans_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_user_fans_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_user_following_list",
+    "description": "获取用户关注列表 (弃用，使用 /api/v1/douyin/web/fetch_user_following_list 替代)/Get user following list (Deprecated, use /api/v1/douyin/web/fetch_user_following_list instead)",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "default": "MS4wLjABAAAA9y04iBlVdeMQqTJbqsQZKb-tqWqWW29jPVJqideHT70",
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_time": {
+          "default": "0",
+          "title": "Max Time",
+          "type": "string"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_app_v3_fetch_user_following_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_user_following_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_user_post_videos",
+    "description": "获取用户主页作品数据/Get user homepage video data",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_cursor": {
+          "default": 0,
+          "title": "Max Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": 0,
+          "title": "Sort Type",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_app_v3_fetch_user_post_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_user_post_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_user_like_videos",
+    "description": "获取用户喜欢作品数据/Get user like video data",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "max_cursor": {
+          "default": 0,
+          "title": "Max Cursor",
+          "type": "integer"
+        },
+        "counts": {
+          "default": 20,
+          "title": "Counts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_app_v3_fetch_user_like_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_user_like_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_comments",
+    "description": "获取单个视频评论数据/Get single video comments data",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_app_v3_fetch_video_commentsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_commentsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_comment_replies",
+    "description": "获取指定视频的评论回复数据/Get comment replies data of specified video",
+    "inputSchema": {
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "comment_id": {
+          "title": "Comment Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "comment_id"
+      ],
+      "title": "douyin_app_v3_fetch_video_comment_repliesArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_comment_repliesOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_mix_detail",
+    "description": "获取抖音视频合集详情数据/Get Douyin video mix detail data",
+    "inputSchema": {
+      "properties": {
+        "mix_id": {
+          "title": "Mix Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mix_id"
+      ],
+      "title": "douyin_app_v3_fetch_video_mix_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_mix_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_mix_post_list",
+    "description": "获取抖音视频合集作品列表数据/Get Douyin video mix post list data",
+    "inputSchema": {
+      "properties": {
+        "mix_id": {
+          "title": "Mix Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mix_id"
+      ],
+      "title": "douyin_app_v3_fetch_video_mix_post_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_mix_post_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_user_series_list",
+    "description": "获取用户短剧合集列表/Get user series list",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "default": "",
+          "title": "User Id",
+          "type": "string"
+        },
+        "sec_user_id": {
+          "default": "",
+          "title": "Sec User Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_app_v3_fetch_user_series_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_user_series_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_series_video_list",
+    "description": "获取短剧视频列表/Get series video list",
+    "inputSchema": {
+      "properties": {
+        "series_id": {
+          "title": "Series Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "series_id"
+      ],
+      "title": "douyin_app_v3_fetch_series_video_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_series_video_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_series_detail",
+    "description": "获取短剧详情信息/Get series detail",
+    "inputSchema": {
+      "properties": {
+        "series_id": {
+          "title": "Series Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "series_id"
+      ],
+      "title": "douyin_app_v3_fetch_series_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_series_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_general_search_result",
+    "description": "获取指定关键词的综合搜索结果（弃用，替代接口见下方文档说明）/Get comprehensive search results of specified keywords (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": "0",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "0",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "filter_duration": {
+          "default": "0",
+          "title": "Filter Duration",
+          "type": "string"
+        },
+        "content_type": {
+          "default": "0",
+          "title": "Content Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_general_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_general_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_search_result",
+    "description": "获取指定关键词的视频搜索结果（弃用，替代接口见下方文档说明）/Get video search results of specified keywords (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": "0",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "0",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "filter_duration": {
+          "default": "0",
+          "title": "Filter Duration",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_video_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_video_search_result_v2",
+    "description": "获取指定关键词的视频搜索结果 V2 （弃用，替代接口见下方文档说明）/Get video search results of specified keywords V2 (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "sort_type": {
+          "default": "_0",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "_0",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "filter_duration": {
+          "default": "_0",
+          "title": "Filter Duration",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "search_id": {
+          "default": "",
+          "title": "Search Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_video_search_result_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_video_search_result_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_user_search_result",
+    "description": "获取指定关键词的用户搜索结果（弃用，替代接口见下方文档说明）/Get user search results of specified keywords (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "douyin_user_fans": {
+          "default": "",
+          "title": "Douyin User Fans",
+          "type": "string"
+        },
+        "douyin_user_type": {
+          "default": "",
+          "title": "Douyin User Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_user_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_user_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_live_search_result",
+    "description": "获取指定关键词的直播搜索结果（弃用，替代接口见下方文档说明）/Get live search results of specified keywords (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_live_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_live_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_music_search_result",
+    "description": "获取指定关键词的音乐搜索结果（弃用，替代接口见下方文档说明）/Get music search results of specified keywords (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_music_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_music_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_hashtag_search_result",
+    "description": "获取指定关键词的话题搜索结果（弃用，替代接口见下方文档说明）/Get hashtag search results of specified keywords (deprecated, see the documentation below for alternative interfaces)",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_fetch_hashtag_search_resultArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_hashtag_search_resultOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_music_detail",
+    "description": "获取指定音乐的详情数据/Get details of specified music",
+    "inputSchema": {
+      "properties": {
+        "music_id": {
+          "title": "Music Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "music_id"
+      ],
+      "title": "douyin_app_v3_fetch_music_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_music_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_music_video_list",
+    "description": "获取指定音乐的视频列表数据/Get video list of specified music",
+    "inputSchema": {
+      "properties": {
+        "music_id": {
+          "title": "Music Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "count": {
+          "default": 10,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "music_id"
+      ],
+      "title": "douyin_app_v3_fetch_music_video_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_music_video_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_hashtag_detail",
+    "description": "获取指定话题的详情数据/Get details of specified hashtag",
+    "inputSchema": {
+      "properties": {
+        "ch_id": {
+          "title": "Ch Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ch_id"
+      ],
+      "title": "douyin_app_v3_fetch_hashtag_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_hashtag_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_hashtag_video_list",
+    "description": "获取指定话题的作品数据/Get video list of specified hashtag",
+    "inputSchema": {
+      "properties": {
+        "ch_id": {
+          "title": "Ch Id",
+          "type": "string"
+        },
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "sort_type": {
+          "default": 0,
+          "title": "Sort Type",
+          "type": "integer"
+        },
+        "count": {
+          "default": 10,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ch_id"
+      ],
+      "title": "douyin_app_v3_fetch_hashtag_video_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_hashtag_video_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_hot_search_list",
+    "description": "获取抖音热搜榜数据/Get Douyin hot search list data",
+    "inputSchema": {
+      "properties": {
+        "board_type": {
+          "default": "0",
+          "title": "Board Type",
+          "type": "string"
+        },
+        "board_sub_type": {
+          "default": "",
+          "title": "Board Sub Type",
+          "type": "string"
+        }
+      },
+      "title": "douyin_app_v3_fetch_hot_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_hot_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_live_hot_search_list",
+    "description": "获取抖音直播热搜榜数据/Get Douyin live hot search list data",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_app_v3_fetch_live_hot_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_live_hot_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_music_hot_search_list",
+    "description": "获取抖音音乐榜数据/Get Douyin music hot search list data",
+    "inputSchema": {
+      "properties": {
+        "chart_type": {
+          "default": "hot",
+          "title": "Chart Type",
+          "type": "string"
+        },
+        "cursor": {
+          "default": "0",
+          "title": "Cursor",
+          "type": "string"
+        }
+      },
+      "title": "douyin_app_v3_fetch_music_hot_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_music_hot_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_brand_hot_search_list",
+    "description": "获取抖音品牌热榜分类数据/Get Douyin brand hot search list data",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_app_v3_fetch_brand_hot_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_brand_hot_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_fetch_brand_hot_search_list_detail",
+    "description": "获取抖音品牌热榜具体分类数据/Get Douyin brand hot search list detail data",
+    "inputSchema": {
+      "properties": {
+        "category_id": {
+          "title": "Category Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "category_id"
+      ],
+      "title": "douyin_app_v3_fetch_brand_hot_search_list_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_fetch_brand_hot_search_list_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_generate_douyin_short_url",
+    "description": "生成抖音短链接/Generate Douyin short link",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "douyin_app_v3_generate_douyin_short_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_generate_douyin_short_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_generate_douyin_video_share_qrcode",
+    "description": "生成抖音视频分享二维码/Generate Douyin video share QR code",
+    "inputSchema": {
+      "properties": {
+        "object_id": {
+          "title": "Object Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id"
+      ],
+      "title": "douyin_app_v3_generate_douyin_video_share_qrcodeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_generate_douyin_video_share_qrcodeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_register_device",
+    "description": "抖音APP注册设备/Douyin APP register device",
+    "inputSchema": {
+      "properties": {
+        "proxy": {
+          "default": "",
+          "title": "Proxy",
+          "type": "string"
+        }
+      },
+      "title": "douyin_app_v3_register_deviceArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_register_deviceOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_open_douyin_app_to_video_detail",
+    "description": "生成抖音分享链接，唤起抖音APP，跳转指定作品详情页/Generate Douyin share link, call Douyin APP, and jump to the specified video details page",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_video_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_video_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_open_douyin_app_to_user_profile",
+    "description": "生成抖音分享链接，唤起抖音APP，跳转指定用户主页/Generate Douyin share link, call Douyin APP, and jump to the specified user profile",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "sec_uid"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_user_profileArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_user_profileOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_open_douyin_app_to_keyword_search",
+    "description": "生成抖音分享链接，唤起抖音APP，跳转指定关键词搜索结果/Generate Douyin share link, call Douyin APP, and jump to the specified keyword search result",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_keyword_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_keyword_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_app_v3_open_douyin_app_to_send_private_message",
+    "description": "生成抖音分享链接，唤起抖音APP，给指定用户发送私信/Generate Douyin share link, call Douyin APP, and send private messages to specified users",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "sec_uid"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_send_private_messageArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_app_v3_open_douyin_app_to_send_private_messageOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_city_list",
+    "description": "获取中国城市列表/Fetch Chinese city list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_city_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_city_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_content_tag",
+    "description": "获取垂类内容标签/Fetch vertical content tags",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_content_tagArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_content_tagOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_category_list",
+    "description": "获取热点榜分类/Fetch hot list category",
+    "inputSchema": {
+      "properties": {
+        "billboard_type": {
+          "title": "Billboard Type",
+          "type": "string"
+        },
+        "snapshot_time": {
+          "default": "20250106151500",
+          "title": "Snapshot Time",
+          "type": "string"
+        },
+        "start_date": {
+          "default": "",
+          "title": "Start Date",
+          "type": "string"
+        },
+        "end_date": {
+          "default": "",
+          "title": "End Date",
+          "type": "string"
+        },
+        "keyword": {
+          "default": "",
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "required": [
+        "billboard_type"
+      ],
+      "title": "douyin_billboard_fetch_hot_category_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_category_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_rise_list",
+    "description": "获取上升热点榜/Fetch rising hot list",
+    "inputSchema": {
+      "properties": {
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "order": {
+          "title": "Order",
+          "type": "string"
+        },
+        "sentence_tag": {
+          "default": "",
+          "title": "Sentence Tag",
+          "type": "string"
+        },
+        "keyword": {
+          "default": "",
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "page_size",
+        "order"
+      ],
+      "title": "douyin_billboard_fetch_hot_rise_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_rise_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_city_list",
+    "description": "获取同城热点榜/Fetch city hot list",
+    "inputSchema": {
+      "properties": {
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "order": {
+          "title": "Order",
+          "type": "string"
+        },
+        "city_code": {
+          "default": "",
+          "title": "City Code",
+          "type": "string"
+        },
+        "sentence_tag": {
+          "default": "",
+          "title": "Sentence Tag",
+          "type": "string"
+        },
+        "keyword": {
+          "default": "",
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "page_size",
+        "order"
+      ],
+      "title": "douyin_billboard_fetch_hot_city_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_city_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_challenge_list",
+    "description": "获取挑战热榜/Fetch hot challenge list",
+    "inputSchema": {
+      "properties": {
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "keyword": {
+          "default": "",
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "page_size"
+      ],
+      "title": "douyin_billboard_fetch_hot_challenge_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_challenge_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_list",
+    "description": "获取热点总榜/Fetch total hot list",
+    "inputSchema": {
+      "properties": {
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "snapshot_time": {
+          "default": "20250106151500",
+          "title": "Snapshot Time",
+          "type": "string"
+        },
+        "start_date": {
+          "default": "",
+          "title": "Start Date",
+          "type": "string"
+        },
+        "end_date": {
+          "default": "",
+          "title": "End Date",
+          "type": "string"
+        },
+        "sentence_tag": {
+          "default": "",
+          "title": "Sentence Tag",
+          "type": "string"
+        },
+        "keyword": {
+          "default": "",
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "page_size",
+        "type"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_calendar_list",
+    "description": "获取活动日历/Fetch activity calendar",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_calendar_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_calendar_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_calendar_detail",
+    "description": "获取活动日历详情/Fetch activity calendar detail",
+    "inputSchema": {
+      "properties": {
+        "calendar_id": {
+          "title": "Calendar Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "calendar_id"
+      ],
+      "title": "douyin_billboard_fetch_hot_calendar_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_calendar_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_user_portrait_list",
+    "description": "获取作品点赞观众画像-仅限热门榜/Fetch work like audience portrait - hot list only",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "option": {
+          "default": 4,
+          "title": "Option",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_billboard_fetch_hot_user_portrait_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_user_portrait_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_comment_word_list",
+    "description": "获取作品评论分析-词云权重/Fetch work comment analysis word cloud weight",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "title": "Aweme Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aweme_id"
+      ],
+      "title": "douyin_billboard_fetch_hot_comment_word_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_comment_word_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_item_trends_list",
+    "description": "获取作品数据趋势/Fetch post data trend",
+    "inputSchema": {
+      "properties": {
+        "aweme_id": {
+          "default": "",
+          "title": "Aweme Id",
+          "type": "string"
+        },
+        "option": {
+          "default": 7,
+          "title": "Option",
+          "type": "integer"
+        },
+        "date_window": {
+          "default": 1,
+          "title": "Date Window",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_billboard_fetch_hot_item_trends_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_item_trends_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_list",
+    "description": "获取热门账号/Fetch hot account list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_account_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_search_list",
+    "description": "搜索用户名或抖音号/Fetch account search list",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "cursor": {
+          "title": "Cursor",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword",
+        "cursor"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_trends_list",
+    "description": "获取账号粉丝数据趋势/Fetch account fan data trend",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        },
+        "option": {
+          "default": 2,
+          "title": "Option",
+          "type": "integer"
+        },
+        "date_window": {
+          "default": 24,
+          "title": "Date Window",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_trends_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_trends_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_item_analysis_list",
+    "description": "获取账号作品分析-上周/Fetch account work analysis - last week",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_item_analysis_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_item_analysis_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_fans_portrait_list",
+    "description": "获取粉丝画像/Fetch fan portrait",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        },
+        "option": {
+          "default": 1,
+          "title": "Option",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_portrait_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_portrait_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_fans_interest_account_list",
+    "description": "获取粉丝兴趣作者 20个用户/Fetch fan interest author 20 users",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_interest_account_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_interest_account_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_fans_interest_topic_list",
+    "description": "获取粉丝近3天感兴趣的话题 10个话题/Fetch fan interest topic in the last 3 days 10 topics",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_interest_topic_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_interest_topic_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_account_fans_interest_search_list",
+    "description": "获取粉丝近3天搜索词 10个搜索词/Fetch fan interest search term in the last 3 days 10 search terms",
+    "inputSchema": {
+      "properties": {
+        "sec_uid": {
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_uid"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_interest_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_account_fans_interest_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_video_list",
+    "description": "获取视频热榜/Fetch video hot list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_video_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_video_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_low_fan_list",
+    "description": "获取低粉爆款榜/Fetch low fan explosion list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_low_fan_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_low_fan_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_high_play_list",
+    "description": "获取高完播率榜/Fetch high completion rate list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_high_play_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_high_play_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_high_like_list",
+    "description": "获取高点赞率榜/Fetch high like rate list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_high_like_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_high_like_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_high_fan_list",
+    "description": "获取高涨粉率榜/Fetch high fan rate list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_high_fan_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_high_fan_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_topic_list",
+    "description": "获取话题热榜/Fetch topic hot list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_topic_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_topic_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_high_topic_list",
+    "description": "获取热度飙升的话题榜/Fetch topic list with rising popularity",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_high_topic_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_high_topic_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_search_list",
+    "description": "获取搜索热榜/Fetch search hot list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_high_search_list",
+    "description": "获取热度飙升的搜索榜/Fetch search list with rising popularity",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_high_search_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_high_search_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_hot_word_list",
+    "description": "获取全部热门内容词/Fetch all hot content words",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_billboard_fetch_hot_total_hot_word_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_hot_word_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_billboard_fetch_hot_total_hot_word_detail_list",
+    "description": "获取内容词详情/Fetch content word details",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "word_id": {
+          "title": "Word Id",
+          "type": "string"
+        },
+        "query_day": {
+          "title": "Query Day",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword",
+        "word_id",
+        "query_day"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_hot_word_detail_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_billboard_fetch_hot_total_hot_word_detail_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_activity_list",
+    "description": "获取创作者活动列表/Get creator activity list",
+    "inputSchema": {
+      "properties": {
+        "start_time": {
+          "title": "Start Time",
+          "type": "integer"
+        },
+        "end_time": {
+          "title": "End Time",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_time",
+        "end_time"
+      ],
+      "title": "douyin_creator_fetch_creator_activity_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_activity_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_activity_detail",
+    "description": "获取创作者活动详情/Get creator activity detail",
+    "inputSchema": {
+      "properties": {
+        "activity_id": {
+          "title": "Activity Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "activity_id"
+      ],
+      "title": "douyin_creator_fetch_creator_activity_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_activity_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_material_center_config",
+    "description": "获取创作者中心配置/Get creator material center config",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_fetch_creator_material_center_configArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_material_center_configOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_material_center_billboard",
+    "description": "获取创作者中心热门视频榜单/Get creator material center billboard",
+    "inputSchema": {
+      "properties": {
+        "billboard_tag": {
+          "default": 0,
+          "title": "Billboard Tag",
+          "type": "integer"
+        },
+        "order_key": {
+          "default": 1,
+          "title": "Order Key",
+          "type": "integer"
+        },
+        "time_filter": {
+          "default": 1,
+          "title": "Time Filter",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_creator_fetch_creator_material_center_billboardArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_material_center_billboardOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_hot_spot_billboard",
+    "description": "获取创作者中心创作热点/Get creator hot spot billboard",
+    "inputSchema": {
+      "properties": {
+        "billboard_tag": {
+          "default": "0",
+          "title": "Billboard Tag",
+          "type": "string"
+        },
+        "hot_search_type": {
+          "default": 1,
+          "title": "Hot Search Type",
+          "type": "integer"
+        },
+        "city_code": {
+          "default": null,
+          "title": "City Code",
+          "type": "string"
+        }
+      },
+      "title": "douyin_creator_fetch_creator_hot_spot_billboardArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_hot_spot_billboardOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_hot_topic_billboard",
+    "description": "获取创作者热门话题榜单/Get creator hot topic billboard",
+    "inputSchema": {
+      "properties": {
+        "billboard_tag": {
+          "default": 0,
+          "title": "Billboard Tag",
+          "type": "integer"
+        },
+        "order_key": {
+          "default": 1,
+          "title": "Order Key",
+          "type": "integer"
+        },
+        "time_filter": {
+          "default": 1,
+          "title": "Time Filter",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_creator_fetch_creator_hot_topic_billboardArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_hot_topic_billboardOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_hot_props_billboard",
+    "description": "获取创作者热门道具榜单/Get creator hot props billboard",
+    "inputSchema": {
+      "properties": {
+        "billboard_tag": {
+          "default": 0,
+          "title": "Billboard Tag",
+          "type": "integer"
+        },
+        "order_key": {
+          "default": 1,
+          "title": "Order Key",
+          "type": "integer"
+        },
+        "time_filter": {
+          "default": 1,
+          "title": "Time Filter",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_creator_fetch_creator_hot_props_billboardArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_hot_props_billboardOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_hot_challenge_billboard",
+    "description": "获取创作者热门挑战榜单/Get creator hot challenge billboard",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_fetch_creator_hot_challenge_billboardArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_hot_challenge_billboardOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_hot_music_billboard",
+    "description": "获取创作者热门音乐榜单/Get creator hot music billboard",
+    "inputSchema": {
+      "properties": {
+        "billboard_tag": {
+          "default": 0,
+          "title": "Billboard Tag",
+          "type": "integer"
+        },
+        "order_key": {
+          "default": 1,
+          "title": "Order Key",
+          "type": "integer"
+        },
+        "time_filter": {
+          "default": 1,
+          "title": "Time Filter",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_creator_fetch_creator_hot_music_billboardArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_hot_music_billboardOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_hot_course",
+    "description": "获取创作者热门课程/Get creator hot course",
+    "inputSchema": {
+      "properties": {
+        "order": {
+          "default": 1,
+          "title": "Order",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 24,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "category_id": {
+          "default": null,
+          "title": "Category Id",
+          "type": "string"
+        }
+      },
+      "title": "douyin_creator_fetch_creator_hot_courseArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_hot_courseOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_content_category",
+    "description": "获取创作者内容创作合集分类/Get creator content creation category",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_fetch_creator_content_categoryArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_content_categoryOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_creator_content_course",
+    "description": "获取创作者内容创作课程/Get creator content creation course",
+    "inputSchema": {
+      "properties": {
+        "category_id": {
+          "title": "Category Id",
+          "type": "integer"
+        },
+        "order": {
+          "default": 1,
+          "title": "Order",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 24,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "category_id"
+      ],
+      "title": "douyin_creator_fetch_creator_content_courseArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_creator_content_courseOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_video_danmaku_list",
+    "description": "获取作品弹幕列表/Get video danmaku list",
+    "inputSchema": {
+      "properties": {
+        "item_id": {
+          "title": "Item Id",
+          "type": "string"
+        },
+        "count": {
+          "default": 20,
+          "title": "Count",
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "title": "Offset",
+          "type": "integer"
+        },
+        "order_type": {
+          "default": 1,
+          "title": "Order Type",
+          "type": "integer"
+        },
+        "is_blocked": {
+          "default": true,
+          "title": "Is Blocked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "item_id"
+      ],
+      "title": "douyin_creator_fetch_video_danmaku_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_video_danmaku_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_user_search",
+    "description": "搜索用户/Search users",
+    "inputSchema": {
+      "properties": {
+        "user_name": {
+          "title": "User Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_name"
+      ],
+      "title": "douyin_creator_fetch_user_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_user_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_mission_task_list",
+    "description": "获取商单任务列表/Get mission task list",
+    "inputSchema": {
+      "properties": {
+        "cursor": {
+          "default": 0,
+          "title": "Cursor",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 24,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "mission_type": {
+          "default": 1,
+          "title": "Mission Type",
+          "type": "integer"
+        },
+        "tab_scene": {
+          "default": 1,
+          "title": "Tab Scene",
+          "type": "integer"
+        },
+        "industry_lv1": {
+          "default": -1,
+          "title": "Industry Lv1",
+          "type": "integer"
+        },
+        "industry_lv2": {
+          "default": -1,
+          "title": "Industry Lv2",
+          "type": "integer"
+        },
+        "platform_channel": {
+          "default": null,
+          "title": "Platform Channel",
+          "type": "string"
+        },
+        "pay_type": {
+          "default": null,
+          "title": "Pay Type",
+          "type": "string"
+        },
+        "greater_than_cost_progress": {
+          "default": null,
+          "title": "Greater Than Cost Progress",
+          "type": "string"
+        },
+        "publish_time_start": {
+          "default": null,
+          "title": "Publish Time Start",
+          "type": "string"
+        },
+        "quick_selector_scene": {
+          "default": null,
+          "title": "Quick Selector Scene",
+          "type": "string"
+        },
+        "keyword": {
+          "default": null,
+          "title": "Keyword",
+          "type": "string"
+        }
+      },
+      "title": "douyin_creator_fetch_mission_task_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_mission_task_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_fetch_industry_category_config",
+    "description": "获取行业分类配置/Get industry category config",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_fetch_industry_category_configArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_fetch_industry_category_configOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_overview_data",
+    "description": "获取作品总览数据/Fetch item overview data",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_overview_dataArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_overview_dataOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_play_source",
+    "description": "获取作品流量来源统计/Fetch item play source statistics",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_play_sourceArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_play_sourceOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_search_keyword",
+    "description": "获取作品搜索关键词统计/Fetch item search keywords statistics",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_search_keywordArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_search_keywordOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_watch_trend",
+    "description": "获取作品观看趋势分析/Fetch item watch trend analysis",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_watch_trendArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_watch_trendOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_danmaku_analysis",
+    "description": "获取作品弹幕分析/Fetch item bullet analysis",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_danmaku_analysisArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_danmaku_analysisOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_audience_portrait",
+    "description": "获取作品观众数据分析/Fetch item audience portrait",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_audience_portraitArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_audience_portraitOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_audience_others",
+    "description": "获取作品观众其他数据分析/Fetch item audience others analysis",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_audience_othersArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_audience_othersOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_analysis_involved_vertical",
+    "description": "获取作品垂类标签/Fetch item analysis involved vertical",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_analysis_involved_verticalArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_analysis_involved_verticalOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_analysis_overview",
+    "description": "获取投稿分析概览/Fetch item analysis overview",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_analysis_overviewArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_analysis_overviewOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_analysis_item_performance",
+    "description": "获取投稿表现数据/Fetch item analysis item performance",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_analysis_item_performanceArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_analysis_item_performanceOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_list",
+    "description": "获取投稿作品列表/Fetch item list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_item_list_download",
+    "description": "导出投稿作品列表/Download item list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_item_list_downloadArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_item_list_downloadOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_live_room_history_list",
+    "description": "获取直播场次历史记录/Fetch live room history list",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_live_room_history_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_live_room_history_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_creator_v2_fetch_author_diagnosis",
+    "description": "获取创作者账号诊断/Fetch author diagnosis",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_creator_v2_fetch_author_diagnosisArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_creator_v2_fetch_author_diagnosisOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_get_sign_image",
+    "description": "获取加密图片解析/Get Sign Image",
+    "inputSchema": {
+      "properties": {
+        "uri": {
+          "title": "Uri",
+          "type": "string"
+        },
+        "durationTS": {
+          "default": 86400,
+          "title": "Durationts",
+          "type": "integer"
+        },
+        "format": {
+          "default": "webp",
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri"
+      ],
+      "title": "douyin_xingtu_get_sign_imageArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_get_sign_imageOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_get_xingtu_kolid_by_uid",
+    "description": "根据抖音用户ID获取游客星图kolid/Get XingTu kolid by Douyin User ID",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "douyin_xingtu_get_xingtu_kolid_by_uidArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_get_xingtu_kolid_by_uidOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_get_xingtu_kolid_by_sec_user_id",
+    "description": "根据抖音sec_user_id获取游客星图kolid/Get XingTu kolid by Douyin sec_user_id",
+    "inputSchema": {
+      "properties": {
+        "sec_user_id": {
+          "title": "Sec User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sec_user_id"
+      ],
+      "title": "douyin_xingtu_get_xingtu_kolid_by_sec_user_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_get_xingtu_kolid_by_sec_user_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_get_xingtu_kolid_by_unique_id",
+    "description": "根据抖音号获取游客星图kolid/Get XingTu kolid by Douyin unique_id",
+    "inputSchema": {
+      "properties": {
+        "unique_id": {
+          "title": "Unique Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unique_id"
+      ],
+      "title": "douyin_xingtu_get_xingtu_kolid_by_unique_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_get_xingtu_kolid_by_unique_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_base_info_v1",
+    "description": "获取kol基本信息V1/Get kol Base Info V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        },
+        "platformChannel": {
+          "title": "Platformchannel",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId",
+        "platformChannel"
+      ],
+      "title": "douyin_xingtu_kol_base_info_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_base_info_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_audience_portrait_v1",
+    "description": "获取kol观众画像V1/Get kol Audience Portrait V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_audience_portrait_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_audience_portrait_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_fans_portrait_v1",
+    "description": "获取kol粉丝画像V1/Get kol Fans Portrait V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        },
+        "fansType": {
+          "default": "_1",
+          "title": "Fanstype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_fans_portrait_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_fans_portrait_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_service_price_v1",
+    "description": "获取kol服务报价V1/Get kol Service Price V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        },
+        "platformChannel": {
+          "title": "Platformchannel",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId",
+        "platformChannel"
+      ],
+      "title": "douyin_xingtu_kol_service_price_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_service_price_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_search_kol_v1",
+    "description": "关键词搜索kol V1/Search Kol V1",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "platformSource": {
+          "title": "Platformsource",
+          "type": "string"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword",
+        "platformSource",
+        "page"
+      ],
+      "title": "douyin_xingtu_search_kol_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_search_kol_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_search_kol_v2",
+    "description": "高级搜索kol V2/Search Kol Advanced V2",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "followerRange": {
+          "default": null,
+          "title": "Followerrange",
+          "type": "string"
+        },
+        "contentTag": {
+          "default": null,
+          "title": "Contenttag",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "douyin_xingtu_search_kol_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_search_kol_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_video_performance_v1",
+    "description": "获取kol视频表现V1/Get kol Video Performance V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        },
+        "onlyAssign": {
+          "title": "Onlyassign",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kolId",
+        "onlyAssign"
+      ],
+      "title": "douyin_xingtu_kol_video_performance_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_video_performance_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_xingtu_index_v1",
+    "description": "获取kol星图指数V1/Get kol Xingtu Index V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_xingtu_index_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_xingtu_index_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_convert_video_display_v1",
+    "description": "获取kol转化视频展示V1/Get kol Convert Video Display V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        },
+        "detailType": {
+          "title": "Detailtype",
+          "type": "string"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kolId",
+        "detailType",
+        "page"
+      ],
+      "title": "douyin_xingtu_kol_convert_video_display_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_convert_video_display_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_link_struct_v1",
+    "description": "获取kol连接用户V1/Get kol Link Struct V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_link_struct_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_link_struct_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_touch_distribution_v1",
+    "description": "获取kol连接用户来源V1/Get kol Touch Distribution V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_touch_distribution_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_touch_distribution_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_cp_info_v1",
+    "description": "获取kol性价比能力分析V1/Get kol Cp Info V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_cp_info_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_cp_info_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_rec_videos_v1",
+    "description": "获取kol内容表现V1/Get kol Rec Videos V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_kol_rec_videos_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_rec_videos_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_kol_daily_fans_v1",
+    "description": "获取kol粉丝趋势V1/Get kol Daily Fans V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        },
+        "startDate": {
+          "title": "Startdate",
+          "type": "string"
+        },
+        "endDate": {
+          "title": "Enddate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId",
+        "startDate",
+        "endDate"
+      ],
+      "title": "douyin_xingtu_kol_daily_fans_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_kol_daily_fans_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_author_hot_comment_tokens_v1",
+    "description": "获取kol热词分析评论V1/Get Author Hot Comment Tokens V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_author_hot_comment_tokens_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_author_hot_comment_tokens_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_author_content_hot_comment_keywords_v1",
+    "description": "获取kol热词分析内容V1/Get Author Content Hot Comment Keywords V1",
+    "inputSchema": {
+      "properties": {
+        "kolId": {
+          "title": "Kolid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kolId"
+      ],
+      "title": "douyin_xingtu_author_content_hot_comment_keywords_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_author_content_hot_comment_keywords_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_ranking_list_catalog",
+    "description": "获取星图热榜分类/Get Ranking List Catalog",
+    "inputSchema": {
+      "properties": {
+        "codes": {
+          "default": "",
+          "title": "Codes",
+          "type": "string"
+        },
+        "biz_scene": {
+          "default": "douyin_flow_split_video_author_ranks",
+          "title": "Biz Scene",
+          "type": "string"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_ranking_list_catalogArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_ranking_list_catalogOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_ranking_list_data",
+    "description": "获取星图达人商业榜数据/Get Ranking List Data",
+    "inputSchema": {
+      "properties": {
+        "code": {
+          "default": 1,
+          "title": "Code",
+          "type": "integer"
+        },
+        "qualifier": {
+          "default": "1901",
+          "title": "Qualifier",
+          "type": "string"
+        },
+        "version": {
+          "default": "flow_split",
+          "title": "Version",
+          "type": "string"
+        },
+        "period": {
+          "default": 30,
+          "title": "Period",
+          "type": "integer"
+        },
+        "date": {
+          "default": "20260131",
+          "title": "Date",
+          "type": "string"
+        },
+        "limit": {
+          "default": 100,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_ranking_list_dataArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_ranking_list_dataOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_playlet_actor_rank_catalog",
+    "description": "获取短剧演员热榜分类/Get Playlet Actor Rank Catalog",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_xingtu_v2_get_playlet_actor_rank_catalogArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_playlet_actor_rank_catalogOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_playlet_actor_rank_list",
+    "description": "获取短剧演员热榜/Get Playlet Actor Rank List",
+    "inputSchema": {
+      "properties": {
+        "category": {
+          "default": "playlet_actor_list",
+          "title": "Category",
+          "type": "string"
+        },
+        "name": {
+          "default": "playlet_actor_composite_list",
+          "title": "Name",
+          "type": "string"
+        },
+        "qualifier": {
+          "default": "",
+          "title": "Qualifier",
+          "type": "string"
+        },
+        "period": {
+          "default": 30,
+          "title": "Period",
+          "type": "integer"
+        },
+        "date": {
+          "default": "20251130",
+          "title": "Date",
+          "type": "string"
+        },
+        "limit": {
+          "default": 100,
+          "title": "Limit",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_playlet_actor_rank_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_playlet_actor_rank_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_market_fields",
+    "description": "获取达人广场筛选字段/Get Author Market Fields",
+    "inputSchema": {
+      "properties": {
+        "market_scene": {
+          "default": 1,
+          "title": "Market Scene",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_author_market_fieldsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_market_fieldsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_base_info",
+    "description": "获取创作者基本信息/Get Author Base Info",
+    "inputSchema": {
+      "properties": {
+        "o_author_id": {
+          "title": "O Author Id",
+          "type": "string"
+        },
+        "platform_source": {
+          "default": 1,
+          "title": "Platform Source",
+          "type": "integer"
+        },
+        "platform_channel": {
+          "default": 1,
+          "title": "Platform Channel",
+          "type": "integer"
+        },
+        "recommend": {
+          "default": true,
+          "title": "Recommend",
+          "type": "boolean"
+        },
+        "need_sec_uid": {
+          "default": true,
+          "title": "Need Sec Uid",
+          "type": "boolean"
+        },
+        "need_linkage_info": {
+          "default": true,
+          "title": "Need Linkage Info",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "o_author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_base_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_base_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_business_card_info",
+    "description": "获取创作者商业卡片信息/Get Author Business Card Info",
+    "inputSchema": {
+      "properties": {
+        "o_author_id": {
+          "title": "O Author Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "o_author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_business_card_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_business_card_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_local_info",
+    "description": "获取创作者位置信息/Get Author Local Info",
+    "inputSchema": {
+      "properties": {
+        "o_author_id": {
+          "title": "O Author Id",
+          "type": "string"
+        },
+        "platform_source": {
+          "default": 1,
+          "title": "Platform Source",
+          "type": "integer"
+        },
+        "platform_channel": {
+          "default": 1,
+          "title": "Platform Channel",
+          "type": "integer"
+        },
+        "time_range": {
+          "default": 30,
+          "title": "Time Range",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "o_author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_local_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_local_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_show_items",
+    "description": "获取创作者视频列表/Get Author Show Items",
+    "inputSchema": {
+      "properties": {
+        "o_author_id": {
+          "title": "O Author Id",
+          "type": "string"
+        },
+        "platform_source": {
+          "default": 1,
+          "title": "Platform Source",
+          "type": "integer"
+        },
+        "platform_channel": {
+          "default": 1,
+          "title": "Platform Channel",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 10,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "only_assign": {
+          "default": true,
+          "title": "Only Assign",
+          "type": "boolean"
+        },
+        "flow_type": {
+          "default": 0,
+          "title": "Flow Type",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "o_author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_show_itemsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_show_itemsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_hot_comment_tokens",
+    "description": "获取创作者评论热词/Get Author Hot Comment Tokens",
+    "inputSchema": {
+      "properties": {
+        "author_id": {
+          "title": "Author Id",
+          "type": "string"
+        },
+        "num": {
+          "default": 10,
+          "title": "Num",
+          "type": "integer"
+        },
+        "without_emoji": {
+          "default": true,
+          "title": "Without Emoji",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_hot_comment_tokensArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_hot_comment_tokensOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_content_hot_keywords",
+    "description": "获取创作者内容热词/Get Author Content Hot Keywords",
+    "inputSchema": {
+      "properties": {
+        "author_id": {
+          "title": "Author Id",
+          "type": "string"
+        },
+        "keyword_type": {
+          "default": 0,
+          "title": "Keyword Type",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_content_hot_keywordsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_content_hot_keywordsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_recommend_for_star_authors",
+    "description": "获取相似创作者推荐/Get Recommend Similar Star Authors",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_xingtu_v2_get_recommend_for_star_authorsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_recommend_for_star_authorsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_excellent_case_category_list",
+    "description": "获取优秀行业分类列表/Get Excellent Case Category List",
+    "inputSchema": {
+      "properties": {
+        "platform_source": {
+          "default": 1,
+          "title": "Platform Source",
+          "type": "integer"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_excellent_case_category_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_excellent_case_category_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_author_spread_info",
+    "description": "获取创作者传播价值/Get Author Spread Info",
+    "inputSchema": {
+      "properties": {
+        "o_author_id": {
+          "title": "O Author Id",
+          "type": "string"
+        },
+        "platform_source": {
+          "default": 1,
+          "title": "Platform Source",
+          "type": "integer"
+        },
+        "platform_channel": {
+          "default": 1,
+          "title": "Platform Channel",
+          "type": "integer"
+        },
+        "type": {
+          "default": 1,
+          "title": "Type",
+          "type": "integer"
+        },
+        "flow_type": {
+          "default": 0,
+          "title": "Flow Type",
+          "type": "integer"
+        },
+        "only_assign": {
+          "default": true,
+          "title": "Only Assign",
+          "type": "boolean"
+        },
+        "range": {
+          "default": 2,
+          "title": "Range",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "o_author_id"
+      ],
+      "title": "douyin_xingtu_v2_get_author_spread_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_author_spread_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_user_profile_qrcode",
+    "description": "获取用户主页二维码/Get User Profile QRCode",
+    "inputSchema": {
+      "properties": {
+        "core_user_id": {
+          "default": null,
+          "title": "Core User Id",
+          "type": "string"
+        },
+        "sec_uid": {
+          "default": null,
+          "title": "Sec Uid",
+          "type": "string"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_user_profile_qrcodeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_user_profile_qrcodeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_content_trend_guide",
+    "description": "获取内容趋势指南/Get Content Trend Guide",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_xingtu_v2_get_content_trend_guideArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_content_trend_guideOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_ip_activity_industry_list",
+    "description": "获取星图IP日历行业列表/Get IP Activity Industry List",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_xingtu_v2_get_ip_activity_industry_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_ip_activity_industry_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_ip_activity_list",
+    "description": "获取星图IP日历活动列表/Get IP Activity List",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_xingtu_v2_get_ip_activity_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_ip_activity_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_ip_activity_detail",
+    "description": "获取星图IP活动详情/Get IP Activity Detail",
+    "inputSchema": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "douyin_xingtu_v2_get_ip_activity_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_ip_activity_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_resource_list",
+    "description": "获取营销活动案例/Get Resource List",
+    "inputSchema": {
+      "properties": {
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "resource_id"
+      ],
+      "title": "douyin_xingtu_v2_get_resource_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_resource_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_xingtu_v2_get_demander_mcn_list",
+    "description": "搜索MCN机构列表/Get Demander MCN List",
+    "inputSchema": {
+      "properties": {
+        "mcn_name": {
+          "default": "",
+          "title": "Mcn Name",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "limit": {
+          "default": 20,
+          "title": "Limit",
+          "type": "integer"
+        },
+        "order_by": {
+          "default": "platform_scores",
+          "title": "Order By",
+          "type": "string"
+        }
+      },
+      "title": "douyin_xingtu_v2_get_demander_mcn_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_xingtu_v2_get_demander_mcn_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_general_search_v1",
+    "description": "获取综合搜索 V1/Fetch general search V1",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_general_search_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_general_search_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_general_search_v2",
+    "description": "获取综合搜索 V2/Fetch general search V2",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_general_search_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_general_search_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_general_search_v3",
+    "description": "获取综合搜索 V3/Fetch general search V3",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_general_search_v3Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_general_search_v3Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_search_suggest",
+    "description": "获取搜索关键词推荐/Fetch search keyword suggestions",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_search_suggestArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_search_suggestOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_video_search_v1",
+    "description": "获取视频搜索 V1/Fetch video search V1",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_video_search_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_video_search_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_video_search_v2",
+    "description": "获取视频搜索 V2/Fetch video search V2",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_video_search_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_video_search_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_multi_search",
+    "description": "获取多重搜索/Fetch multi-type search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_multi_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_multi_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_user_search",
+    "description": "获取用户搜索/Fetch user search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_user_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_user_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_user_search_v2",
+    "description": "获取用户搜索 V2/Fetch user search V2",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_user_search_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_user_search_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_image_search",
+    "description": "获取图片搜索/Fetch image search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_image_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_image_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_image_search_v3",
+    "description": "获取图文搜索 V3/Fetch image-text search V3",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_image_search_v3Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_image_search_v3Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_live_search_v1",
+    "description": "获取直播搜索 V1/Fetch live search V1",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_live_search_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_live_search_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_challenge_search_v1",
+    "description": "获取话题搜索 V1/Fetch hashtag search V1",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_challenge_search_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_challenge_search_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_challenge_search_v2",
+    "description": "获取话题搜索 V2/Fetch hashtag search V2",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_challenge_search_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_challenge_search_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_challenge_suggest",
+    "description": "获取话题推荐搜索/Fetch hashtag suggestions",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_challenge_suggestArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_challenge_suggestOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_experience_search",
+    "description": "获取经验搜索/Fetch experience search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_experience_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_experience_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_music_search",
+    "description": "获取音乐搜索/Fetch music search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_music_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_music_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_discuss_search",
+    "description": "获取讨论搜索/Fetch discussion search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_discuss_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_discuss_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_school_search",
+    "description": "获取学校搜索/Fetch school search",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_school_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_school_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "douyin_search_fetch_vision_search",
+    "description": "获取图像识别搜索/Fetch vision search (image-based search)",
+    "inputSchema": {
+      "properties": {},
+      "title": "douyin_search_fetch_vision_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "douyin_search_fetch_vision_searchOutput",
+      "type": "object"
+    }
+  }
+]

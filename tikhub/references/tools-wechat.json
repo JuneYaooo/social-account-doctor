@@ -1,0 +1,583 @@
+[
+  {
+    "name": "wechat_mp_web_fetch_mp_article_detail_json",
+    "description": "获取微信公众号文章详情的JSON/Get Wechat MP Article Detail JSON",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_detail_jsonArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_detail_jsonOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_detail_html",
+    "description": "获取微信公众号文章详情的HTML/Get Wechat MP Article Detail HTML",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_detail_htmlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_detail_htmlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_list",
+    "description": "获取微信公众号文章列表/Get Wechat MP Article List",
+    "inputSchema": {
+      "properties": {
+        "ghid": {
+          "title": "Ghid",
+          "type": "string"
+        },
+        "offset": {
+          "default": "",
+          "title": "Offset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ghid"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_read_count",
+    "description": "获取微信公众号文章阅读量/Get Wechat MP Article Read Count",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "comment_id": {
+          "title": "Comment Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "comment_id"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_read_countArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_read_countOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_url",
+    "description": "获取微信公众号文章永久链接/Get Wechat MP Article URL",
+    "inputSchema": {
+      "properties": {
+        "sogou_url": {
+          "title": "Sogou Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sogou_url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_comment_list",
+    "description": "获取微信公众号文章评论列表/Get Wechat MP Article Comment List",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "comment_id": {
+          "default": "",
+          "title": "Comment Id",
+          "type": "string"
+        },
+        "buffer": {
+          "default": "",
+          "title": "Buffer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_comment_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_comment_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_comment_reply_list",
+    "description": "获取微信公众号文章评论回复列表/Get Wechat MP Article Comment Reply List",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "default": "https://mp.weixin.qq.com/s/Ko5V9jw9kwL8TO6Q7J3UqQ",
+          "title": "Url",
+          "type": "string"
+        },
+        "comment_id": {
+          "title": "Comment Id",
+          "type": "string"
+        },
+        "content_id": {
+          "title": "Content Id",
+          "type": "string"
+        },
+        "offset": {
+          "default": "0",
+          "title": "Offset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "comment_id",
+        "content_id"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_comment_reply_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_comment_reply_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_ad",
+    "description": "获取微信公众号广告/Get Wechat MP Article Ad",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_adArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_adOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_article_url_conversion",
+    "description": "获取微信公众号长链接转短链接/Get Wechat MP Long URL to Short URL",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_url_conversionArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_article_url_conversionOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_mp_web_fetch_mp_related_articles",
+    "description": "获取微信公众号关联文章/Get Wechat MP Related Articles",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "wechat_mp_web_fetch_mp_related_articlesArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_mp_web_fetch_mp_related_articlesOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_default_search",
+    "description": "微信视频号默认搜索/WeChat Channels Default Search",
+    "inputSchema": {
+      "properties": {},
+      "title": "wechat_channels_fetch_default_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_default_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_search_latest",
+    "description": "微信视频号搜索最新视频/WeChat Channels Search Latest Videos",
+    "inputSchema": {
+      "properties": {
+        "keywords": {
+          "title": "Keywords",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "title": "wechat_channels_fetch_search_latestArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_search_latestOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_search_ordinary",
+    "description": "微信视频号综合搜索/WeChat Channels Comprehensive Search",
+    "inputSchema": {
+      "properties": {
+        "keywords": {
+          "title": "Keywords",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "title": "wechat_channels_fetch_search_ordinaryArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_search_ordinaryOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_user_search",
+    "description": "微信视频号用户搜索/WeChat Channels User Search",
+    "inputSchema": {
+      "properties": {
+        "keywords": {
+          "title": "Keywords",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "title": "wechat_channels_fetch_user_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_user_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_video_detail",
+    "description": "微信视频号视频详情/WeChat Channels Video Detail",
+    "inputSchema": {
+      "properties": {
+        "id": {
+          "default": "",
+          "title": "Id",
+          "type": "string"
+        },
+        "exportId": {
+          "default": "",
+          "title": "Exportid",
+          "type": "string"
+        }
+      },
+      "title": "wechat_channels_fetch_video_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_video_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_home_page",
+    "description": "微信视频号主页/WeChat Channels Home Page",
+    "inputSchema": {
+      "properties": {},
+      "title": "wechat_channels_fetch_home_pageArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_home_pageOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_comments",
+    "description": "微信视频号评论/WeChat Channels Comments",
+    "inputSchema": {
+      "properties": {},
+      "title": "wechat_channels_fetch_commentsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_commentsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_live_history",
+    "description": "微信视频号直播回放/WeChat Channels Live History",
+    "inputSchema": {
+      "properties": {
+        "username": {
+          "title": "Username",
+          "type": "string"
+        }
+      },
+      "required": [
+        "username"
+      ],
+      "title": "wechat_channels_fetch_live_historyArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_live_historyOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "wechat_channels_fetch_hot_words",
+    "description": "微信视频号热门话题/WeChat Channels Hot Topics",
+    "inputSchema": {
+      "properties": {},
+      "title": "wechat_channels_fetch_hot_wordsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "wechat_channels_fetch_hot_wordsOutput",
+      "type": "object"
+    }
+  }
+]

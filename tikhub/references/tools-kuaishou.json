@@ -1,0 +1,1068 @@
+[
+  {
+    "name": "kuaishou_web_fetch_one_video",
+    "description": "获取单个作品数据 V1/Get single video data V1",
+    "inputSchema": {
+      "properties": {
+        "share_text": {
+          "title": "Share Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_text"
+      ],
+      "title": "kuaishou_web_fetch_one_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_one_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_one_video_v2",
+    "description": "获取单个作品数据 V2/Get single video data V2",
+    "inputSchema": {
+      "properties": {
+        "photo_id": {
+          "title": "Photo Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_id"
+      ],
+      "title": "kuaishou_web_fetch_one_video_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_one_video_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_one_video_by_url",
+    "description": "链接获取作品数据/Fetch single video by URL",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "kuaishou_web_fetch_one_video_by_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_one_video_by_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_one_video_comment",
+    "description": "获取作品一级评论/Fetch video comments",
+    "inputSchema": {
+      "properties": {
+        "photo_id": {
+          "title": "Photo Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_id"
+      ],
+      "title": "kuaishou_web_fetch_one_video_commentArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_one_video_commentOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_one_video_sub_comment",
+    "description": "获取作品二级评论/Fetch video sub comments",
+    "inputSchema": {
+      "properties": {
+        "photo_id": {
+          "title": "Photo Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": "",
+          "title": "Pcursor",
+          "type": "string"
+        },
+        "root_comment_id": {
+          "title": "Root Comment Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_id",
+        "root_comment_id"
+      ],
+      "title": "kuaishou_web_fetch_one_video_sub_commentArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_one_video_sub_commentOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_generate_share_short_url",
+    "description": "生成分享短连接/Generate share short URL",
+    "inputSchema": {
+      "properties": {
+        "photo_id": {
+          "title": "Photo Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_id"
+      ],
+      "title": "kuaishou_web_generate_share_short_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_generate_share_short_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_user_info",
+    "description": "获取用户信息/Fetch user info",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_web_fetch_user_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_user_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_user_post",
+    "description": "获取用户发布作品/Fetch user posts",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_web_fetch_user_postArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_user_postOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_user_live_replay",
+    "description": "获取用户直播回放/Fetch user live replay",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_web_fetch_user_live_replayArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_user_live_replayOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_user_collect",
+    "description": "获取用户收藏作品/Fetch user collect",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_web_fetch_user_collectArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_user_collectOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_kuaishou_hot_list_v1",
+    "description": "获取快手热榜 V1/Fetch Kuaishou Hot List V1",
+    "inputSchema": {
+      "properties": {},
+      "title": "kuaishou_web_fetch_kuaishou_hot_list_v1Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_kuaishou_hot_list_v1Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_kuaishou_hot_list_v2",
+    "description": "获取快手热榜 V2/Fetch Kuaishou Hot List V2",
+    "inputSchema": {
+      "properties": {
+        "board_type": {
+          "default": "1",
+          "title": "Board Type",
+          "type": "string"
+        }
+      },
+      "title": "kuaishou_web_fetch_kuaishou_hot_list_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_kuaishou_hot_list_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_web_fetch_get_user_id",
+    "description": "获取用户ID/Fetch user ID",
+    "inputSchema": {
+      "properties": {
+        "share_link": {
+          "title": "Share Link",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_link"
+      ],
+      "title": "kuaishou_web_fetch_get_user_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_web_fetch_get_user_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_one_video",
+    "description": "视频详情V1/Video detailsV1",
+    "inputSchema": {
+      "properties": {
+        "photo_id": {
+          "title": "Photo Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_id"
+      ],
+      "title": "kuaishou_app_fetch_one_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_one_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_videos_batch",
+    "description": "快手批量视频查询接口/Kuaishou batch video query API",
+    "inputSchema": {
+      "properties": {
+        "photo_ids": {
+          "title": "Photo Ids",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_ids"
+      ],
+      "title": "kuaishou_app_fetch_videos_batchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_videos_batchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_one_video_by_url",
+    "description": "根据链接获取单个作品数据/Fetch single video by URL",
+    "inputSchema": {
+      "properties": {
+        "share_text": {
+          "title": "Share Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_text"
+      ],
+      "title": "kuaishou_app_fetch_one_video_by_urlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_one_video_by_urlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_one_video_comment",
+    "description": "获取单个作品评论数据/Get single video comment data",
+    "inputSchema": {
+      "properties": {
+        "photo_id": {
+          "title": "Photo Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "photo_id"
+      ],
+      "title": "kuaishou_app_fetch_one_video_commentArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_one_video_commentOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_one_user_v2",
+    "description": "获取单个用户数据V2/Get single user data V2",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_app_fetch_one_user_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_one_user_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_user_live_info",
+    "description": "获取用户直播信息/Get user live info",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_app_fetch_user_live_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_user_live_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_user_hot_post",
+    "description": "获取用户热门作品数据/Get user hot post data",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_app_fetch_user_hot_postArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_user_hot_postOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_user_post_v2",
+    "description": "用户视频列表V2/User video list V2",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "kuaishou_app_fetch_user_post_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_user_post_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_search_comprehensive",
+    "description": "综合搜索/Comprehensive search",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": null,
+          "title": "Pcursor",
+          "type": "string"
+        },
+        "sort_type": {
+          "default": "all",
+          "title": "Sort Type",
+          "type": "string"
+        },
+        "publish_time": {
+          "default": "all",
+          "title": "Publish Time",
+          "type": "string"
+        },
+        "duration": {
+          "default": "all",
+          "title": "Duration",
+          "type": "string"
+        },
+        "search_scope": {
+          "default": "all",
+          "title": "Search Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "kuaishou_app_search_comprehensiveArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_search_comprehensiveOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_search_video_v2",
+    "description": "搜索视频V2/Search video V2",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "page": {
+          "default": "1",
+          "title": "Page",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "kuaishou_app_search_video_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_search_video_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_search_user_v2",
+    "description": "搜索用户V2/Search user V2",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "page": {
+          "default": "1",
+          "title": "Page",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "kuaishou_app_search_user_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_search_user_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_hot_board_categories",
+    "description": "快手热榜分类/Kuaishou hot categories",
+    "inputSchema": {
+      "properties": {},
+      "title": "kuaishou_app_fetch_hot_board_categoriesArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_hot_board_categoriesOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_hot_board_detail",
+    "description": "快手热榜详情/Kuaishou hot board detail",
+    "inputSchema": {
+      "properties": {
+        "boardType": {
+          "default": 1,
+          "title": "Boardtype",
+          "type": "integer"
+        },
+        "boardId": {
+          "default": 1,
+          "title": "Boardid",
+          "type": "integer"
+        }
+      },
+      "title": "kuaishou_app_fetch_hot_board_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_hot_board_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_hot_search_person",
+    "description": "快手热搜人物榜单/Kuaishou hot search person board",
+    "inputSchema": {
+      "properties": {},
+      "title": "kuaishou_app_fetch_hot_search_personArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_hot_search_personOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_live_top_list",
+    "description": "快手直播榜单/Kuaishou live top list",
+    "inputSchema": {
+      "properties": {
+        "subTabId": {
+          "default": 0,
+          "title": "Subtabid",
+          "type": "integer"
+        },
+        "subTabName": {
+          "default": "",
+          "title": "Subtabname",
+          "type": "string"
+        }
+      },
+      "title": "kuaishou_app_fetch_live_top_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_live_top_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_shopping_top_list",
+    "description": "快手购物榜单/Kuaishou shopping top list",
+    "inputSchema": {
+      "properties": {
+        "subTabId": {
+          "default": 0,
+          "title": "Subtabid",
+          "type": "integer"
+        },
+        "subTabName": {
+          "default": "",
+          "title": "Subtabname",
+          "type": "string"
+        }
+      },
+      "title": "kuaishou_app_fetch_shopping_top_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_shopping_top_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_brand_top_list",
+    "description": "快手品牌榜单/Kuaishou brand top list",
+    "inputSchema": {
+      "properties": {
+        "subTabId": {
+          "default": 0,
+          "title": "Subtabid",
+          "type": "integer"
+        },
+        "subTabName": {
+          "default": "",
+          "title": "Subtabname",
+          "type": "string"
+        }
+      },
+      "title": "kuaishou_app_fetch_brand_top_listArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_brand_top_listOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_generate_kuaishou_share_link",
+    "description": "生成快手分享链接/Generate Kuaishou share link",
+    "inputSchema": {
+      "properties": {
+        "shareObjectId": {
+          "title": "Shareobjectid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "shareObjectId"
+      ],
+      "title": "kuaishou_app_generate_kuaishou_share_linkArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_generate_kuaishou_share_linkOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_magic_face_usage",
+    "description": "获取魔法表情使用人数/Fetch magic face usage count",
+    "inputSchema": {
+      "properties": {
+        "magic_face_id": {
+          "title": "Magic Face Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "magic_face_id"
+      ],
+      "title": "kuaishou_app_fetch_magic_face_usageArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_magic_face_usageOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "kuaishou_app_fetch_magic_face_hot",
+    "description": "获取魔法表情热门视频/Fetch magic face hot videos",
+    "inputSchema": {
+      "properties": {
+        "magic_face_id": {
+          "title": "Magic Face Id",
+          "type": "string"
+        },
+        "pcursor": {
+          "default": "0",
+          "title": "Pcursor",
+          "type": "string"
+        },
+        "count": {
+          "default": 18,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "magic_face_id"
+      ],
+      "title": "kuaishou_app_fetch_magic_face_hotArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "kuaishou_app_fetch_magic_face_hotOutput",
+      "type": "object"
+    }
+  }
+]

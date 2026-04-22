@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""tikhub — CLI wrapper for tikhub MCP HTTP endpoints.
+
+Usage:
+    tikhub --health                                    # GET /health
+    tikhub --platforms                                 # GET /platforms
+
+    tikhub list <platform>                             # all tools (from cache)
+    tikhub list <platform> <substring>                 # filter by substring
+    tikhub describe <platform> <tool_name>             # full schema
+
+    tikhub <platform> <tool_name> [--key value ...]    # call tool, kwargs mode
+    tikhub <platform> <tool_name> --json '{"...": ..}' # call tool, raw JSON mode
+
+Output:
+    - success: result JSON to stdout
+    - failure: {"error": "..."} to stderr, non-zero exit
+
+Env:
+    TIKHUB_API_KEY   — overrides ~/.claude/.env
+    TIKHUB_DEBUG=1   — print HTTP request/response info to stderr
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+# Make `lib/` importable when the script is run via PATH.
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent / "lib"))
+
+from tikhub_client import TikhubClient, TikhubError, health, platforms  # noqa: E402
+
+REFERENCES_DIR = HERE.parent / "references"
+SUPPORTED_PLATFORMS = (
+    "douyin",
+    "xiaohongshu",
+    "kuaishou",
+    "wechat",
+    "bilibili",
+    "tiktok",
+    "instagram",
+    "weibo",
+    "youtube",
+    "zhihu",
+    "linkedin",
+    "reddit",
+    "twitter",
+    "threads",
+)
+
+
+def _die(msg: str, code: int = 1) -> None:
+    print(json.dumps({"error": msg}, ensure_ascii=False), file=sys.stderr)
+    sys.exit(code)
+
+
+def _print_json(obj) -> None:
+    print(json.dumps(obj, ensure_ascii=False, indent=2))
+
+
+def _coerce_value(raw: str):
+    """Best-effort type guess for CLI string values."""
+    if raw.lower() == "true":
+        return True
+    if raw.lower() == "false":
+        return False
+    if raw.lower() in ("null", "none"):
+        return None
+    try:
+        if "." in raw:
+            return float(raw)
+        return int(raw)
+    except ValueError:
+        return raw
+
+
+def _parse_kwargs(extras: list[str]) -> dict:
+    """Convert ['--key', 'val', '--flag'] into {'key': 'val', 'flag': True}.
+
+    --json '{...}' takes precedence and short-circuits this.
+    """
+    out: dict = {}
+    i = 0
+    while i < len(extras):
+        tok = extras[i]
+        if not tok.startswith("--"):
+            _die(f"unexpected positional arg: {tok!r}")
+        key = tok[2:]
+        if "=" in key:
+            k, v = key.split("=", 1)
+            out[k] = _coerce_value(v)
+            i += 1
+            continue
+        if i + 1 >= len(extras) or extras[i + 1].startswith("--"):
+            out[key] = True
+            i += 1
+        else:
+            out[key] = _coerce_value(extras[i + 1])
+            i += 2
+    return out
+
+
+def _load_cached_tools(platform: str) -> list[dict] | None:
+    cache = REFERENCES_DIR / f"tools-{platform}.json"
+    if not cache.is_file():
+        return None
+    try:
+        return json.loads(cache.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def cmd_list(platform: str, substring: str | None) -> None:
+    tools = _load_cached_tools(platform)
+    if tools is None:
+        _die(
+            f"no cached tool catalog for {platform!r}. "
+            f"Run: python3 {HERE.parent}/scripts/refresh_tools.py {platform}"
+        )
+    if substring:
+        needle = substring.lower()
+        tools = [t for t in tools if needle in t["name"].lower()]
+    print(f"# {platform} — {len(tools)} tool(s)")
+    for t in tools:
+        desc = (t.get("description") or "").splitlines()[0][:90]
+        print(f"  {t['name']:<60s}  {desc}")
+
+
+def cmd_describe(platform: str, tool_name: str) -> None:
+    tools = _load_cached_tools(platform)
+    if tools is None:
+        _die(
+            f"no cached tool catalog for {platform!r}. "
+            f"Run: python3 {HERE.parent}/scripts/refresh_tools.py {platform}"
+        )
+    for t in tools:
+        if t["name"] == tool_name:
+            _print_json(t)
+            return
+    _die(f"tool {tool_name!r} not found in {platform} catalog")
+
+
+def cmd_call(platform: str, tool_name: str, args: argparse.Namespace, extras: list[str]) -> None:
+    if args.json:
+        try:
+            arguments = json.loads(args.json)
+        except json.JSONDecodeError as e:
+            _die(f"--json parse error: {e}")
+        if not isinstance(arguments, dict):
+            _die("--json must be an object")
+    else:
+        arguments = _parse_kwargs(extras)
+    try:
+        client = TikhubClient(platform=platform)
+        result = client.call(tool_name, arguments)
+    except TikhubError as e:
+        _die(str(e), code=2)
+    if isinstance(result, (dict, list)):
+        _print_json(result)
+    else:
+        print(result)
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        prog="tikhub",
+        description="CLI wrapper for tikhub MCP HTTP endpoints.",
+        add_help=True,
+        allow_abbrev=False,
+    )
+    parser.add_argument("--health", action="store_true", help="check tikhub health and exit")
+    parser.add_argument("--platforms", action="store_true", help="list available platforms and exit")
+    parser.add_argument("--json", help="raw JSON arguments object (overrides --key val)")
+    parser.add_argument("positional", nargs="*", help="see usage in module docstring")
+
+    args, extras = parser.parse_known_args(argv)
+
+    if args.health:
+        try:
+            _print_json(health())
+        except TikhubError as e:
+            _die(str(e), code=2)
+        return
+
+    if args.platforms:
+        try:
+            _print_json(platforms())
+        except TikhubError as e:
+            _die(str(e), code=2)
+        return
+
+    pos = args.positional
+    if not pos:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
+    head = pos[0]
+
+    # Subcommand: list / describe
+    if head in ("list", "describe"):
+        if head == "list":
+            if len(pos) < 2:
+                _die("usage: tikhub list <platform> [substring]")
+            cmd_list(pos[1], pos[2] if len(pos) >= 3 else None)
+        else:
+            if len(pos) != 3:
+                _die("usage: tikhub describe <platform> <tool_name>")
+            cmd_describe(pos[1], pos[2])
+        return
+
+    # Otherwise: call mode  → tikhub <platform> <tool_name>
+    if head not in SUPPORTED_PLATFORMS:
+        _die(
+            f"unknown platform {head!r}. "
+            f"Supported: {', '.join(SUPPORTED_PLATFORMS)}. "
+            f"Or did you mean a subcommand? (list, describe)"
+        )
+    if len(pos) < 2:
+        _die(f"usage: tikhub {head} <tool_name> [--key value ...]")
+    platform = head
+    tool_name = pos[1]
+    cmd_call(platform, tool_name, args, extras)
+
+
+if __name__ == "__main__":
+    main()

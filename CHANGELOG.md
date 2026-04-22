@@ -1,5 +1,58 @@
 # Changelog
 
+## v0.4.0 — 2026-04-22
+
+仓库自包含化：把 tikhub HTTP CLI 直接打包进仓库 + 补全 B 站平台支持。
+任何人 `git clone` 之后单装就能跑，不再依赖外部 skill。
+
+### 新增 — `tikhub/` 目录（自包含 HTTP CLI）
+
+```
+tikhub/
+├── README.md                       # CLI 用法 + 协议细节 + 错误排查
+├── bin/tikhub                      # CLI 入口（chmod +x）
+├── lib/tikhub_client.py            # HTTP JSON-RPC + SSE + session 缓存（纯 stdlib）
+├── references/tools-{平台}.json    # 5 平台工具目录缓存（~330KB，409 个工具）
+└── scripts/refresh_tools.py        # 重建工具目录
+```
+
+**已缓存 5 平台**（`xiaohongshu` / `douyin` / `kuaishou` / `wechat` / `bilibili`）开箱即用。
+追加 tikhub 其他 9 个平台（`tiktok` / `instagram` / `weibo` / `youtube` / `zhihu` / `linkedin` / `reddit` / `twitter` / `threads`）：
+```bash
+python3 tikhub/scripts/refresh_tools.py tiktok
+```
+
+之前 v0.3.0 文档假设用户单独装 `tikhub-api` skill — 那个 skill 不发布。本版本把它的代码直接 vendored 进来。
+
+### 新增 — `references/platforms/bilibili.md`（B 站诊断手册）
+
+B 站之前是占位（v0.2.5 仅在 SKILL.md §7 有 wechat-channels 独立路径，B 站没有 platform doc）。本版补全：
+
+- §0.5 算法规则速查（T0/T1）：三连率 / 完播分档 / 横版封面
+- §1 阈值表：三连率（命门）+ 投币率 + 收藏率 + 弹幕密度
+- §2 三连率诊断（5 种崩盘根因 + 分项诊断）
+- §3 弹幕分析（4 类信号：梗 / 问题 / 打卡 / 吐槽 — B 站独家）
+- §4 tikhub-bilibili 工具映射 + 推荐调用顺序 + 搜索参数速查
+- §5 B 站版六维评分细则（横版封面 + 对话感标题 + 章节结构）
+- §6 P0/P1/P2 行动清单 + §7 7 条铁律
+
+### 修改 — README.md / SKILL.md 反映自包含
+
+- `README.md` §2 安装文档：tikhub CLI 安装从「装外部 tikhub-api skill」改为「直接用仓库 `tikhub/bin/tikhub`」
+- `README.md` 仓库结构图加 `tikhub/` 子目录
+- 平台覆盖度行加 B 站 ✅
+- `SKILL.md` §7 工具速查表加 B 站列（含弹幕独家行）+ 新增「B 站独立路径」子段（横版 + 三连 + 弹幕的差异化路径）
+- `SKILL.md` §11 「tikhub 调用走 CLI」铁律：明确 CLI 自包含在仓库 `tikhub/` 目录，新机器初始化命令更新
+- `references/platforms/bilibili.md` 加入后，`platforms/` 5 个平台齐全（xhs / douyin / kuaishou / wechat-channels / bilibili）
+
+### 不变
+
+- 5 个独立的平台 search skill（xhs-search / douyin-search / kuaishou-search / wechat-search / bilibili-search）保留作为可选的 ad-hoc 触发入口（不在本仓库范围）
+- `find / crack / adapt` 三命令 SOP 不动
+- diagnostic-mode L2 兜底流程不动
+
+---
+
 ## v0.3.0 — 2026-04-22
 
 架构重构：tikhub 调用从「`claude mcp add` MCP 注册」改为「HTTP CLI 包装」。skill 自包含、零工具列表污染、不需要重启 claude。

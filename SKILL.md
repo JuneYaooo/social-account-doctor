@@ -243,16 +243,17 @@ CTA（命中互动钩子模板）：
 
 ### tikhub CLI（按平台 × 任务）
 
-> 调用走 `tikhub <platform> <tool> --args`（详见 `tikhub-api` skill），底层 HTTP JSON-RPC + session 缓存。不知道工具名时 `tikhub list <platform> <关键词>` 模糊查。
+> 调用走 `tikhub <platform> <tool> --args`（CLI 自包含在仓库 `tikhub/` 目录，纯 Python stdlib + HTTP JSON-RPC + session 缓存）。不知道工具名时 `tikhub list <platform> <关键词>` 模糊查；看完整 schema 用 `tikhub describe <platform> <tool>`。
 
-| 任务 | 小红书 | 抖音 | 快手 |
-|---|---|---|---|
-| **find Step 3 关键词搜** | `xiaohongshu_app_search_notes`（**唯一可用**，见 §9.1） | `douyin_app_v3_fetch_video_search_result_v2` | `kuaishou_app_search_video_v2` |
-| **find Step 5 账号信息** | `xiaohongshu_web_v2_fetch_user_info` | `douyin_web_handler_user_profile` | `kuaishou_app_fetch_one_user_v2` |
-| **crack 笔记/视频详情（最稳兜底）** | `xiaohongshu_web_v2_fetch_feed_notes_v2` | `douyin_app_v3_fetch_one_video` | `kuaishou_app_fetch_one_video` |
-| **crack 拿封面/视频** | `xiaohongshu_web_v2_fetch_note_image` | `douyin_app_v3_fetch_video_high_quality_play_url` | `kuaishou_app_fetch_one_video`（含 play_url） |
-| **crack 拿评论** | `xiaohongshu_web_v2_fetch_note_comments` | `douyin_app_v3_fetch_video_comments` | `kuaishou_app_fetch_one_video_comment` |
-| **解析分享链接** | `xiaohongshu_web_get_note_id_and_xsec_token` | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` |
+| 任务 | 小红书 | 抖音 | 快手 | B 站 |
+|---|---|---|---|---|
+| **find Step 3 关键词搜** | `xiaohongshu_app_search_notes`（**唯一可用**，见 §9.1） | `douyin_app_v3_fetch_video_search_result_v2` | `kuaishou_app_search_video_v2` | `bilibili_web_fetch_general_search` |
+| **find Step 5 账号信息** | `xiaohongshu_web_v2_fetch_user_info` | `douyin_web_handler_user_profile` | `kuaishou_app_fetch_one_user_v2` | `bilibili_web_fetch_user_profile` + `_user_up_stat` + `_user_relation_stat` |
+| **crack 笔记/视频详情（最稳兜底）** | `xiaohongshu_web_v2_fetch_feed_notes_v2` | `douyin_app_v3_fetch_one_video` | `kuaishou_app_fetch_one_video` | `bilibili_web_fetch_one_video` |
+| **crack 拿封面/视频** | `xiaohongshu_web_v2_fetch_note_image` | `douyin_app_v3_fetch_video_high_quality_play_url` | `kuaishou_app_fetch_one_video`（含 play_url） | `bilibili_web_fetch_video_subtitle`（字幕拆口播） |
+| **crack 拿评论** | `xiaohongshu_web_v2_fetch_note_comments` | `douyin_app_v3_fetch_video_comments` | `kuaishou_app_fetch_one_video_comment` | `bilibili_web_fetch_video_comments` + `_comment_reply` |
+| **B 站独家：弹幕** | — | — | — | `bilibili_web_fetch_video_danmaku`（4 类信号见 platforms/bilibili.md §3） |
+| **解析分享链接** | `xiaohongshu_web_get_note_id_and_xsec_token` | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` | `bilibili_web_bv_to_aid`（bv ↔ aid 转换） |
 
 ### 视频号（独立路径 — 没分享链接）
 
@@ -271,6 +272,27 @@ CTA（命中互动钩子模板）：
 **视频号 find 的 5 步要做两个调整**：
 1. Step 3 关键词搜要**双源跑**（ordinary + latest），交集 = 已被算法验证的爆款，差集 = 新发未推 / 老爆款长尾
 2. Step 5 账号信息时，user_search 503 是常态 — fallback 是从 `search_ordinary` 结果里按 nickname 精确匹配 + 头像 url 校验
+
+### B 站（横版 + 三连 + 弹幕，跟其他四平台都不同）
+
+B 站是 16:9 横屏 + 长视频文化，**算法核心信号是三连率（点赞 + 投币 + 收藏 / 播放）**，不是完播率，也不是收藏比。**弹幕**是其他平台都没有的实时情绪流，每条对标必跑：
+
+| 任务 | 工具 | 注意 |
+|---|---|---|
+| **关键词搜（综合 / 时间窗口）** | `bilibili_web_fetch_general_search` | `order` 用 `totalrank`/`click`/`pubdate`/`stow`(收藏) 等；蓝海词监控用 `pubtime_begin_s` |
+| **视频详情** | `bilibili_web_fetch_one_video` | 含 `cid`（拉弹幕用）+ stat 全字段（投币 / 收藏 / 弹幕） |
+| **弹幕（独家信号）** | `bilibili_web_fetch_video_danmaku --cid <cid>` | 4 类信号：梗 / 问题 / 打卡 / 吐槽 — 详见 platforms/bilibili.md §3 |
+| **字幕（拆口播结构）** | `bilibili_web_fetch_video_subtitle --aid --cid` | AI 字幕（如有） |
+| **UP 主（双统计）** | `bilibili_web_fetch_user_profile` + `_user_up_stat` + `_user_relation_stat` | 三个分别拿基本信息 / 总播放点赞 / 粉丝关注 |
+| **UP 主投稿 + 动态** | `bilibili_web_fetch_user_post_videos` + `_user_dynamic` | 动态看是否在 B 站外引流 / 预告 |
+| **bv ↔ aid 转换** | `bilibili_web_bv_to_aid` | URL 输入支持用 `bilibili_web_fetch_one_video_v3` |
+
+**B 站 find 关键差异**：
+1. **按三连率排序而不是播放量**：拉到结果后算 `(coin + favorite + like) / view`，按这个排
+2. **每条对标必拉弹幕**：弹幕里的"打卡时间戳"直接告诉你哪一段是高潮（剪短视频投抖音/小红书复用素材）
+3. **看 UP 主 = 看分区垂直度**：分区跨度 ≥ 3 个的 UP 主算法不推
+
+详见 `references/platforms/bilibili.md`。
 
 平台细节（阈值、6 维评分细则）在 `references/platforms/{平台}.md`，**find/crack/adapt 主流程不用看**，L2 诊断时才读。
 
@@ -401,7 +423,7 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
       - tikhub --health 不通 / TIKHUB_API_KEY 没配 / 连续 retry 失败
 
    两个选择：
-   ① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或 PATH（详见 tikhub-api skill），再来一次
+   ① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或 PATH（详见仓库 `tikhub/README.md`），再来一次
    ② 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
    ```
 
@@ -411,9 +433,9 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    - **半成品不写盘**（不污染 reports/ 目录）
    - 接口连续 3 次 retry 失败 → 视同工具不可用 → 进入上面的话术
 
-11. **tikhub 调用走 CLI，不走 `claude mcp add`**：所有 tikhub 数据抓取通过 `tikhub <platform> <tool> --args` CLI 命令调用（详见 `tikhub-api` skill 与 `~/.claude/.env`）。**不要再 `claude mcp add tikhub-*`**：
+11. **tikhub 调用走 CLI，不走 `claude mcp add`**：所有 tikhub 数据抓取通过 `tikhub <platform> <tool> --args` CLI 命令调用。**CLI 自包含在仓库 `tikhub/` 目录**（不依赖外部 skill）。**不要再 `claude mcp add tikhub-*`**：
 
-    - HTTP 端点是 `https://mcp.tikhub.io/{xiaohongshu|douyin|kuaishou|wechat|bilibili}/mcp`，5 个平台共用一个 CLI、一个 API key
+    - HTTP 端点是 `https://mcp.tikhub.io/{xiaohongshu|douyin|kuaishou|wechat|bilibili}/mcp`，所有平台共用一个 CLI、一个 API key
     - 不需要重启 claude，不污染全局工具列表
     - session id 自动缓存（5 min TTL），不用关心连接管理
 
@@ -423,6 +445,15 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
     tikhub list xiaohongshu search               # 工具目录可读
     ls ~/.claude/.env                            # API key 存这里（chmod 600）
     ```
+
+    新机器初始化（`git clone` 之后一次性）：
+    ```bash
+    cd ~/.claude/skills/social-account-doctor
+    ln -sf "$(pwd)/tikhub/bin/tikhub" ~/.local/bin/tikhub   # 让 tikhub 命令在 PATH
+    echo "TIKHUB_API_KEY=YOUR_KEY" >> ~/.claude/.env
+    chmod 600 ~/.claude/.env
+    ```
+    详见 `tikhub/README.md`。
 
 ---
 

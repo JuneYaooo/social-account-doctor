@@ -1,0 +1,1380 @@
+[
+  {
+    "name": "bilibili_web_fetch_one_video",
+    "description": "获取单个视频详情信息/Get single video data",
+    "inputSchema": {
+      "properties": {
+        "bv_id": {
+          "title": "Bv Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bv_id"
+      ],
+      "title": "bilibili_web_fetch_one_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_one_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_one_video_v2",
+    "description": "获取单个视频详情信息V2/Get single video data V2",
+    "inputSchema": {
+      "properties": {
+        "a_id": {
+          "title": "A Id",
+          "type": "string"
+        },
+        "c_id": {
+          "title": "C Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "a_id",
+        "c_id"
+      ],
+      "title": "bilibili_web_fetch_one_video_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_one_video_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_one_video_v3",
+    "description": "获取单个视频详情信息V3/Get single video data V3",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "bilibili_web_fetch_one_video_v3Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_one_video_v3Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_detail",
+    "description": "获取单个视频详情/Get single video detail",
+    "inputSchema": {
+      "properties": {
+        "aid": {
+          "title": "Aid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "aid"
+      ],
+      "title": "bilibili_web_fetch_video_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_play_info",
+    "description": "获取单个视频播放信息/Get single video play info",
+    "inputSchema": {
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "title": "bilibili_web_fetch_video_play_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_play_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_subtitle",
+    "description": "获取视频字幕信息/Get video subtitle info",
+    "inputSchema": {
+      "properties": {
+        "a_id": {
+          "title": "A Id",
+          "type": "string"
+        },
+        "c_id": {
+          "title": "C Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "a_id",
+        "c_id"
+      ],
+      "title": "bilibili_web_fetch_video_subtitleArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_subtitleOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_hot_search",
+    "description": "获取热门搜索信息/Get hot search data",
+    "inputSchema": {
+      "properties": {
+        "limit": {
+          "title": "Limit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "limit"
+      ],
+      "title": "bilibili_web_fetch_hot_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_hot_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_general_search",
+    "description": "获取综合搜索信息/Get general search data",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "order": {
+          "title": "Order",
+          "type": "string"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "duration": {
+          "default": 0,
+          "title": "Duration",
+          "type": "integer"
+        },
+        "pubtime_begin_s": {
+          "default": 0,
+          "title": "Pubtime Begin S",
+          "type": "integer"
+        },
+        "pubtime_end_s": {
+          "default": 0,
+          "title": "Pubtime End S",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword",
+        "order",
+        "page",
+        "page_size"
+      ],
+      "title": "bilibili_web_fetch_general_searchArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_general_searchOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_playurl",
+    "description": "获取视频流地址/Get video playurl",
+    "inputSchema": {
+      "properties": {
+        "bv_id": {
+          "title": "Bv Id",
+          "type": "string"
+        },
+        "cid": {
+          "title": "Cid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bv_id",
+        "cid"
+      ],
+      "title": "bilibili_web_fetch_video_playurlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_playurlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_vip_video_playurl",
+    "description": "获取大会员清晰度视频流地址/Get VIP video playurl",
+    "inputSchema": {
+      "properties": {},
+      "title": "bilibili_web_fetch_vip_video_playurlArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_vip_video_playurlOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_user_post_videos",
+    "description": "获取用户主页作品数据/Get user homepage video data",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "pn": {
+          "default": 1,
+          "title": "Pn",
+          "type": "integer"
+        },
+        "order": {
+          "default": "pubdate",
+          "title": "Order",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "bilibili_web_fetch_user_post_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_user_post_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_collect_folders",
+    "description": "获取用户所有收藏夹信息/Get user collection folders",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "bilibili_web_fetch_collect_foldersArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_collect_foldersOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_user_collection_videos",
+    "description": "获取指定收藏夹内视频数据/Gets video data from a collection folder",
+    "inputSchema": {
+      "properties": {
+        "folder_id": {
+          "title": "Folder Id",
+          "type": "string"
+        },
+        "pn": {
+          "default": 1,
+          "title": "Pn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "folder_id"
+      ],
+      "title": "bilibili_web_fetch_user_collection_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_user_collection_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_user_profile",
+    "description": "获取指定用户的信息/Get information of specified user",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "bilibili_web_fetch_user_profileArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_user_profileOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_user_up_stat",
+    "description": "获取UP主状态统计/Get UP stat (total likes and views)",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "bilibili_web_fetch_user_up_statArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_user_up_statOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_user_relation_stat",
+    "description": "获取用户关系状态统计/Get user relation stat (following and followers)",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "bilibili_web_fetch_user_relation_statArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_user_relation_statOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_com_popular",
+    "description": "获取综合热门视频信息/Get comprehensive popular video information",
+    "inputSchema": {
+      "properties": {
+        "pn": {
+          "default": 1,
+          "title": "Pn",
+          "type": "integer"
+        }
+      },
+      "title": "bilibili_web_fetch_com_popularArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_com_popularOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_comments",
+    "description": "获取指定视频的评论/Get comments on the specified video",
+    "inputSchema": {
+      "properties": {
+        "bv_id": {
+          "title": "Bv Id",
+          "type": "string"
+        },
+        "pn": {
+          "default": 1,
+          "title": "Pn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bv_id"
+      ],
+      "title": "bilibili_web_fetch_video_commentsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_commentsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_comment_reply",
+    "description": "获取视频下指定评论的回复/Get reply to the specified comment",
+    "inputSchema": {
+      "properties": {
+        "bv_id": {
+          "title": "Bv Id",
+          "type": "string"
+        },
+        "pn": {
+          "default": 1,
+          "title": "Pn",
+          "type": "integer"
+        },
+        "rpid": {
+          "title": "Rpid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bv_id",
+        "rpid"
+      ],
+      "title": "bilibili_web_fetch_comment_replyArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_comment_replyOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_user_dynamic",
+    "description": "获取指定用户动态/Get dynamic information of specified user",
+    "inputSchema": {
+      "properties": {
+        "uid": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "offset": {
+          "default": "",
+          "title": "Offset",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid"
+      ],
+      "title": "bilibili_web_fetch_user_dynamicArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_user_dynamicOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_dynamic_detail",
+    "description": "获取动态详情/Get dynamic detail",
+    "inputSchema": {
+      "properties": {
+        "dynamic_id": {
+          "title": "Dynamic Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dynamic_id"
+      ],
+      "title": "bilibili_web_fetch_dynamic_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_dynamic_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_dynamic_detail_v2",
+    "description": "获取动态详情v2/Get dynamic detail v2",
+    "inputSchema": {
+      "properties": {
+        "dynamic_id": {
+          "title": "Dynamic Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dynamic_id"
+      ],
+      "title": "bilibili_web_fetch_dynamic_detail_v2Arguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_dynamic_detail_v2Output",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_danmaku",
+    "description": "获取视频实时弹幕/Get Video Danmaku",
+    "inputSchema": {
+      "properties": {
+        "cid": {
+          "title": "Cid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cid"
+      ],
+      "title": "bilibili_web_fetch_video_danmakuArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_danmakuOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_live_room_detail",
+    "description": "获取指定直播间信息/Get information of specified live room",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "room_id"
+      ],
+      "title": "bilibili_web_fetch_live_room_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_live_room_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_live_videos",
+    "description": "获取直播间视频流/Get live video data of specified room",
+    "inputSchema": {
+      "properties": {
+        "room_id": {
+          "title": "Room Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "room_id"
+      ],
+      "title": "bilibili_web_fetch_live_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_live_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_live_streamers",
+    "description": "获取指定分区正在直播的主播/Get live streamers of specified live area",
+    "inputSchema": {
+      "properties": {
+        "area_id": {
+          "title": "Area Id",
+          "type": "string"
+        },
+        "pn": {
+          "default": 1,
+          "title": "Pn",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "area_id"
+      ],
+      "title": "bilibili_web_fetch_live_streamersArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_live_streamersOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_all_live_areas",
+    "description": "获取所有直播分区列表/Get a list of all live areas",
+    "inputSchema": {
+      "properties": {},
+      "title": "bilibili_web_fetch_all_live_areasArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_all_live_areasOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_bv_to_aid",
+    "description": "通过bv号获得视频aid号/Generate aid by bvid",
+    "inputSchema": {
+      "properties": {
+        "bv_id": {
+          "title": "Bv Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bv_id"
+      ],
+      "title": "bilibili_web_bv_to_aidArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_bv_to_aidOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_video_parts",
+    "description": "通过bv号获得视频分p信息/Get Video Parts By bvid",
+    "inputSchema": {
+      "properties": {
+        "bv_id": {
+          "title": "Bv Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bv_id"
+      ],
+      "title": "bilibili_web_fetch_video_partsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_video_partsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_web_fetch_get_user_id",
+    "description": "提取用户ID/Extract user ID",
+    "inputSchema": {
+      "properties": {
+        "share_link": {
+          "title": "Share Link",
+          "type": "string"
+        }
+      },
+      "required": [
+        "share_link"
+      ],
+      "title": "bilibili_web_fetch_get_user_idArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_web_fetch_get_user_idOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_one_video",
+    "description": "获取单个视频详情信息/Get single video data",
+    "inputSchema": {
+      "properties": {
+        "av_id": {
+          "default": null,
+          "title": "Av Id",
+          "type": "string"
+        },
+        "bv_id": {
+          "default": null,
+          "title": "Bv Id",
+          "type": "string"
+        }
+      },
+      "title": "bilibili_app_fetch_one_videoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_one_videoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_video_comments",
+    "description": "获取视频评论列表/Get video comments",
+    "inputSchema": {
+      "properties": {
+        "av_id": {
+          "default": null,
+          "title": "Av Id",
+          "type": "string"
+        },
+        "bv_id": {
+          "default": null,
+          "title": "Bv Id",
+          "type": "string"
+        },
+        "mode": {
+          "default": 3,
+          "title": "Mode",
+          "type": "integer"
+        },
+        "next_offset": {
+          "default": 1,
+          "title": "Next Offset",
+          "type": "integer"
+        }
+      },
+      "title": "bilibili_app_fetch_video_commentsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_video_commentsOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_reply_detail",
+    "description": "获取二级评论回复/Get reply detail",
+    "inputSchema": {
+      "properties": {
+        "root": {
+          "title": "Root",
+          "type": "string"
+        },
+        "av_id": {
+          "default": null,
+          "title": "Av Id",
+          "type": "string"
+        },
+        "bv_id": {
+          "default": null,
+          "title": "Bv Id",
+          "type": "string"
+        },
+        "next_offset": {
+          "default": 0,
+          "title": "Next Offset",
+          "type": "integer"
+        },
+        "ps": {
+          "default": 20,
+          "title": "Ps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "root"
+      ],
+      "title": "bilibili_app_fetch_reply_detailArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_reply_detailOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_user_videos",
+    "description": "获取用户投稿视频/Get user videos",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        },
+        "post_filter": {
+          "default": "archive",
+          "title": "Post Filter",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "ps": {
+          "default": 20,
+          "title": "Ps",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "bilibili_app_fetch_user_videosArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_user_videosOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_user_info",
+    "description": "获取用户信息/Get user info",
+    "inputSchema": {
+      "properties": {
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id"
+      ],
+      "title": "bilibili_app_fetch_user_infoArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_user_infoOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_home_feed",
+    "description": "获取主页推荐视频流/Get home feed",
+    "inputSchema": {
+      "properties": {
+        "idx": {
+          "default": null,
+          "title": "Idx",
+          "type": "integer"
+        },
+        "flush": {
+          "default": 0,
+          "title": "Flush",
+          "type": "integer"
+        },
+        "pull": {
+          "default": true,
+          "title": "Pull",
+          "type": "boolean"
+        }
+      },
+      "title": "bilibili_app_fetch_home_feedArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_home_feedOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_popular_feed",
+    "description": "获取热门推荐/Get popular feed",
+    "inputSchema": {
+      "properties": {
+        "idx": {
+          "default": 1,
+          "title": "Idx",
+          "type": "integer"
+        },
+        "last_param": {
+          "default": null,
+          "title": "Last Param",
+          "type": "string"
+        }
+      },
+      "title": "bilibili_app_fetch_popular_feedArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_popular_feedOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_search_all",
+    "description": "综合搜索/search all",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "order": {
+          "default": 0,
+          "title": "Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "bilibili_app_fetch_search_allArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_search_allOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_search_by_type",
+    "description": "分类搜索/ search by type",
+    "inputSchema": {
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "search_type": {
+          "default": "video",
+          "title": "Search Type",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "order": {
+          "default": 0,
+          "title": "Order",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "bilibili_app_fetch_search_by_typeArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_search_by_typeOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_cinema_tab",
+    "description": "获取影视推荐/Get cinema tab",
+    "inputSchema": {
+      "properties": {},
+      "title": "bilibili_app_fetch_cinema_tabArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_cinema_tabOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "bilibili_app_fetch_bangumi_tab",
+    "description": "获取番剧推荐/Get bangumi tab",
+    "inputSchema": {
+      "properties": {},
+      "title": "bilibili_app_fetch_bangumi_tabArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "string"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "bilibili_app_fetch_bangumi_tabOutput",
+      "type": "object"
+    }
+  }
+]

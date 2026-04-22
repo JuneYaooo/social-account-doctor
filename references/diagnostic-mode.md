@@ -35,7 +35,7 @@
 我现在不能做：Layer 2 对标扫描 + Layer 3 六维拆解
 
 两个选择：
-① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或 ~/.claude/skills/tikhub-api/ 的 PATH，再来一次完整诊断
+① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或仓库内 `tikhub/bin/tikhub` 的 PATH，再来一次完整诊断
 ② 你直接给我 3-5 个你眼中的对标账号/笔记链接 — 我跳过搜索，直接进 Layer 3 拆解
 ```
 
