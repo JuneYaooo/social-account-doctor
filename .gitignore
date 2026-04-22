@@ -211,3 +211,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Skill 运行时产物 — 用户诊断报告 / 钩子库 / 临时素材, 不入库
+reports/
+assets/
