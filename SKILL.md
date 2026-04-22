@@ -245,6 +245,12 @@ CTA（命中互动钩子模板）：
 
 > 调用走 `tikhub <platform> <tool> --args`（CLI 自包含在仓库 `tikhub/` 目录，纯 Python stdlib + HTTP JSON-RPC + session 缓存）。不知道工具名时 `tikhub list <platform> <关键词>` 模糊查；看完整 schema 用 `tikhub describe <platform> <tool>`。
 
+**参数类型铁律（防"看着对其实数据被破坏"）**：
+- CLI 默认所有 `--key=value` **按 string 透传**，只 `true/false/null/none` 字面量被 coerce
+- ID 字段（`user_id` / `photo_id` / `note_id` / `sec_user_id` / `aweme_id`）几乎都是 string schema — **直接 `--user_id 4253294011`**，不要包 `:int`
+- 真要 int 用显式 tag：`--page:int=1` / `--count:int=20`；复杂结构用 `--json '{...}'`
+- 看到 `validation error ... input_type=int` → 检查是不是手贱加了 `:int`
+
 | 任务 | 小红书 | 抖音 | 快手 | B 站 |
 |---|---|---|---|---|
 | **find Step 3 关键词搜** | `xiaohongshu_app_search_notes`（**唯一可用**，见 §9.1） | `douyin_app_v3_fetch_video_search_result_v2` | `kuaishou_app_search_video_v2` | `bilibili_web_fetch_general_search` |

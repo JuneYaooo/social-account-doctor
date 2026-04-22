@@ -63,25 +63,32 @@ def _print_json(obj) -> None:
 
 
 def _coerce_value(raw: str):
-    """Best-effort type guess for CLI string values."""
-    if raw.lower() == "true":
+    """Default type guess for CLI string values.
+
+    Coerces only bool/null literals. Numeric strings stay as strings — most
+    tikhub schemas type IDs (user_id, photo_id, note_id, sec_user_id) AND
+    pagination (page, pcursor) as `string`, so auto int coerce silently broke
+    pydantic validation (e.g. "4253294011" → int → "Input should be a valid
+    string"). Use explicit `--key:int=42` for true numerics, or `--json '{...}'`.
+    """
+    low = raw.lower()
+    if low == "true":
         return True
-    if raw.lower() == "false":
+    if low == "false":
         return False
-    if raw.lower() in ("null", "none"):
+    if low in ("null", "none"):
         return None
-    try:
-        if "." in raw:
-            return float(raw)
-        return int(raw)
-    except ValueError:
-        return raw
+    return raw
 
 
 def _parse_kwargs(extras: list[str]) -> dict:
     """Convert ['--key', 'val', '--flag'] into {'key': 'val', 'flag': True}.
 
-    --json '{...}' takes precedence and short-circuits this.
+    Supports explicit type tags: `--page:int=1`, `--ratio:float=0.5`,
+    `--quiet:bool=true`, `--id:str=4253294011`. Without a tag, values stay
+    as strings (only bool/null literals are coerced — see _coerce_value).
+    Type tag is stripped from the key name; the dict key is `page` not
+    `page:int`. --json '{...}' takes precedence and short-circuits this.
     """
     out: dict = {}
     i = 0
@@ -92,16 +99,44 @@ def _parse_kwargs(extras: list[str]) -> dict:
         key = tok[2:]
         if "=" in key:
             k, v = key.split("=", 1)
-            out[k] = _coerce_value(v)
+            name, value = _apply_type_tag(k, v)
+            out[name] = value
             i += 1
             continue
         if i + 1 >= len(extras) or extras[i + 1].startswith("--"):
-            out[key] = True
+            name, _ = _apply_type_tag(key, "")
+            out[name] = True
             i += 1
         else:
-            out[key] = _coerce_value(extras[i + 1])
+            name, value = _apply_type_tag(key, extras[i + 1])
+            out[name] = value
             i += 2
     return out
+
+
+def _apply_type_tag(key: str, raw: str):
+    """Honor `--name:type` if present, else default _coerce_value.
+
+    Returns (clean_key, parsed_value).
+    """
+    if ":" not in key:
+        return key, _coerce_value(raw)
+    name, tag = key.split(":", 1)
+    if tag == "int":
+        try:
+            return name, int(raw)
+        except ValueError:
+            _die(f"--{key}: cannot parse {raw!r} as int")
+    if tag == "float":
+        try:
+            return name, float(raw)
+        except ValueError:
+            _die(f"--{key}: cannot parse {raw!r} as float")
+    if tag == "bool":
+        return name, raw.lower() in ("true", "1", "yes", "on")
+    if tag == "str":
+        return name, raw
+    _die(f"--{key}: unknown type tag {tag!r} (use int/float/bool/str)")
 
 
 def _load_cached_tools(platform: str) -> list[dict] | None:
