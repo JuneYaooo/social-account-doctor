@@ -195,9 +195,3 @@ social-account-doctor/
 
 MIT © 2026 JuneYaooo
 
----
-
-## 反馈与贡献
-
-- Issues：https://github.com/JuneYaooo/social-account-doctor/issues
-- 数字漂移上报 / 平台 API 失效 / 新平台贡献（B 站 / 公众号专项）都欢迎
