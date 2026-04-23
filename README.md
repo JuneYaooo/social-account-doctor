@@ -1,16 +1,12 @@
 # social-account-doctor
 
-> 小红书 / 抖音 / 快手 / 视频号 / B 站 自媒体「**(素材打底 →) 找对标 → 拆爆款 → 套自己**」四命令闭环。
-> 输入我的账号 / 选题方向 / 原始素材 → 输出**可发的下一条笔记初稿**（标题 + 封面大字 + 首段 + CTA）。
-> Claude Code Skill / OpenClaw Skill。
+> 小红书 / 抖音 / 快手 / 视频号 / B 站 自媒体「**(素材打底 →) 找对标 → 拆爆款 → 套自己**」四命令闭环。输入我的账号 / 选题方向 / 原始素材 → 输出**可发的下一条笔记初稿**（标题 + 封面大字 + 首段 + CTA）。Claude Code Skill。
 
 <p align="center">
   <img src="docs/images/demo-page-01.png" width="32%" alt="TL;DR — 这条会爆吗？">
   <img src="docs/images/demo-page-04.png" width="32%" alt="六维拆解评分">
   <img src="docs/images/demo-page-05.png" width="32%" alt="三图 multimodal 封面诊断">
 </p>
-
-> 📄 上图来自 `reports/xhs-22029ddb-20260422-1410.pdf` — 对一条真实小红书笔记跑完 crack 后的成品报告（7 页 A4，思源 + 卡片 CSS）。完整 md/html/pdf 三件套都在 `reports/`。
 
 ## ✨ 特性
 
@@ -19,36 +15,36 @@
 - 🌐 **5 个平台统一入口**：xiaohongshu / douyin / kuaishou / wechat (公众号 + 视频号) / bilibili，走 tikhub HTTP CLI，零 MCP 工具污染
 - 🖼 **多模态原生**：封面 → 5 变量 + 模板归类（A 大字报 / D 实物展示 …）；视频 → talking / visual / keyframe 三模式自动路由；后台截图 → 结构化指标
 - 📋 **可发即产**：输出不是"建议"，是**能直接粘到 App 发送框的初稿**（含数字、人群锚定、CTA）
-- 📄 **按需 md → PDF**：`scripts/build_report_pdf.py` 一键生成思源字体 + A4 + 卡片 CSS 的打印版
+- 📄 **按需 md → PDF**：`scripts/render_report_pdf.py` 一键生成思源字体 + A4 + 卡片 CSS 的打印版
 - 🩺 **诊断模式是兜底**：用户问「为什么不爆」才走 `references/diagnostic-mode.md`，不是默认路径
 
 ## 📸 案例演示 — 一条真实小红书笔记跑完 crack
 
-一条 AI 赛道的新笔记（`@AI折腾日记 / 「GPT image2效果太爆炸了！」`），发布 21 分钟，3 赞 1 评 2 收藏。跑完 crack 得出：**9 成扑街概率、3 个一票否决项、可在 5 分钟内抢救的 P0 行动。**
+一条 AI 赛道的新笔记，发布 21 分钟，3 赞 1 评 2 收藏。跑完 crack 得出：**9 成扑街概率、3 个一票否决项、可在 5 分钟内抢救的 P0 行动。**
 
 ### 1. L2 同赛道对标扫描 — 找到"真对标"而不是"同关键词"
 
 <p align="center">
-  <img src="docs/images/demo-page-03.png" width="72%" alt="L2 同赛道 top 10 扫描">
+  <img src="docs/images/demo-page-03.png" width="72%">
 </p>
 
-> 赛道特征自动归纳：头部 2k+ 赞已成型、收藏比 ≥ 0.5（干货教程）、评论 50-200 是常态。用户这条"无差异化跟风"被直接定位。
+赛道特征自动归纳：头部 2k+ 赞已成型、收藏比 ≥ 0.5（干货教程）、评论 50-200 是常态。用户这条"无差异化跟风"被直接定位。
 
 ### 2. 封面三图 multimodal 拆解 — 钩子被埋到第 3 张
 
 <p align="center">
-  <img src="docs/images/demo-page-05.png" width="72%" alt="三图 multimodal 封面诊断">
+  <img src="docs/images/demo-page-05.png" width="72%">
 </p>
 
-> `scripts/analyze_image.py` 跑完三张封面 → 第 1 张判定为 D 实物展示型（0 钩子）、第 3 张才是 A 大字报型 + 人群锚定「设计师又又又要失业了」。**封面顺序反了 → 小红书 CTR 只看第 1 张 → 直接判死刑。**
+`scripts/analyze_image.py` 跑完三张封面 → 第 1 张判定为 D 实物展示型（0 钩子）、第 3 张才是 A 大字报型 + 人群锚定。**封面顺序反了 → 小红书 CTR 只看第 1 张 → 直接判死刑。**
 
 ### 3. 行动清单 — 不是"建议"，是可粘贴的改写
 
 <p align="center">
-  <img src="docs/images/demo-page-06.png" width="72%" alt="P0/P1/P2 行动清单">
+  <img src="docs/images/demo-page-06.png" width="72%">
 </p>
 
-> P0（5 分钟内）：把第 3 张设成封面 + 正文补提示词 + 标题按公式 1（数字+人群+效果）重写，直接给出 3 个候选。P1/P2 覆盖 24h 互动钩 + 账号月度转型。
+P0（5 分钟内）：把第 3 张设成封面 + 正文补提示词 + 标题按公式 1（数字+人群+效果）重写，直接给出 3 个候选。P1/P2 覆盖 24h 互动钩 + 账号月度转型。
 
 ## 🚀 一键安装
 
@@ -182,12 +178,6 @@ social-account-doctor/
 ## 🧭 内容层铁律
 
 **脚本层（tikhub 返回的 JSON / 多模态分析输出）信任直接吐；账号资料层（定位、简介、人设）不清楚的地方宁可不说也不编。** 详见 `SKILL.md` 开头铁律。
-
-## 🙏 致谢
-
-- [tikhub.io](https://tikhub.io/) — 16 平台统一 HTTP API，本仓库数据层基座
-- [lewislulu/html-ppt-skill](https://github.com/lewislulu/html-ppt-skill) — Claude Code skill SKILL.md frontmatter 写法参考
-- [JuneYaooo/gpt-image2-ppt-skills](https://github.com/JuneYaooo/gpt-image2-ppt-skills) — README / install 脚本 / 仓库骨架参考
 
 ## License
 
