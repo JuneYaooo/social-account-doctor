@@ -1,50 +1,66 @@
 # social-account-doctor
 
-> 小红书 / 抖音 / 快手 / 视频号 / B 站 自媒体「**(素材打底 →) 找对标 → 拆爆款 → 套自己**」四命令闭环。输入我的账号 / 选题方向 / 原始素材 → 输出**可发的下一条笔记初稿**（标题 + 封面大字 + 首段 + CTA）。Claude Code Skill。
+> 小红书 / 抖音 / 快手 / 视频号 / B 站 自媒体的「下一条笔记」生成器。
+> 给它一个账号链接 + 一个选题方向（或一堆零散素材），它吐出**能直接粘到 App 发送框的初稿** —— 3 个标题备选 + 3 个封面大字 + 1 段开头 + 1 句 CTA。
 
 <p align="center">
-  <img src="docs/images/demo-page-01.png" width="32%" alt="TL;DR — 这条会爆吗？">
+  <img src="docs/images/demo-page-01.png" width="32%" alt="这条会爆吗 — TL;DR">
   <img src="docs/images/demo-page-04.png" width="32%" alt="六维拆解评分">
-  <img src="docs/images/demo-page-05.png" width="32%" alt="三图 multimodal 封面诊断">
+  <img src="docs/images/demo-page-05.png" width="32%" alt="封面三图诊断">
 </p>
 
-## ✨ 特性
+## 它帮你解决什么
 
-- 🎯 **四命令闭环**：`compose`（素材打底）→ `find`（多模态识别本质 + 矩阵搜 + 相似度过滤）→ `crack`（钩子/骨架/封面/标签 4 行拆）→ `adapt`（3 标题 + 3 封面大字 + 1 首段 + 1 CTA）
-- 🧬 **找对标靠本质、不靠关键词**：单搜「东北大酱」会出一堆真人主播 — 5 维抽象 + 矩阵词 + 多模态相似度过滤，才能找到"AI 拟人 + 怀旧 + 反差"的真同行
-- 🌐 **5 个平台统一入口**：xiaohongshu / douyin / kuaishou / wechat (公众号 + 视频号) / bilibili，走 tikhub HTTP CLI，零 MCP 工具污染
-- 🖼 **多模态原生**：封面 → 5 变量 + 模板归类（A 大字报 / D 实物展示 …）；视频 → talking / visual / keyframe 三模式自动路由；后台截图 → 结构化指标
-- 📋 **可发即产**：输出不是"建议"，是**能直接粘到 App 发送框的初稿**（含数字、人群锚定、CTA）
-- 📄 **按需 md → PDF**：`scripts/render_report_pdf.py` 一键生成思源字体 + A4 + 卡片 CSS 的打印版
-- 🩺 **诊断模式是兜底**：用户问「为什么不爆」才走 `references/diagnostic-mode.md`，不是默认路径
+- **不知道写什么** → 扫你同赛道的真对标，挑 3-5 条能抄的模式给你
+- **知道写什么、但不会开头** → 拆一条爆款的钩子 / 结构 / 封面 / 话题，给你 4 行可抄清单
+- **有素材但出不了稿** → 把一份 PDF、一组图、一段视频变成可发的笔记初稿
+- **发了但没人看** → 看你后台截图,告诉你是封面、标题、时间还是人群定位出了问题
 
-## 📸 案例演示 — 一条真实小红书笔记跑完 crack
+## 和市面上的 AI 写作工具有啥不一样
 
-一条 AI 赛道的新笔记，发布 21 分钟，3 赞 1 评 2 收藏。跑完 crack 得出：**9 成扑街概率、3 个一票否决项、可在 5 分钟内抢救的 P0 行动。**
+- **不是"帮你凑段话"** —— 先看你同赛道 top 真实在涨的是什么,再决定你该写什么
+- **封面也管** —— 会看完你现有的 3 张封面,告诉你哪张应该设为第 1 张
+- **五平台各有算法** —— 小红书、抖音、视频号的爆款公式不同,每个平台有单独的阈值和钩子库
+- **能看图、能看视频** —— 给它一条视频链接,它会看完画面 + 听完字幕再拆
+- **输出是能粘贴的初稿,不是"建议"** —— 3 个候选标题直接备选,不用再二次加工
 
-### 1. L2 同赛道对标扫描 — 找到"真对标"而不是"同关键词"
+## 怎么用 —— 直接跟 Claude 说
+
+| 你说 | 它做什么 |
+|---|---|
+| 「扫一下我这个号的同赛道」+ 账号主页链接 | 吐 5-10 条真对标,说明每条为什么是对标 |
+| 「拆这条爆款」+ 笔记或视频链接 | 钩子 / 开头 / 结构 / 封面 / 话题,4 行内拆完 |
+| 「对着这条仿写」 | 3 标题 + 3 封面大字 + 开头 + CTA,可直接粘贴 |
+| 「我这份 PPT / 这组图 / 这段视频能出一条笔记吗」 | 素材打底 → 找对标 → 仿写,一条龙 |
+| 「我这条为什么不爆」+ 后台截图 | 逐项诊断(封面 / 标题 / 时间 / 互动钩) |
+
+## 📸 案例演示
+
+下面是对一条 AI 赛道的真实小红书笔记跑完全流程的报告 —— 笔记发布 21 分钟、3 赞 1 评 2 收藏,结论是 **9 成扑街概率、3 个一票否决项、5 分钟内可抢救的动作**。
+
+### 1. 先扫同赛道 —— 找到"真对标"而不是"同关键词"
 
 <p align="center">
   <img src="docs/images/demo-page-03.png" width="72%">
 </p>
 
-赛道特征自动归纳：头部 2k+ 赞已成型、收藏比 ≥ 0.5（干货教程）、评论 50-200 是常态。用户这条"无差异化跟风"被直接定位。
+自动归纳赛道特征:头部 2k+ 赞已经成型、收藏比 ≥ 0.5(干货教程调性)、评论区普遍 50-200 条。用户这条被定性为"无差异化跟风"。
 
-### 2. 封面三图 multimodal 拆解 — 钩子被埋到第 3 张
+### 2. 三张封面逐张体检 —— 钩子被埋到第 3 张
 
 <p align="center">
   <img src="docs/images/demo-page-05.png" width="72%">
 </p>
 
-`scripts/analyze_image.py` 跑完三张封面 → 第 1 张判定为 D 实物展示型（0 钩子）、第 3 张才是 A 大字报型 + 人群锚定。**封面顺序反了 → 小红书 CTR 只看第 1 张 → 直接判死刑。**
+第 1 张只是"放了张产品图",没有钩子;第 3 张才是大字报 + 人群锚定,真正有 CTR。**封面顺序反了 → 小红书用户只看第 1 张就划走 → 直接判死刑。**
 
-### 3. 行动清单 — 不是"建议"，是可粘贴的改写
+### 3. 行动清单 —— 不是"建议",是可粘贴的改写
 
 <p align="center">
   <img src="docs/images/demo-page-06.png" width="72%">
 </p>
 
-P0（5 分钟内）：把第 3 张设成封面 + 正文补提示词 + 标题按公式 1（数字+人群+效果）重写，直接给出 3 个候选。P1/P2 覆盖 24h 互动钩 + 账号月度转型。
+P0(5 分钟内):把第 3 张设为封面 + 正文补关键信息 + 标题按"数字 + 人群 + 效果"公式重写,直接给出 3 个候选。P1 / P2 覆盖 24 小时互动钩和账号月度转型方向。
 
 ## 🚀 一键安装
 
@@ -54,130 +70,32 @@ cd social-account-doctor
 bash install_as_skill.sh
 ```
 
-脚本会拷贝到 `~/.claude/skills/social-account-doctor/`、装 Python 依赖、把 `tikhub` 软链进 `~/.local/bin/`。Claude Code 重启后自动识别。
+脚本会装好依赖并把 skill 拷贝到 Claude Code 的目录。重启 Claude Code 即可识别。
 
-## ⚙ 配置
+## ⚙ 配置三把钥匙
 
-### 1. tikhub HTTP CLI（数据来源）
+安装脚本会引导你填这些,也可以手动编辑 `~/.claude/skills/social-account-doctor/.env` 和 `~/.claude/.env`:
 
-```bash
-# 申请 key: https://tikhub.io/
-mkdir -p ~/.claude
-echo 'TIKHUB_API_KEY=YOUR_KEY' >> ~/.claude/.env
-chmod 600 ~/.claude/.env
+1. **[tikhub.io](https://tikhub.io/) 的 API key** —— 抓各平台数据用,一个 key 通吃五平台
+2. **一个会看图 / 看视频的大模型 key** —— 推荐 Gemini 3.1 Pro,OpenAI 协议兼容的代理站都行
+3. **一个语音转写 key**(可选) —— 只有当你要拆"真人口播"类视频时才需要(SenseVoice / Whisper 均可)
 
-tikhub --health                       # {"status":"healthy",...}
-tikhub list xiaohongshu search        # 看可用工具
-```
+> 🔒 脚本只读 skill 目录下的 `.env` 和 `~/.claude/.env`,不会翻项目里的 `.env`,不用担心误吃无关密钥。
 
-**已缓存 5 平台**（开箱即用）：`xiaohongshu` / `douyin` / `kuaishou` / `wechat` / `bilibili`。追加 `tiktok` / `weibo` / `youtube` / `zhihu` 等：`python3 tikhub/scripts/refresh_tools.py tiktok`。
+系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
 
-> 💡 **为什么不用 `claude mcp add`**：4 个平台合计会注入 ~370 个 `mcp__tikhub-*__*` 到全局工具列表，污染所有无关任务。HTTP CLI 方式：所有平台共用一个 key、零工具列表污染、不用重启 claude。详见 `tikhub/README.md`。
+## 📂 输出在哪
 
-### 2. 多模态分析（封面 / 视频 / 截图）
+跑完之后,当前目录下会出现:
 
-编辑 `~/.claude/skills/social-account-doctor/.env`：
+- `reports/` —— 本次的对标扫描 / 爆款拆解 / 仿写初稿,markdown 可直接看,按需可导出 PDF(思源字体 + A4 打印版)
+- `assets/` —— 钩子库、标题库,跨任务累积复用
 
-```bash
-# Gemini 3.1 Pro (OpenAI 兼容协议) — 封面 / 视频 / 截图都用它
-VIDEO_ANALYSIS_API_KEY=sk-xxx
-VIDEO_ANALYSIS_BASE_URL=https://your-gemini-proxy.com/v1
-VIDEO_ANALYSIS_MODEL_NAME=gemini-3-pro
+> 💡 `reports/` 通常含账号和选题信息,建议加进 `.gitignore` 别公开;`assets/` 是长期资产,建议 commit。
 
-# SenseVoice / Whisper — 仅视频 talking 模式需要
-AUDIO_TRANSCRIPTION_API_KEY=sk-xxx
-AUDIO_TRANSCRIPTION_BASE_URL=https://your-asr-proxy.com/v1
-AUDIO_TRANSCRIPTION_MODEL=sensevoice
-```
+## ⚠ 关于内置的平台数据
 
-> 🔒 **安全**：脚本只读 skill 目录下的 `.env` 和 `~/.claude/.env`，**不会**向上递归抓项目 `.env`，避免误吃无关密钥。
-
-### 3. 系统依赖
-
-Python 3.10+，ffmpeg（`apt install ffmpeg` / `brew install ffmpeg`）。
-
-## 🛠 在 Claude Code 里怎么用
-
-直接和 Claude 说：
-
-| 你说 | Claude 走哪条 |
-|---|---|
-| "找对标" / "扫一下同赛道" + 我的账号链接 | **find** |
-| "拆这条爆款" + 笔记/视频链接 | **crack** |
-| "对着这条仿写" / "下一条该怎么写" | **crack + adapt** |
-| "我有素材（文档/图片/视频），帮我写一条能爆的" | **compose + find + crack + adapt**（全闭环） |
-| "我这个号缺爆款选题" | **find + crack + adapt** |
-| "为什么我这条不爆" / "完整诊断" | L2 兜底诊断（按需，不主推） |
-
-### find 的 5 步（关键差异）
-
-| Step | 干什么 | 不能省 |
-|---|---|---|
-| 1 | 多模态识别我的"内容本质"（5 个抽象维度，不是表面词） | 必须 |
-| 2 | 5 维交叉生成 4-6 个搜索词矩阵（**禁止单关键词**） | 必须 |
-| 3 | 矩阵词并行 search → 候选池 20-50 条 | 必须 |
-| 4 | 候选池每条多模态过相似度（≥ 3 维相似才留） | 必须（省了 = 表面假对标污染） |
-| 5 | 体量 + 活跃度过滤 → 5-10 真对标 → 人工勾 3-5 条 | 必须 |
-
-## 📂 输出位置
-
-跑完闭环，文件落到当前工作目录：
-
-```
-./reports/
-  {YYYYMMDD-HHMM}-find-{我的账号末8位}.md      # 5-10 对标 + 为什么是真对标
-  {YYYYMMDD-HHMM}-crack-{对标末8位}.md         # 每条 4 行清单
-  {YYYYMMDD-HHMM}-adapt-{选题短码}.md          # 标题 + 封面 + 首段 + CTA → 可发
-
-./assets/                                     # 副产品，跨任务累积
-  hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md / hooks-wechat-channels.md
-```
-
-> 💡 `.gitignore` 加 `reports/`（含账号选题信息，通常不想 commit），`assets/` 是长期资产建议 commit。
-
-### 按需把 md 打成 PDF
-
-```bash
-python3 scripts/render_report_pdf.py reports/xhs-xxx.md
-# → reports/xhs-xxx.pdf  (思源字体 + A4 + 卡片 CSS)
-```
-
-## 📦 仓库结构
-
-```
-social-account-doctor/
-├── SKILL.md                            # L1 主入口 — Claude 加载这个（四命令 SOP）
-├── install_as_skill.sh                 # 一键安装到 ~/.claude/skills/
-├── references/
-│   ├── scoring-vocab.md                # L3 评分词典（5 封面 / 10 标题 / 3 骨架 / 7 钩子）
-│   ├── diagnostic-mode.md              # L2 兜底诊断（"为什么不爆"才走这里）
-│   └── platforms/                      # 平台阈值数据（被 L2 调用）
-│       └── xiaohongshu.md / douyin.md / kuaishou.md / wechat-channels.md / bilibili.md
-├── scripts/
-│   ├── analyze_document.py             # 文档/图片/视频素材 → compose 独家要素溯源
-│   ├── analyze_image.py                # 封面 → 5 变量 + 模板归类 + 钩子识别
-│   ├── analyze_video.py                # 视频 → talking/visual/keyframe 三模式自动路由
-│   ├── ocr_screenshot.py               # 后台截图 → 结构化指标
-│   ├── dispatch_account.py             # 账号链接 → platform + user_id + tikhub 命令
-│   └── render_report_pdf.py            # md → A4 卡片 PDF（思源字体）
-└── tikhub/                             # 自包含 tikhub HTTP CLI
-    ├── bin/tikhub                      # CLI 入口
-    ├── lib/tikhub_client.py            # HTTP JSON-RPC + SSE + session（纯 stdlib）
-    ├── references/tools-{平台}.json    # 5 平台工具目录缓存
-    └── scripts/refresh_tools.py        # 重建工具目录
-```
-
-## ⚠ 数据时效性
-
-`references/platforms/*.md` 里所有阈值（完播率 / CTR / CES 等）均为**行业经验值**，**非平台官方公告**。
-
-📅 **采集日期：2026-04** ｜ **建议复核：每 6 个月**
-
-主流程（find/crack/adapt）**不依赖这些数字** — 只用作 L2 诊断时的方向判断。
-
-## 🧭 内容层铁律
-
-**脚本层（tikhub 返回的 JSON / 多模态分析输出）信任直接吐；账号资料层（定位、简介、人设）不清楚的地方宁可不说也不编。** 详见 `SKILL.md` 开头铁律。
+内置的平台阈值(完播率、CTR、收藏比等)是**行业经验值**,**不是平台官方公告**。信息时点 **2026-04**,建议每 6 个月复核。主流程(找对标 / 拆爆款 / 仿写)不依赖这些数字,只在诊断模式下用作方向判断。
 
 ## License
 
