@@ -16,7 +16,7 @@
 - **发了但没人看** → 给后台截图,逐项诊断是封面、标题、时间还是人群定位的问题
 - **有素材不知道能不能发** → 一份 PDF / 一组图 / 一段视频,先判断能不能出爆款再说怎么写
 
-## 它在做什么 —— 账号诊断 + 爆款分析,不是 AI 写稿
+## 它在做什么 —— 账号诊断 + 爆款分析
 
 这不是"把你的想法润色成笔记"的工具,核心是**帮你看懂自己和同赛道**:
 
@@ -64,7 +64,18 @@
 
 P0(5 分钟内):把第 3 张设为封面 + 正文补关键信息 + 标题按"数字 + 人群 + 效果"公式重写,直接给出 3 个候选。P1 / P2 覆盖 24 小时互动钩和账号月度转型方向。
 
-## 🚀 一键安装
+## 🚀 安装
+
+### 方式一:让 AI 自己装(推荐)
+
+把下面这段 prompt 丢给你的 AI 助手(Claude Code / OpenClaw / Codex / Cursor / Trae 都行),它会自己 clone、跑脚本、问你要 API key、提示你重启:
+
+```
+帮我安装 social-account-doctor:
+https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/install.md
+```
+
+### 方式二:手动安装
 
 ```bash
 git clone https://github.com/JuneYaooo/social-account-doctor.git
@@ -72,7 +83,7 @@ cd social-account-doctor
 bash install_as_skill.sh
 ```
 
-脚本会装好依赖并把 skill 拷贝到 Claude Code 的目录。重启 Claude Code 即可识别。
+脚本会把 skill 装到 `~/.claude/skills/social-account-doctor/`,重启 Claude Code 后自动识别。
 
 ## ⚙ 配置三把钥匙
 
@@ -85,6 +96,12 @@ bash install_as_skill.sh
 > 🔒 脚本只读 skill 目录下的 `.env` 和 `~/.claude/.env`,不会翻项目里的 `.env`,不用担心误吃无关密钥。
 
 系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
+
+## 🛠 在 Claude Code 里怎么用
+
+装完直接跟 Claude 说人话就行,见上面 [怎么用 —— 直接跟 Claude 说](#怎么用--直接跟-claude-说) 表格。Claude 会自己路由到 find / crack / adapt / compose 命令,跑完把报告路径告诉你。
+
+**🧑‍💻 想自己写脚本调 CLI 而不走 agent?** 看 [SKILL.md](./SKILL.md) —— 命令闭环、输入路由、每个脚本的参数和文件布局都在那;`scripts/` 下的 `analyze_image.py` / `analyze_video.py` / `analyze_document.py` / `render_report_pdf.py` 也可以独立调。
 
 ## 📂 输出在哪
 
