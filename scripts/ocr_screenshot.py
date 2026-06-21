@@ -31,9 +31,12 @@ social-account-doctor: ocr_screenshot.py
 - VIDEO_ANALYSIS_API_KEY
 - VIDEO_ANALYSIS_BASE_URL  (默认 https://generativelanguage.googleapis.com)
 - VIDEO_ANALYSIS_MODEL_NAME  (默认 gemini-3-pro-preview)
+- VIDEO_ANALYSIS_TIMEOUT_SECONDS  (默认 600 秒)
+- VIDEO_ANALYSIS_NORMALIZE_IMAGES  (默认 1，非 JPEG 图片转 JPEG 后发送)
 """
 
 import base64
+import io
 import json
 import mimetypes
 import os
@@ -84,13 +87,67 @@ PROMPT = """你是自媒体账号数据分析专家。这是一张笔记/账号�
 
 只输出 JSON,不要任何其他文字。"""
 
+DEFAULT_ANALYSIS_TIMEOUT_SECONDS = 600
+
+
+def env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if not raw:
+        return default
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return default
+
+
+def analysis_timeout_seconds() -> int:
+    return env_int("VIDEO_ANALYSIS_TIMEOUT_SECONDS", DEFAULT_ANALYSIS_TIMEOUT_SECONDS)
+
+
+def chat_completions_url(base_url: str) -> str:
+    base = base_url.rstrip("/")
+    if base.endswith("/v1"):
+        return f"{base}/chat/completions"
+    return f"{base}/v1/chat/completions"
+
+
+def gemini_generate_content_url(base_url: str, model: str, api_key: str) -> str:
+    base = base_url.rstrip("/")
+    if base.endswith("/v1beta") or base.endswith("/v1"):
+        return f"{base}/models/{model}:generateContent?key={api_key}"
+    return f"{base}/v1beta/models/{model}:generateContent?key={api_key}"
+
 
 def encode_image_to_base64(path: Path) -> tuple[str, str]:
     mime, _ = mimetypes.guess_type(str(path))
     if mime is None:
         mime = "image/png"
-    data = path.read_bytes()
-    return base64.b64encode(data).decode("utf-8"), mime
+    raw = path.read_bytes()
+    normalize = os.environ.get("VIDEO_ANALYSIS_NORMALIZE_IMAGES", "1").lower() not in {"0", "false", "no"}
+    if not normalize or mime == "image/jpeg":
+        return base64.b64encode(raw).decode("utf-8"), mime
+
+    try:
+        from PIL import Image, ImageOps
+
+        with Image.open(io.BytesIO(raw)) as img:
+            img = ImageOps.exif_transpose(img)
+            if img.mode in {"RGBA", "LA"} or (img.mode == "P" and "transparency" in img.info):
+                img = img.convert("RGBA")
+                background = Image.new("RGBA", img.size, (255, 255, 255, 255))
+                background.alpha_composite(img)
+                img = background.convert("RGB")
+            else:
+                img = img.convert("RGB")
+
+            resampling = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+            img.thumbnail((1800, 1800), resampling)
+            out = io.BytesIO()
+            img.save(out, format="JPEG", quality=92, optimize=True)
+    except Exception:
+        return base64.b64encode(raw).decode("utf-8"), mime
+
+    return base64.b64encode(out.getvalue()).decode("utf-8"), "image/jpeg"
 
 
 def call_gemini(image_b64: str, mime: str, api_key: str, base_url: str, model: str) -> str:
@@ -98,7 +155,7 @@ def call_gemini(image_b64: str, mime: str, api_key: str, base_url: str, model: s
 
     if "generativelanguage" in base_url:
         # 原生 Gemini 格式
-        url = f"{base_url.rstrip('/')}/v1beta/models/{model}:generateContent?key={api_key}"
+        url = gemini_generate_content_url(base_url, model, api_key)
         payload = {
             "contents": [{
                 "parts": [
@@ -111,13 +168,13 @@ def call_gemini(image_b64: str, mime: str, api_key: str, base_url: str, model: s
                 "responseMimeType": "application/json",
             },
         }
-        resp = requests.post(url, json=payload, timeout=120)
+        resp = requests.post(url, json=payload, timeout=analysis_timeout_seconds())
         resp.raise_for_status()
         data = resp.json()
         return data["candidates"][0]["content"]["parts"][0]["text"]
     else:
         # OpenAI 兼容格式(很多代理是这种)
-        url = f"{base_url.rstrip('/')}/v1/chat/completions"
+        url = chat_completions_url(base_url)
         payload = {
             "model": model,
             "messages": [{
@@ -131,7 +188,7 @@ def call_gemini(image_b64: str, mime: str, api_key: str, base_url: str, model: s
             "response_format": {"type": "json_object"},
         }
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-        resp = requests.post(url, json=payload, headers=headers, timeout=120)
+        resp = requests.post(url, json=payload, headers=headers, timeout=analysis_timeout_seconds())
         resp.raise_for_status()
         data = resp.json()
         return data["choices"][0]["message"]["content"]

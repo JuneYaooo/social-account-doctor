@@ -72,7 +72,7 @@
 2. 调 tikhub douyin douyin_app_v3_fetch_one_video(aweme_id)
    → 拿 video_url + cover_url + 完播率 + 5s留存
 3. 把 video_url 下载到 /tmp/account_diagnostic/{aweme_id}/video.mp4
-4. 调 scripts/analyze_video.py（分段裁剪喂 Gemini，**不走抽帧**）
+4. 调 scripts/analyze_video.py（默认按视频配置走；本地视频片段存在且未禁用时发 video_url，如需代表帧兜底设 `VIDEO_ANALYSIS_USE_VIDEO_URL=0`）
    → 拿前 5s 的画面变化、口播文字、信息密度点分布
 5. 对照 §2.2 五种钩子失败模式定位根因
 ```
@@ -147,8 +147,9 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.m
 | 视频统计（播放/点赞/转发/下载） | `douyin_app_v3_fetch_video_statistics` | `douyin_app_v3_fetch_multi_video_statistics`（批量） |
 | 视频高画质播放地址 | `douyin_app_v3_fetch_video_high_quality_play_url` | `douyin_web_fetch_video_high_quality_play_url` |
 | 视频评论 | `douyin_app_v3_fetch_video_comments` | `douyin_web_fetch_video_comments` |
-| 关键词搜索作者（找对标） | `douyin_app_v3_fetch_user_search_result` | `douyin_web_fetch_user_search_result_v3` |
-| 关键词搜索视频（找选题/对标作品） | `douyin_app_v3_fetch_video_search_result_v2` | `douyin_app_v3_fetch_general_search_result` |
+| 关键词搜索作者（找对标） | `douyin_billboard_fetch_hot_account_search_list --cursor 0` | `douyin_app_v3_fetch_user_search_result` → `douyin_web_fetch_user_search_result_v3` |
+| 关键词搜索视频（找选题/对标作品） | `douyin_app_v3_fetch_video_search_result_v2`（必须加超时） | `douyin_app_v3_fetch_general_search_result` |
+| 关键词搜话题（反查高互动作者） | `douyin_app_v3_fetch_hashtag_search_result` | `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>` |
 | 短链解析（v.douyin.com） | `douyin_app_v3_fetch_one_video_by_share_url` | `douyin_app_v3_fetch_share_info_by_share_code` |
 | 创作者中心粉丝画像（深度诊断） | `douyin_billboard_fetch_hot_account_fans_portrait_list`（**仅星图收录账号有数据，普通账号会返回空**） | `douyin_billboard_fetch_hot_account_fans_interest_topic_list` |
 
@@ -161,8 +162,39 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.m
 4. 计算每条互动数据（avg_play, avg_like, avg_comment）→ 算爆款率/扑街率
 5. 取 top 3 + bottom 3 → 对每条调 douyin_app_v3_fetch_one_video → 拿完整指标
 6. 对 top 3 + bottom 3 → analyze_video.py 拆前 5s 钩子
-7. 关键词搜索 → 找对标候选（5k-50k 粉，活跃，同赛道）
+7. 关键词搜索 → 找对标候选（新号优先 500-1W 粉，进阶号用 5k-50k 粉，活跃，同赛道）
 ```
+
+### 4.2 推荐调用顺序（找对标时）
+
+抖音搜索接口变化频繁，不要一次失败就写“无对标参考”。
+
+```
+1. 从账号简介和近 10 条作品提取 4-6 个关键词
+   例：宝宝情绪 / 育儿情绪 / 宝宝打人 / 宝宝抢玩具 / 分离焦虑宝宝
+
+2. 账号搜索首选：
+   tikhub douyin douyin_billboard_fetch_hot_account_search_list \
+     --keyword <关键词> --cursor 0
+   注意：cursor 必传；返回后按 nickname / signature / 粉丝数 / 作品数筛掉泛领域号。
+
+3. 账号搜索不够时：
+   - 用 `douyin_app_v3_fetch_hashtag_search_result --keyword <词> --offset 0 --count 10`
+   - 取相关 ch_id，再用 `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>`
+   - 按点赞 / 评论 / 收藏 / 分享排序，反查重复出现的作者
+
+4. 视频搜索只做补充：
+   `douyin_app_v3_fetch_video_search_result_v2` 可能长时间无响应，必须给 shell/脚本超时。
+   超时 1 次就换账号搜索或话题搜索，不要连续卡住。
+
+5. 最终对标池：
+   新号优先找 3-5 个 500-1W 粉的同赛道号，再补 1-2 个更高粉账号看方法论。
+```
+
+**不要误判为无对标的情况**：
+- 某个 search 工具 schema 为空 / 参数不明：先 `tikhub list douyin search` 或 `tikhub describe` 查工具详情
+- 视频搜索挂了但账号搜索可用：仍然算 L2 可完成
+- 用户给的是短链：先解析 sec_uid / aweme_id，再用主页信息提关键词，不能只围绕单条视频标题搜
 
 ---
 
@@ -176,6 +208,23 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.m
 | **标题钩子** | 抖音标题（描述）作用低于小红书，但仍要套 SKILL.md §5.2 10 个标题公式（数字+人群+效果） |
 | **正文骨架** | **前 3 秒口播 + 黄金 7 秒密度点**（每 7 秒一个反转/数据/画面切）。MrBeast 公式 |
 | **发布节奏** | 抖音算法偏爱"稳定日更"。频率 < 3 条/周 → 标签衰减 |
+
+---
+
+### 5.1 AI 视频 / AI 插画号专项评分
+
+如果作品是 AI 生成视频、AI 插画轮播、数字人口播或强模板视频，六维之外必须补这组判断：
+
+| 维度 | 看什么 | 低分表现 | 优化动作 |
+|---|---|---|---|
+| 首帧冲突 | 0-2 秒是否看懂具体行为 | 只有温馨插画，看不出打人/抢玩具/哭闹 | 首帧直接画冲突动作，大字写妈妈动作 |
+| 人物连续性 | 妈妈/宝宝/主角/家庭场景是否稳定 | 每条像不同素材拼接 | 固定人物设定和家庭场景，至少连续 20 条不乱换 |
+| 画面承载时长 | AI 素材能否撑住视频长度 | 1-2 分钟内画面变化少，用户疲劳 | 新号先做 20-40 秒，每条 3-5 个有效镜头 |
+| 大字安全区 | 列表缩略图里文字是否完整 | 大字被裁切、字数太长 | 封面大字 ≤10 字，放中上安全区 |
+| 可信度 | AI 感是否削弱专业/育儿/知识信任 | 过度可爱、抽象、像模板 | 多用生活场景、可照做话术、稳定视觉设定 |
+| 模板感 | 是否像批量套模板 | 背景、角色、运镜每条都随机 | 建账号级视觉规范：角色、色调、字幕、镜头节奏统一 |
+
+AI 视频不是原罪。对标也可能用 AI 插画，关键差距通常在“标题/首帧/话术是否服务同一个具体场景”。
 
 ---
 

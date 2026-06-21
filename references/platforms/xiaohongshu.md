@@ -154,9 +154,10 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 > 首选 / Fallback。首选挂时按列依次重试。
 >
-> **⚠️ 硬规则（复测 2026-04-22，与 SKILL.md §9.1 接口稳定性表对齐）**：
-> - **小红书所有 V2 接口（不论 app v2 还是 web v2）实测仍然全挂**（RetryError[HTTPStatusError]）—— 直接用 V1，**不要再去试 V2,也不要"V2 失败切 web V2"**（旧建议已过时,实测两个都挂）
-> - **官方说法 vs 实测**：tikhub 官方 2026-04 称 V2 应可用，但实测仍 RetryError — **以实测为准**
+> **⚠️ 硬规则（复测 2026-04-23，与 SKILL.md §9.1 接口稳定性表对齐）**：
+> - search / note_info / comments / user_info 首选 App V1；用户作品列表目前只有 `xiaohongshu_web_v2_fetch_home_notes_app` 跑通
+> - App V2 全系列实测 RetryError；Web V2 只能作为少数场景备用，官方已停止维护，随时可能下线
+> - **官方说法 vs 实测**：tikhub 官方 2026-04 称 App V2 应可用，但实测仍 RetryError — **以实测为准**
 > - **官方已弃用接口**：`xiaohongshu_app_search_notes_v2`（注意命名：`app_search_notes_v2` ≠ `app_v2_search_notes`）—— **永远不要用**
 > - 关键词搜笔记 = `xiaohongshu_app_search_notes`（App V1，唯一稳定）
 > - 关键词搜用户 = `xiaohongshu_web_search_users`（Web V1，唯一稳定 — 注意 App V1 `search_users` 也挂）
@@ -167,31 +168,31 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 | 任务 | 首选 | Fallback |
 |---|---|---|
-| 账号信息（昵称/粉丝/认证） | `xiaohongshu_web_v2_fetch_user_info` | `xiaohongshu_app_v2_get_user_info` |
-| 账号笔记列表 | `xiaohongshu_app_v2_get_user_posted_notes` | `xiaohongshu_web_v2_fetch_home_notes` → `_app` |
-| 账号粉丝/关注关系 | `xiaohongshu_web_v2_fetch_follower_list` | `xiaohongshu_web_v2_fetch_following_list` |
-| 用户收藏笔记（看口味） | `xiaohongshu_app_v2_get_user_faved_notes` | — |
-| 笔记详情 | `xiaohongshu_web_v2_fetch_feed_notes_v2` | `xiaohongshu_app_v2_get_image_note_detail` / `_video_note_detail` / `_mixed_note_detail` |
-| 笔记图片（封面+正文图） | `xiaohongshu_web_v2_fetch_note_image` | 从 `feed_notes_v2` 的 image_list 字段取 |
-| 笔记评论 | `xiaohongshu_web_v2_fetch_note_comments` | `xiaohongshu_web_get_note_comments` → `xiaohongshu_app_v2_get_note_comments` |
-| 评论子回复 | `xiaohongshu_web_v2_fetch_sub_comments` | `xiaohongshu_app_v2_get_note_sub_comments` |
+| 账号信息（昵称/粉丝/认证） | `xiaohongshu_app_get_user_info` | 需要时让用户补主页截图 |
+| 账号笔记列表 | `xiaohongshu_web_v2_fetch_home_notes_app`（当前唯一能用） | — |
+| 账号粉丝/关注关系 | 当前不稳定 | 优先让用户截图 |
+| 用户收藏笔记（看口味） | 当前不稳定 | — |
+| 笔记详情 | `xiaohongshu_app_get_note_info`（需 xsec_token） | `xiaohongshu_web_get_note_info_v7` / `xiaohongshu_web_v2_fetch_feed_notes_v2`（备用） |
+| 笔记图片（封面+正文图） | 从 `app_get_note_info` / `web_get_note_info_v7` 的 `image_list` 字段取 | — |
+| 笔记评论 | `xiaohongshu_app_get_note_comments` | `xiaohongshu_web_v2_fetch_note_comments`（备用） |
+| 评论子回复 | `xiaohongshu_app_get_sub_comments` | `xiaohongshu_web_v2_fetch_sub_comments`（备用） |
 | 关键词搜笔记（找选题/对标作品） | `xiaohongshu_app_search_notes`（App V1，**唯一稳**） | `xiaohongshu_web_search_notes`（Web V1，备用） — ❌ 不要试 V2 全挂 |
 | 关键词搜用户（找对标账号） | `xiaohongshu_web_search_users`（Web V1，**唯一稳**） | — ❌ App V1/V2 全挂,Web V2 也挂,没有备用 |
 | 热榜（蓝海期选题） | `xiaohongshu_web_v2_fetch_hot_list` | — |
-| 话题信息 + 话题笔记 | `xiaohongshu_app_v2_get_topic_info` + `_get_topic_feed` | — |
-| 分享链接解析 | `xiaohongshu_app_extract_share_info` | `xiaohongshu_web_get_note_id_and_xsec_token` |
-| 商品列表（看变现） | `xiaohongshu_web_v2_fetch_product_list` | `xiaohongshu_app_v2_search_products` |
+| 话题信息 + 话题笔记 | 小红书当前不支持 hashtag 维度搜笔记 | 只能关键词搜索 |
+| 分享链接解析 | `xiaohongshu_web_get_note_id_and_xsec_token` | `xiaohongshu_app_extract_share_info` |
+| 商品列表（看变现） | 当前不稳定 | 让用户补店铺/商品后台截图 |
 
 ### 4.1 推荐调用顺序（输入 = 账号链接时）
 
 ```
 1. dispatch_account.py <url> → 拿到 user_id (+ xsec_token)
-2. xiaohongshu_web_v2_fetch_user_info(user_id) → 账号基础信息
-3. xiaohongshu_app_v2_get_user_posted_notes(user_id, cursor="") → 最近 20 条 note_id 列表
+2. xiaohongshu_app_get_user_info(user_id) → 账号基础信息；失败时让用户补主页截图
+3. xiaohongshu_web_v2_fetch_home_notes_app(user_id, cursor="") → 最近 20 条 note_id 列表
 4. 计算每条互动数据（avg_like, avg_collect, avg_comment）→ 算 CES 均值 + 爆款率
-5. 取 top 3 + bottom 3 → 对每条调 xiaohongshu_web_v2_fetch_feed_notes_v2 → 拿完整数据
+5. 取 top 3 + bottom 3 → 对每条调 xiaohongshu_app_get_note_info（需 xsec_token）/ xiaohongshu_web_get_note_info_v7 → 拿完整数据
 6. 对 top 3 + bottom 3 → scripts/analyze_image.py 拆封面 5 变量
-7. 对 top 3 → xiaohongshu_web_v2_fetch_note_comments 拿前 20 条评论（提炼痛点）
+7. 对 top 3 → xiaohongshu_app_get_note_comments 拿前 20 条评论（提炼痛点）
 8. 关键词搜索 → 找对标候选（5k-50k 粉，活跃，同赛道）
 ```
 

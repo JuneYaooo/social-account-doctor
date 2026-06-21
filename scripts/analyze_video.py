@@ -10,14 +10,18 @@ social-account-doctor: analyze_video.py
   - auto（默认）：抽 5 个代表帧 + 前 30s 音轨喂 Gemini 判 content_type，自动路由
 
 铁律澄清：
-  - 「不抽帧」指的是不要对【时序内容】做均匀抽帧 — 钩子/节奏/情绪弧抽帧会丢光
+  - 时序内容不能只看单帧；多张代表帧是 OpenAI 兼容代理的默认兜底
   - 但【图文密集类】（PPT 录屏 / 知识截图视频 / 思维导图）画面是文字稳定载体，
     时序信息少，必须抽场景变化关键帧才能拆出知识点
-  - 三条路径都遵循：用 ffmpeg 重编码到 base64 可吞的大小，喂 Gemini 3.1 Pro 原生多模态
+  - visual/talking 的轻量视觉分析默认按视频配置走：本地视频片段存在且未禁用时走 video_url；
+    显式禁用 video_url 或没有本地视频片段时，才按时间顺序抽 JPEG 代表帧喂模型
 
 环境变量：
   VIDEO_ANALYSIS_API_KEY / VIDEO_ANALYSIS_BASE_URL / VIDEO_ANALYSIS_MODEL_NAME
+  VIDEO_ANALYSIS_TIMEOUT_SECONDS（默认 600 秒）
+  VIDEO_ANALYSIS_USE_VIDEO_URL=1/0（1 强制 video_url；0 强制代表帧；未设则本地视频存在时用 video_url）
   AUDIO_TRANSCRIPTION_API_KEY / AUDIO_TRANSCRIPTION_BASE_URL / AUDIO_TRANSCRIPTION_MODEL
+  AUDIO_TRANSCRIPTION_TIMEOUT_SECONDS（默认 600 秒）
     （talking 模式必须设；其他模式可选）
 
 用法：
@@ -53,6 +57,53 @@ VIDEO_SEGMENT_MAX_BYTES = 18 * 1024 * 1024
 KEYFRAME_SCENE_THRESHOLD = 0.30   # ffmpeg scene change 阈值
 DETECTION_FRAME_COUNT = 5         # auto detection 抽 5 帧
 DETECTION_AUDIO_SECONDS = 30      # auto detection 截前 30s 音轨
+VISUAL_SEGMENT_FRAME_COUNT = 6    # visual/talking 每段抽帧数
+DEFAULT_ANALYSIS_TIMEOUT_SECONDS = 600
+DEFAULT_TRANSCRIPTION_TIMEOUT_SECONDS = 600
+
+
+def env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if not raw:
+        return default
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return default
+
+
+def analysis_timeout_seconds() -> int:
+    return env_int("VIDEO_ANALYSIS_TIMEOUT_SECONDS", DEFAULT_ANALYSIS_TIMEOUT_SECONDS)
+
+
+def transcription_timeout_seconds() -> int:
+    return env_int("AUDIO_TRANSCRIPTION_TIMEOUT_SECONDS", DEFAULT_TRANSCRIPTION_TIMEOUT_SECONDS)
+
+
+def env_bool(name: str):
+    raw = os.environ.get(name)
+    if raw is None:
+        return None
+    value = raw.strip().lower()
+    if value in {"1", "true", "yes", "on"}:
+        return True
+    if value in {"0", "false", "no", "off"}:
+        return False
+    return None
+
+
+def use_video_url_payload(video_path: str) -> bool:
+    configured = env_bool("VIDEO_ANALYSIS_USE_VIDEO_URL")
+    if configured is not None:
+        return configured
+    return Path(video_path).exists()
+
+
+def chat_completions_url(base_url: str) -> str:
+    base = base_url.rstrip("/")
+    if base.endswith("/v1"):
+        return f"{base}/chat/completions"
+    return f"{base}/v1/chat/completions"
 
 # 关键帧上限 — 按时长动态
 def keyframe_cap(duration: float) -> int:
@@ -223,6 +274,36 @@ def b64_image(path: str) -> str:
     return b64_file(path)
 
 
+def extract_even_frames(
+    video_path: str,
+    out_dir: Path,
+    start: float,
+    duration: float,
+    count: int,
+    prefix: str,
+    scale: int = 720,
+) -> list:
+    out_dir.mkdir(exist_ok=True)
+    frame_count = max(1, min(count, int(max(1, duration * 2))))
+    frames = []
+    for i in range(frame_count):
+        if frame_count == 1:
+            t = start + duration / 2
+        else:
+            t = start + ((i + 0.5) * duration / frame_count)
+        out = out_dir / f"{prefix}_{i:02d}.jpg"
+        r = run([
+            "ffmpeg", "-y", "-loglevel", "error",
+            "-ss", str(max(0, t)), "-i", video_path,
+            "-vf", f"scale={scale}:-2",
+            "-frames:v", "1",
+            str(out),
+        ])
+        if r.returncode == 0 and out.exists():
+            frames.append({"index": i, "timestamp": round(t, 2), "path": str(out)})
+    return frames
+
+
 def gemini_chat(messages: list, max_tokens: int = 2500, temperature: float = 0.2) -> dict:
     """统一的 Gemini 调用 — OpenAI 兼容协议。返回解析后的 JSON dict（或带 error 的 dict）。"""
     api_key = os.environ["VIDEO_ANALYSIS_API_KEY"]
@@ -237,8 +318,8 @@ def gemini_chat(messages: list, max_tokens: int = 2500, temperature: float = 0.2
     }
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     try:
-        r = requests.post(f"{base_url}/chat/completions", headers=headers,
-                          json=payload, timeout=300)
+        r = requests.post(chat_completions_url(base_url), headers=headers,
+                          json=payload, timeout=analysis_timeout_seconds())
         r.raise_for_status()
         content = r.json()["choices"][0]["message"]["content"].strip()
         if content.startswith("```"):
@@ -302,17 +383,42 @@ def cut_segments(video_path: str, workdir: Path, total_dur: float, seg_seconds: 
 
 
 def call_visual_segment(seg: dict, total_segs: int) -> dict:
-    b64 = b64_file(seg["path"])
     user_prompt = VISUAL_SEGMENT_USER.format(
         seg_index=seg["index"], seg_total=total_segs,
         seg_dur=int(seg["duration"]), start=int(seg["start"]), end=int(seg["end"]),
     )
+    user_content = [{"type": "text", "text": user_prompt}]
+    if use_video_url_payload(seg["path"]):
+        b64 = b64_file(seg["path"])
+        user_content.append({"type": "video_url", "video_url": {"url": f"data:video/mp4;base64,{b64}"}})
+    else:
+        frame_dir = Path(seg["path"]).parent / f"seg_{seg['index']:03d}_frames"
+        frames = extract_even_frames(
+            seg["path"],
+            frame_dir,
+            start=0,
+            duration=float(seg["duration"]),
+            count=VISUAL_SEGMENT_FRAME_COUNT,
+            prefix="frame",
+        )
+        if not frames:
+            return {
+                "error": "no frames extracted for representative-frame fallback",
+                "segment_index": seg["index"],
+            }
+        user_content[0]["text"] += (
+            "\n\n下面是该片段按时间顺序抽出的代表帧；只能依据这些帧和可见文字作答，"
+            "不要臆测未出现的人物、产品、BGM 或口播。"
+        )
+        for frame in frames:
+            user_content.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{b64_image(frame['path'])}"},
+            })
+
     result = gemini_chat([
         {"role": "system", "content": VISUAL_SEGMENT_SYSTEM},
-        {"role": "user", "content": [
-            {"type": "text", "text": user_prompt},
-            {"type": "video_url", "video_url": {"url": f"data:video/mp4;base64,{b64}"}},
-        ]},
+        {"role": "user", "content": user_content},
     ])
     if "error" in result:
         result["segment_index"] = seg["index"]
@@ -459,7 +565,7 @@ def call_sensevoice(audio_chunks: list, required: bool = False) -> dict:
                 headers = {"Authorization": f"Bearer {api_key}"}
                 r = requests.post(
                     f"{base_url}/audio/transcriptions",
-                    headers=headers, files=files, data=data, timeout=600,
+                    headers=headers, files=files, data=data, timeout=transcription_timeout_seconds(),
                 )
                 r.raise_for_status()
                 resp = r.json()
