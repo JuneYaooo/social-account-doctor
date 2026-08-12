@@ -72,24 +72,12 @@ P0(5 分钟内):把第 3 张设为封面 + 正文补关键信息 + 标题按"数
 
 ## 🚀 安装
 
-### 方式一:让 AI 自己装(推荐)
-
-把下面这段 prompt 丢给你的 AI 助手(Claude Code / OpenClaw / Codex / Cursor / Trae 都行),它会自己 clone、跑脚本、问你要 API key、提示你重启:
+把下面这段 prompt 丢给你的 AI 助手（Claude Code / OpenClaw / Codex / Cursor / Trae 都行），它会自己 clone、跑脚本、问你要 API key、提示你重启：
 
 ```
 帮我安装 social-account-doctor:
 https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/install.md
 ```
-
-### 方式二:手动安装
-
-```bash
-git clone https://github.com/JuneYaooo/social-account-doctor.git
-cd social-account-doctor
-bash install_as_skill.sh
-```
-
-脚本会把 skill 装到 `~/.claude/skills/social-account-doctor/`,重启 Claude Code 后自动识别。
 
 ## ⚙ 配置三把钥匙
 
