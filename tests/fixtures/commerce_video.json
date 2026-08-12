@@ -1,0 +1,116 @@
+{
+  "description": "sample commerce video data for testing normalize_metrics.py",
+  "platform": "douyin",
+  "videos": [
+    {
+      "video_id": "7300000000000000001",
+      "account_id": "MS4wLjABAAAAtest001",
+      "follower_count": 5000,
+      "metrics": {
+        "views": 45000,
+        "likes": 3200,
+        "comments": 180,
+        "shares": 95,
+        "product_clicks": 450,
+        "gmv": 12000
+      },
+      "published_at": "2026-08-10T14:30:00"
+    },
+    {
+      "video_id": "7300000000000000002",
+      "account_id": "MS4wLjABAAAAtest001",
+      "follower_count": 5000,
+      "metrics": {
+        "views": 12000,
+        "likes": 800,
+        "comments": 45,
+        "shares": 23,
+        "product_clicks": 120,
+        "gmv": 3500
+      },
+      "published_at": "2026-08-09T10:00:00"
+    },
+    {
+      "video_id": "7300000000000000003",
+      "account_id": "MS4wLjABAAAAtest001",
+      "follower_count": 5000,
+      "metrics": {
+        "views": 8000,
+        "likes": 520,
+        "comments": 30,
+        "shares": 15,
+        "product_clicks": 80,
+        "gmv": 2000
+      },
+      "published_at": "2026-08-08T09:00:00"
+    },
+    {
+      "video_id": "7300000000000000004",
+      "account_id": "MS4wLjABAAAAtest002",
+      "follower_count": 25000,
+      "metrics": {
+        "views": 120000,
+        "likes": 9500,
+        "comments": 420,
+        "shares": 310,
+        "product_clicks": 1800,
+        "gmv": 56000
+      },
+      "published_at": "2026-08-10T18:00:00"
+    },
+    {
+      "video_id": "7300000000000000005",
+      "account_id": "MS4wLjABAAAAtest002",
+      "follower_count": 25000,
+      "metrics": {
+        "views": 50000,
+        "likes": 3800,
+        "comments": 150,
+        "shares": 100,
+        "product_clicks": 600,
+        "gmv": 18000
+      },
+      "published_at": "2026-08-09T16:00:00"
+    },
+    {
+      "video_id": "7300000000000000006",
+      "account_id": "MS4wLjABAAAAtest003",
+      "follower_count": 150000,
+      "metrics": {
+        "views": 500000,
+        "likes": 45000,
+        "comments": 2100,
+        "shares": 1800,
+        "product_clicks": 8500,
+        "gmv": 280000
+      },
+      "published_at": "2026-08-10T20:00:00"
+    },
+    {
+      "video_id": "7300000000000000007",
+      "account_id": "MS4wLjABAAAAtest004",
+      "follower_count": 800,
+      "metrics": {
+        "views": 500,
+        "likes": 30,
+        "comments": 5,
+        "shares": 2
+      },
+      "published_at": "2026-08-10T12:00:00"
+    },
+    {
+      "video_id": "7300000000000000008",
+      "account_id": "MS4wLjABAAAAtest001",
+      "follower_count": 5000,
+      "metrics": {
+        "views": 250000,
+        "likes": 18000,
+        "comments": 950,
+        "shares": 520,
+        "product_clicks": 3200,
+        "gmv": 95000
+      },
+      "published_at": "2026-08-10T15:00:00"
+    }
+  ]
+}
