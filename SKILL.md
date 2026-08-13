@@ -1,6 +1,6 @@
 ---
 name: social-account-doctor
-description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材打底 →) 找对标 → 拆爆款 → 套自己」四命令闭环，含带货电商模式（commerce）。给我的账号 / 选题方向 / 原始素材（文档/图片/视频）/ 商品链接，吐出"可发的下一条笔记初稿"或"带货视频文案+分镜"。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"、"我有素材帮我写一条能爆的"、"这份文档/这组图/这段视频能出一条爆款吗"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。带货触发词：爆款带货、带货视频、爆品、挂车、商品链接、人群/痛点/卖点/买点、佣金、转化、成交、商品卡、详情页、选品、预爆款、账号适配 — 走 commerce 路由。
+description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材打底 →) 找对标 → 拆爆款 → 套自己」四命令闭环，含抖音带货电商 Beta（commerce）；其他平台只做通用内容分析，不承诺商品 SKU/价格核验。给我的账号 / 选题方向 / 原始素材（文档/图片/视频）/ 商品链接，吐出"可发的下一条笔记初稿"或"带货视频文案+分镜"。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"、"我有素材帮我写一条能爆的"、"这份文档/这组图/这段视频能出一条爆款吗"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。带货触发词：爆款带货、带货视频、爆品、挂车、商品链接、人群/痛点/卖点/买点、佣金、转化、成交、商品卡、详情页、选品、预爆款、账号适配 — 走 commerce 路由。
 ---
 
 # social-account-doctor — 找对标 / 拆爆款 / 套自己
@@ -160,13 +160,20 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 > **作用**：在现有 find/crack/adapt 闭环上叠加电商维度 — 商品事实核验、利益点拆解、带货文案生成、合规风险标注。
 > **原则**：不重写主流程，保留 compose/find/crack/adapt/diagnostic 全部能力，commerce 是电商模式扩展层。
 
+### commerce 能力边界与门禁
+
+- 商品数据自动核验当前仅支持**抖音电商 Beta**。快手/视频号/小红书只能复用通用 `find/crack/adapt`；除非用户提供详情页、SKU、价格和资质证据，否则不得声称已核验商品事实。
+- 每次 `commerce-product` 前先运行 `python3 scripts/check_commerce_capabilities.py`。只有输出 `product_fact_ready: true` 才走 TikHub 商品接口。
+- 能力检查为 `degraded/unavailable` 时，明确标记交付为`部分（缺商品 API 核验）`，让用户提供商品详情、SKU、价格、活动和资质截图，构建人工事实卡。禁止用缓存工具清单证明在线接口可用。
+- `commerce-selection` 和趋势监控不在本仓库的独立能力内。只有已安装相应外部 Skill 时才能承诺选品 Top10 或趋势分析；否则说明依赖缺失。
+
 ### commerce 路由的强制补充输入
 
 检测到 commerce 触发词后，**必须先向用户索要**以下信息（缺什么问什么，不要跳过）：
 
 | 字段 | 必选/可选 | 说明 |
 |---|---|---|
-| 平台 | 必选 | 抖音/快手/视频号/小红书 |
+| 平台 | 必选 | 抖音商品核验 Beta；快手/视频号/小红书仅通用内容分析 |
 | 商品链接 | 必选（有商品时） | 详情页链接，用于解析 SKU/价格/规格 |
 | 账号定位 | 必选 | 一句话描述：谁、做什么内容、目标人群 |
 | 目标人群 | 必选 | 年龄段/性别/消费力/核心需求 |
@@ -224,6 +231,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 ```
 ProductFactCard（adapt 的前置输入）：
 ├─ 商品事实（3-5 条原子事实，每条有来源）
+├─ SKU（名称 / 价格 / 库存状态；拿不到就留空并列入待核验）
 ├─ 目标人群（年龄段/性别/需求场景）
 ├─ 用户痛点（3 条，按强度排序）
 ├─ 产品卖点（3-5 条，有详情页证据）
@@ -245,31 +253,35 @@ ProductFactCard（adapt 的前置输入）：
 
 ### commerce-adapt 的输出格式
 
-```
-标题候选（3 个，每个标注命中哪个标题公式 + 用了哪个商品利益点）：
+```markdown
+## 标题候选（3 个，每个标注命中哪个标题公式 + 用了哪个商品利益点）
   1. 「[文案]」 — 公式 N + 利益点「XXX」+ 改了 XX
   2. 「[文案]」 — 公式 N + 利益点「XXX」+ 改了 XX
   3. 「[文案]」 — 公式 N + 利益点「XXX」+ 改了 XX
 
-口播脚本（15s / 30s / 60s 三档）：
+## 口播脚本（15s / 30s / 60s 三档）
   15s：「[口播全文]」— 只打 1 个核心利益点 + CTA
   30s：「[口播全文]」— 痛点 → 1 个利益点 + 证明 + CTA
   60s：「[口播全文]」— 痛点 → 2-3 个利益点 + 证明动作 + 价格/赠品 + CTA
 
-分镜提示（3-5 镜）：
+## 分镜提示（3-5 镜）
   镜1：[时间] [画面描述] [口播对应句] [商品露出方式]
   镜2：...
   ...
 
-CTA 候选（2 个）：
+## CTA 候选（2 个）
   1. 「[文案]」— 限时/限量/评论互动
   2. 「[文案]」— 引导主页/直播间/商品卡
 
-风险标注：
-  ⚠️ 待核验：[列出所有写了但未核实的事实]
-  🚫 禁用表达：[列出 ProductFactCard 标记的禁用项]
-  📅 价格抓取时间：[时间戳]
+## 风险标注
+### ⚠️ 待核验
+- [列出所有未核实的事实；没有则写“无”]
+### 🚫 禁用表达
+- [列出 ProductFactCard 标记的禁用项；没有则写“无”]
+价格抓取时间：[时间戳]
 ```
+
+落盘 JSON 前必须运行 `build_commerce_package.py`。脚本返回 `invalid` 时修复报告或补证据，不得交付旧 JSON；成功包契约版本为 `2.0.0`。
 
 ### commerce 的输出位置
 
@@ -296,7 +308,8 @@ commerce-adapt
   └─ 本 Skill 独立完成（依赖 ProductFactCard）
   
 commerce-product（商品链接分析）
-  ├─ 本 Skill 可完成基础解析（WebFetch 详情页 + LLM 提取）
+  ├─ 抖音且在线能力门禁通过：TikHub + WebFetch 完成基础解析
+  ├─ 门禁失败或其他平台：用户截图/资料 → 人工事实卡
   └─ 复杂商品建议调用 commerce-product-intelligence Skill
 
 commerce-selection（选品 Top10）
@@ -611,7 +624,8 @@ B 站是 16:9 横屏 + 长视频文化，**算法核心信号是三连率（点�
 - `dispatch_account.py <账号URL>`：链接 → platform + user_id
 - `render_report_pdf.py <md> [-o out.pdf] [--keep-html]`：md 报告 → PDF（**按需，不默认**，详见 §5.1）
 - `normalize_metrics.py <input.json> [--platform douyin/kuaishou/xhs] [--baseline account_id]`（commerce 模式）：跨平台指标归一化，输出账号基线倍数和增长异常标记。按粉丝规模分桶（0-1k/1k-10k/10k-100k/100k+），取同类账号中位数做基线
-- `build_commerce_package.py <product_fact.md> <adapt_output.md> [--output commerce-package.json]`（commerce 模式）：将商品事实卡 + 带货文案 + 分镜打包成结构化 JSON，供 capsule-cinema 等下游 Skill 消费
+- `check_commerce_capabilities.py`（commerce 模式）：读取 TikHub 在线工具目录；商品主接口缺失时返回降级状态并要求人工事实卡
+- `build_commerce_package.py <product_fact.md> <adapt_output.md> [--output commerce-package.json]`（commerce 模式）：按 ProductFactCard 2.0 契约校验并打包；关键字段缺失时不写输出文件
 
 ### commerce 参考文件（references/）
 - `references/commerce-workflow.md`：commerce 模式完整工作流、子命令路由规则、与其他 Skill 的调用协议

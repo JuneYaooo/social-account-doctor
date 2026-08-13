@@ -7,6 +7,7 @@ Run with:
 
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -126,6 +127,42 @@ def test_normalize_video_missing_fields():
     assert result["vs_baseline"]["engagement_multiple"] == 0.0
 
 
+def test_account_baseline_is_used_and_reports_missing_buckets():
+    module = load_script("normalize_metrics")
+    data = {
+        "videos": [
+            {"video_id": "a1", "account_id": "baseline", "follower_count": 5000,
+             "metrics": {"views": 100, "likes": 5, "comments": 0, "shares": 0}},
+            {"video_id": "a2", "account_id": "baseline", "follower_count": 5000,
+             "metrics": {"views": 300, "likes": 15, "comments": 0, "shares": 0}},
+            {"video_id": "target", "account_id": "other", "follower_count": 5000,
+             "metrics": {"views": 1000, "likes": 50, "comments": 0, "shares": 0}},
+            {"video_id": "other_bucket", "account_id": "other", "follower_count": 50000,
+             "metrics": {"views": 2000, "likes": 100, "comments": 0, "shares": 0}},
+        ]
+    }
+    result = module.normalize_dataset(data, "baseline")
+    target = next(video for video in result["videos"] if video["video_id"] == "target")
+    other_bucket = next(video for video in result["videos"] if video["video_id"] == "other_bucket")
+
+    assert result["baseline"]["mode"] == "account"
+    assert result["baseline"]["account_id"] == "baseline"
+    assert result["baseline"]["buckets"]["1k-10k"]["views"] == 200
+    assert target["vs_baseline"]["views_multiple"] == 5.0
+    assert target["baseline_sample_size"] == 2
+    assert other_bucket["vs_baseline"]["views_multiple"] is None
+    assert any("no baseline samples" in warning for warning in result["warnings"])
+
+
+def test_unknown_baseline_account_fails():
+    module = load_script("normalize_metrics")
+    try:
+        module.normalize_dataset({"videos": [{"account_id": "a"}]}, "missing")
+        assert False, "should have raised"
+    except ValueError as exc:
+        assert "baseline account not found" in str(exc)
+
+
 def test_load_input(tmp_path):
     module = load_script("normalize_metrics")
     p = tmp_path / "test.json"
@@ -158,6 +195,9 @@ def test_extract_fact_card_from_markdown():
 - 产品含有透明质酸成分，来源：详情页第3屏
 - 规格为30ml/瓶，来源：SKU选择区
 
+## SKU
+- 30ml/瓶 | 99.00 | 有货
+
 ## 目标人群
 - 25-35岁女性
 - 干性/混干肤质
@@ -180,11 +220,13 @@ def test_extract_fact_card_from_markdown():
     result = module.extract_fact_card(md)
     assert result["product_url"] == "https://example.com/product/123"
     assert result["captured_at"] == "2026-08-10T14:30:00"
-    assert len(result["facts"]) >= 1
+    assert len(result["facts_with_sources"]) >= 1
+    assert result["facts_with_sources"][0]["source"] == "详情页第3屏"
+    assert result["sku"][0]["name"] == "30ml/瓶"
     assert len(result["target_audience"]) >= 1
     assert len(result["pain_points"]) >= 1
     assert len(result["selling_points"]) >= 1
-    assert len(result["risky_claims"]) >= 1
+    assert len(result["claims_risk"]) >= 1
     assert len(result["pending_verification"]) >= 1
 
 
@@ -253,6 +295,7 @@ def test_extract_risks():
 价格抓取时间: 2026-08-10 14:30
 """
     risks = module.extract_risks(md)
+    assert risks["declared"] is True
     assert len(risks["pending_verification"]) == 2
     assert len(risks["forbidden_expressions"]) == 2
     assert risks["price_captured_at"] == "2026-08-10 14:30"
@@ -273,6 +316,41 @@ def test_extract_titles():
     assert titles[2]["formula_id"] == 6
 
 
+def test_extracts_skill_label_template_without_swallowing_annotations():
+    module = load_script("build_commerce_package")
+    md = """
+标题候选（3 个，每个标注公式）：
+  1. 「测试标题」 — 公式 1 + 利益点「测试利益点」
+
+口播脚本（15s / 30s / 60s 三档）：
+  15s：「十五秒正文」— 只打 1 个核心利益点 + CTA
+  30s：「三十秒正文」— 痛点 → 证明 + CTA
+  60s：「六十秒正文」— 完整正文
+
+分镜提示（3-5 镜）：
+  镜1：[0-3s] [商品特写] [十五秒正文] [手持展示]
+
+CTA 候选（2 个）：
+  1. 「去商品卡看看」— 引导商品卡
+
+风险标注：
+  ⚠️ 待核验：价格；库存
+  🚫 禁用表达：全网最低
+  📅 价格抓取时间：2026-08-13T00:00:00Z
+"""
+    assert module.extract_titles(md)[0]["text"] == "测试标题"
+    assert module.extract_scripts(md) == {
+        "15s": "十五秒正文",
+        "30s": "三十秒正文",
+        "60s": "六十秒正文",
+    }
+    assert len(module.extract_storyboard(md)) == 1
+    assert module.extract_ctas(md) == ["去商品卡看看"]
+    assert module.extract_risks(md)["declared"] is True
+    assert module.extract_risks(md)["pending_verification"] == ["价格", "库存"]
+    assert module.extract_risks(md)["forbidden_expressions"] == ["全网最低"]
+
+
 def test_build_full_package(tmp_path):
     module = load_script("build_commerce_package")
     fact_md = tmp_path / "product_fact.md"
@@ -287,7 +365,7 @@ def test_build_full_package(tmp_path):
 抓取时间: 2026-08-10T14:30:00
 
 ## 商品事实
-- 产品规格：30ml/瓶
+- 产品规格：30ml/瓶，来源：SKU选择区
 
 ## 目标人群
 - 干性肤质
@@ -341,7 +419,7 @@ def test_build_full_package(tmp_path):
     with open(output_json, encoding="utf-8") as f:
         package = json.load(f)
 
-    assert package["metadata"]["version"] == "1.0.0"
+    assert package["metadata"]["version"] == "2.0.0"
     assert "source_files" in package["metadata"]
     assert package["product_fact"]["product_url"] == "https://example.com/product/test"
     assert len(package["titles"]) == 1
@@ -351,3 +429,53 @@ def test_build_full_package(tmp_path):
     assert len(package["storyboard"]) == 2
     assert len(package["ctas"]) == 2
     assert len(package["risk_annotations"]["pending_verification"]) == 1
+
+
+def test_invalid_package_does_not_write_output(tmp_path):
+    fact_md = tmp_path / "product_fact.md"
+    adapt_md = tmp_path / "adapt_output.md"
+    output_json = tmp_path / "commerce-package.json"
+    fact_md.write_text("""商品链接: https://example.com/product/test
+抓取时间: 2026-08-10T14:30:00
+## 商品事实
+- 产品规格：30ml，来源：详情页
+""")
+    adapt_md.write_text("## 标题候选\n1. 「只有标题」")
+
+    result = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "build_commerce_package.py"),
+         str(fact_md), str(adapt_md), "--output", str(output_json)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 3
+    assert '"status": "invalid"' in result.stdout
+    assert not output_json.exists()
+
+
+def test_commerce_capability_assessment_detects_removed_detail_tool():
+    module = load_script("check_commerce_capabilities")
+    names = set(module.REQUIRED_TOOLS.values()) | set(module.OPTIONAL_TOOLS.values())
+    names.remove("douyin_web_fetch_product_detail")
+    result = module.assess(names, "test")
+
+    assert result["status"] == "degraded"
+    assert result["product_fact_ready"] is False
+    assert "douyin_web_fetch_product_detail" in result["missing_required_tools"]
+    assert result["fallback"]
+
+
+def test_tikhub_key_can_come_from_explicit_skill_env(tmp_path, monkeypatch):
+    client_path = REPO_ROOT / "tikhub" / "lib" / "tikhub_client.py"
+    spec = importlib.util.spec_from_file_location("test_tikhub_client", client_path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+
+    env_file = tmp_path / ".env"
+    env_file.write_text("TIKHUB_API_KEY=from-skill-env\n")
+    monkeypatch.delenv("TIKHUB_API_KEY", raising=False)
+    monkeypatch.setenv("TIKHUB_ENV_FILE", str(env_file))
+
+    assert module.load_api_key() == "from-skill-env"

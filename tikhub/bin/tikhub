@@ -17,7 +17,8 @@ Output:
     - failure: {"error": "..."} to stderr, non-zero exit
 
 Env:
-    TIKHUB_API_KEY   — overrides ~/.claude/.env
+    TIKHUB_API_KEY   — overrides the installed Skill .env and legacy ~/.claude/.env
+    TIKHUB_ENV_FILE  — optional explicit .env path
     TIKHUB_DEBUG=1   — print HTTP request/response info to stderr
 """
 

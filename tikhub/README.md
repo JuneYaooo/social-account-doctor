@@ -20,12 +20,11 @@ distribution, the wrapper is copied here.
 ## Quick install (after `git clone social-account-doctor`)
 
 ```bash
-# 1. API key in ~/.claude/.env (chmod 600)
-mkdir -p ~/.claude
-cat >> ~/.claude/.env <<'EOF'
-TIKHUB_API_KEY=YOUR_KEY_FROM_https://tikhub.io
-EOF
-chmod 600 ~/.claude/.env
+# 1. Put the API key in the repository/installed Skill .env
+cp -n .env.example .env
+# Edit the existing TIKHUB_API_KEY line; do not append a duplicate key.
+${EDITOR:-vi} .env
+chmod 600 .env
 
 # 2. Symlink to PATH
 ln -sf "$(pwd)/tikhub/bin/tikhub" ~/.local/bin/tikhub
@@ -66,7 +65,7 @@ python3 tikhub/scripts/refresh_tools.py tiktok
 
 | Symptom | Fix |
 |---|---|
-| `missing TIKHUB_API_KEY` | Check `~/.claude/.env`; `chmod 600 ~/.claude/.env` |
+| `missing TIKHUB_API_KEY` | Check the installed Skill `.env`, set `TIKHUB_ENV_FILE`, or export the variable |
 | `HTTP 401` | Bad/expired key → regenerate at https://user.tikhub.io |
 | `HTTP 429` | Rate limit (10 RPS); cap concurrency ≤ 3 |
 | `RetryError[<HTTPStatusError>]` | Upstream tikhub flakiness; rotate to fallback tool (see search skill docs) |

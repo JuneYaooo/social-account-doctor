@@ -194,18 +194,26 @@
 
 ### ProductFactCard
 
+`build_commerce_package.py` 输出并校验以下 2.0 契约。其他文档不得另定义同名对象。
+
 ```json
 {
   "product_url": "",
+  "captured_at": "ISO8601",
+  "price_valid_until": null,
   "sku": [{"name": "", "price": 0, "stock": 0}],
   "facts_with_sources": [{"fact": "", "source": "", "confidence": "confirmed"}],
+  "target_audience": [],
   "pain_points": [],
   "selling_points": [],
   "buying_points": [],
   "proof_actions": [],
+  "usable_copy": [],
+  "price_and_gifts": [],
+  "qualifications": [],
   "claims_risk": [],
-  "captured_at": "ISO8601",
-  "price_valid_until": "ISO8601 or null"
+  "pending_verification": [],
+  "evidence": []
 }
 ```
 

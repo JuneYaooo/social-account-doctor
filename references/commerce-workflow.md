@@ -2,6 +2,7 @@
 
 > 本文件是 SKILL.md 的 commerce 模式（§1B）的详细参考。
 > 定义 commerce 子命令的路由规则、完整工作流、以及与其他 Skill 的调用协议。
+> 当前商品数据自动核验仅支持抖音电商 Beta，并受 TikHub 在线工具能力门禁约束。
 
 ---
 
@@ -87,15 +88,17 @@
 ### Step 1：提取 product_id 并验证链接
 
 ```
-1. 从商品链接中提取 product_id（正则: /goods/(\d+) 或 /product/(\d+)）
-2. 调 TikHub douyin_web_fetch_product_detail 验证商品可访问
-3. 保存 API 返回 + 抓取时间戳
-4. 如果 API 返回空/报错 → 要求用户提供截图或手动输入商品信息
+1. 运行 python3 scripts/check_commerce_capabilities.py 检查在线工具目录
+2. 从商品链接 path 或 query 参数 id/product_id 中提取 product_id
+3. 只有 product_fact_ready=true 时才调用在线商品接口并保存抓取时间
+4. 门禁失败、接口返回空或报错 → 要求用户提供详情/SKU/价格/资质截图，构建人工事实卡
 ```
+
+不得依据 `tikhub/references/tools-douyin.json` 的缓存目录判断在线接口可用。该目录仅用于离线发现，线上工具会变化。
 
 ### Step 2：通过 TikHub API + WebFetch 兜底提取商品基础信息
 
-**主路径 — TikHub API（6 个工具覆盖）**：
+**主路径 — TikHub 在线能力门禁通过后按实时目录调用**：
 
 | 工具 | 获取内容 |
 |---|---|
@@ -112,7 +115,7 @@
 - 商品详情图/视频（下载媒体文件）
 - 问大家/常见问题（⚠️ 通常 JS 渲染，WebFetch 可能拿不到）
 
-**最终兜底**：要求用户提供截图或手动输入缺失信息。详细策略见 `references/platforms/douyin-commerce.md` §7。
+**最终兜底**：要求用户提供截图或手动输入缺失信息，并把所有未验证字段放进 `pending_verification`。详细策略见 `references/platforms/douyin-commerce.md` §7。
 
 ### Step 2.1：提取 author_id / sec_user_id
 
@@ -158,8 +161,10 @@
 ```json
 {
   "product_url": "",
-  "captured_at": "",
-  "facts": [
+  "captured_at": "ISO8601",
+  "price_valid_until": null,
+  "sku": [{"name": "", "price": null, "stock": null}],
+  "facts_with_sources": [
     {"fact": "", "source": "", "confidence": "confirmed/inferred/unknown"}
   ],
   "target_audience": [],
@@ -167,9 +172,10 @@
   "selling_points": [],
   "buying_points": [],
   "proof_actions": [],
+  "usable_copy": [],
   "price_and_gifts": [],
   "qualifications": [],
-  "risky_claims": [],
+  "claims_risk": [],
   "pending_verification": [],
   "evidence": []
 }
@@ -213,10 +219,10 @@
 
 ### 第一版做到
 
-- ✅ 输入商品链接 → 输出带证据的利益点分析
+- ✅ 抖音在线商品接口可用，或用户提供完整截图时 → 输出带证据的利益点分析
 - ✅ 输入带货视频链接 → 输出带货结构拆解（4 维 + 电商 5 维）
 - ✅ 基于 ProductFactCard + 对标拆解 → 输出 15/30/60 秒文案和分镜
-- ✅ 根据用户指定类目 → 生成带货对标候选清单
+- ✅ 根据用户指定类目 → 生成公开视频对标候选清单
 - ✅ 报告保存到本地
 
 ### 第一版不承诺
@@ -226,6 +232,8 @@
 - ❌ 自动下载的素材都可以商用
 - ❌ 全自动生成无需人工拍摄的爆款视频
 - ❌ 实时价格/库存监控（那是 trend-radar 的职责）
+- ❌ 本仓库独立完成选品 Top10 或趋势分析（依赖外部 Skill）
+- ❌ 快手/视频号/小红书商品 SKU、价格和评价自动核验
 
 ---
 
@@ -234,10 +242,11 @@
 | 场景 | 处理方式 |
 |---|---|
 | 商品链接打不开 | 要求用户提供截图或手动输入商品信息，不能猜 |
+| 在线能力检查为 degraded/unavailable | 标记“部分（缺商品 API 核验）”，转人工事实卡，不调用已下线工具 |
 | 详情页信息矛盾 | 列出冲突点，不生成文案，等用户澄清 |
 | 没有对标搜索结果 | 让用户手甩 3-5 个对标链接 → 直接进 crack |
 | 商品涉及高风险行业（医疗/金融等） | 在 ProductFactCard 风险清单中标红，建议先跑合规审核 |
-| 用户只给了商品链接没给账号信息 | 先分析商品，再追问账号定位和目标人群 |
+| 用户只给了商品链接没给账号信息 | 先在能力允许或用户补截图后分析商品，再追问账号定位和目标人群 |
 
 ---
 

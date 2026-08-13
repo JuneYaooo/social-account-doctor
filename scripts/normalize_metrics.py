@@ -11,7 +11,7 @@ social-account-doctor: normalize_metrics.py
 不直接调平台 API。caller 自己拿到原始数据后，把 JSON 喂给本脚本做归一化。
 
 用法:
-    normalize_metrics.py <input.json> [--platform douyin/kuaishou/xhs] [--baseline account_id]
+    normalize_metrics.py <input.json> [--platform PLATFORM] [--baseline ACCOUNT_ID]
     normalize_metrics.py --help
 
 输入 JSON 格式:
@@ -38,8 +38,7 @@ social-account-doctor: normalize_metrics.py
 输出 JSON 格式:
     {
       "platform": "douyin",
-      "bucket": "1k-10k",
-      "bucket_median": { "views": ..., "likes": ..., "engagement_rate": ... },
+      "baseline": {"mode": "input-bucket/account", "account_id": null, "buckets": {...}},
       "videos": [
         {
           "video_id": "...",
@@ -77,10 +76,13 @@ def bucket_name(follower_count: int) -> str:
 
 def compute_engagement_rate(v: dict) -> Optional[float]:
     m = v.get("metrics", {})
-    views = m.get("views", 0)
-    if views <= 0:
+    views = m.get("views")
+    if not isinstance(views, (int, float)) or views <= 0:
         return None
-    interactions = m.get("likes", 0) + m.get("comments", 0) + m.get("shares", 0)
+    interactions = sum(
+        value if isinstance(value, (int, float)) else 0
+        for value in (m.get("likes"), m.get("comments"), m.get("shares"))
+    )
     return interactions / views
 
 
@@ -93,12 +95,11 @@ def compute_median(values: list[float]) -> Optional[float]:
 def normalize_video(video: dict, bucket_medians: dict) -> dict:
     m = video.get("metrics", {})
     views = m.get("views", 0)
-    engagements = m.get("likes", 0) + m.get("comments", 0) + m.get("shares", 0)
 
     vs_baseline = {}
 
     median_views = bucket_medians.get("views")
-    if median_views and median_views > 0 and views > 0:
+    if median_views and median_views > 0 and isinstance(views, (int, float)) and views > 0:
         vs_baseline["views_multiple"] = round(views / median_views, 2)
     else:
         vs_baseline["views_multiple"] = None
@@ -150,6 +151,83 @@ def normalize_video(video: dict, bucket_medians: dict) -> dict:
         "vs_baseline": vs_baseline,
         "growth_flags": growth_flags,
         "data_completeness": completeness,
+        "baseline_sample_size": bucket_medians.get("sample_size", 0),
+    }
+
+
+def build_bucket_baselines(videos: list[dict]) -> dict[str, dict]:
+    """Build medians by follower bucket and expose sample size for confidence."""
+    buckets_data: dict[str, list[dict]] = {}
+    for video in videos:
+        follower_count = video.get("follower_count", 0)
+        if not isinstance(follower_count, (int, float)) or follower_count < 0:
+            follower_count = 0
+        buckets_data.setdefault(bucket_name(follower_count), []).append(video)
+
+    baselines = {}
+    for bucket, bucket_videos in buckets_data.items():
+        views_list = [
+            value
+            for video in bucket_videos
+            if isinstance((value := video.get("metrics", {}).get("views")), (int, float)) and value > 0
+        ]
+        engagement_rates = [compute_engagement_rate(video) for video in bucket_videos]
+        engagement_rates = [value for value in engagement_rates if value is not None]
+        baselines[bucket] = {
+            "views": compute_median(views_list),
+            "engagement_rate": compute_median(engagement_rates),
+            "sample_size": len(bucket_videos),
+        }
+    return baselines
+
+
+def normalize_dataset(data: dict, baseline_account_id: Optional[str] = None) -> dict:
+    videos = data.get("videos", [])
+    if baseline_account_id:
+        baseline_videos = [
+            video for video in videos if str(video.get("account_id", "")) == baseline_account_id
+        ]
+        if not baseline_videos:
+            raise ValueError(f"baseline account not found: {baseline_account_id}")
+        baseline_mode = "account"
+    else:
+        baseline_videos = videos
+        baseline_mode = "input-bucket"
+
+    baselines = build_bucket_baselines(baseline_videos)
+    warnings = []
+    for bucket, values in baselines.items():
+        if values["sample_size"] < 3:
+            warnings.append(
+                f"baseline bucket {bucket} only has {values['sample_size']} sample(s); multiples are low confidence"
+            )
+
+    output_videos = []
+    for video in videos:
+        follower_count = video.get("follower_count", 0)
+        bucket = bucket_name(follower_count) if isinstance(follower_count, (int, float)) else "unknown"
+        medians = baselines.get(bucket)
+        if medians is None:
+            medians = {"views": None, "engagement_rate": None, "sample_size": 0}
+            warning = f"no baseline samples for bucket {bucket}"
+            if warning not in warnings:
+                warnings.append(warning)
+        result = normalize_video(video, medians)
+        result["bucket"] = bucket
+        output_videos.append(result)
+
+    output_videos.sort(
+        key=lambda video: video.get("vs_baseline", {}).get("views_multiple") or 0,
+        reverse=True,
+    )
+    return {
+        "videos": output_videos,
+        "baseline": {
+            "mode": baseline_mode,
+            "account_id": baseline_account_id,
+            "buckets": baselines,
+        },
+        "warnings": warnings,
     }
 
 
@@ -164,6 +242,7 @@ def load_input(path: str) -> dict:
 def main():
     args = sys.argv[1:]
     platform_override = None
+    baseline_account_id = None
 
     positional = []
     i = 0
@@ -178,8 +257,15 @@ def main():
         elif arg == "--platform" and i + 1 < len(args):
             platform_override = args[i + 1]
             i += 2
-        elif arg.startswith("--baseline"):
-            i += 2 if arg == "--baseline" else 1
+        elif arg.startswith("--baseline="):
+            baseline_account_id = arg.split("=", 1)[1]
+            i += 1
+        elif arg == "--baseline" and i + 1 < len(args):
+            baseline_account_id = args[i + 1]
+            i += 2
+        elif arg == "--baseline":
+            print(json.dumps({"error": "--baseline requires an account_id"}, ensure_ascii=False))
+            sys.exit(1)
         else:
             positional.append(arg)
             i += 1
@@ -202,35 +288,21 @@ def main():
         print(json.dumps({"error": "empty videos list", "platform": platform}, ensure_ascii=False))
         sys.exit(0)
 
-    buckets_data: dict[str, list[dict]] = {}
-    for v in videos:
-        fc = v.get("follower_count", 0)
-        b = bucket_name(fc)
-        buckets_data.setdefault(b, []).append(v)
+    try:
+        normalized = normalize_dataset(data, baseline_account_id)
+    except ValueError as e:
+        print(json.dumps({"error": str(e), "platform": platform}, ensure_ascii=False))
+        sys.exit(2)
 
-    output_videos = []
-    for b, b_videos in buckets_data.items():
-        views_list = [vv.get("metrics", {}).get("views", 0) for vv in b_videos if vv.get("metrics", {}).get("views", 0) > 0]
-        er_list = [compute_engagement_rate(vv) for vv in b_videos]
-        er_list = [e for e in er_list if e is not None]
-
-        medians = {
-            "views": compute_median(views_list),
-            "engagement_rate": compute_median(er_list),
-        }
-
-        for vv in b_videos:
-            result = normalize_video(vv, medians)
-            result["bucket"] = b
-            output_videos.append(result)
-
-    output_videos.sort(key=lambda v: v.get("vs_baseline", {}).get("views_multiple") or 0, reverse=True)
+    output_videos = normalized["videos"]
 
     print(json.dumps({
         "platform": platform,
         "normalized_at": datetime.now(timezone.utc).isoformat(),
         "total_videos": len(output_videos),
         "buckets": sorted(set(v["bucket"] for v in output_videos)),
+        "baseline": normalized["baseline"],
+        "warnings": normalized["warnings"],
         "videos": output_videos,
     }, ensure_ascii=False, indent=2))
 

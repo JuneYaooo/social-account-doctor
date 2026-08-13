@@ -10,12 +10,19 @@
    cd social-account-doctor
    ```
 
-2. **跑安装脚本**:
+2. **按 agent 宿主跑安装脚本**:
    ```bash
-   bash install_as_skill.sh
+   # Claude Code（默认，兼容旧用法）
+   bash install_as_skill.sh --target claude
+
+   # Codex / Cursor / OpenClaw 三选一
+   bash install_as_skill.sh --target codex
+   bash install_as_skill.sh --target cursor
+   bash install_as_skill.sh --target openclaw
    ```
+   已在虚拟环境中安装依赖或做离线安装时，可追加 `--skip-deps`；正常安装不要跳过。
    脚本会:
-   - 把仓库内容拷贝到 `~/.claude/skills/social-account-doctor/`
+   - 把仓库内容拷贝到对应宿主的 skills 目录
    - 安装 Python 依赖(`pip install -r requirements.txt`)
    - 软链 `tikhub` CLI
    - 交互式引导配置 `.env`
@@ -25,16 +32,22 @@
    | key | 必选? | 用途 | 去哪搞 |
    |---|---|---|---|
    | `TIKHUB_API_KEY` | ✅ 必选 | 抓小红书/抖音/快手/视频号/B 站 数据 | https://tikhub.io/ |
-   | `OPENAI_API_KEY` + `OPENAI_BASE_URL` | ✅ 必选 | 看图 / 看视频的多模态大模型(推荐 Gemini 3.1 Pro,OpenAI 协议兼容中转站都行) | 用户自己的 key 或代理站 |
-   | `SENSEVOICE_API_KEY` 或 `WHISPER_API_KEY` | ⚪ 可选 | 拆"真人口播"视频时做语音转写 | SiliconFlow / OpenAI |
+   | `VIDEO_ANALYSIS_API_KEY` + `VIDEO_ANALYSIS_BASE_URL` | ✅ 必选 | 看图 / 看视频的多模态大模型（OpenAI 兼容协议） | 用户自己的 key 或代理站 |
+   | `AUDIO_TRANSCRIPTION_API_KEY` | ⚪ 可选 | 拆"真人口播"视频时做语音转写 | SiliconFlow / OpenAI 兼容服务 |
 
-   key 写到 `~/.claude/skills/social-account-doctor/.env`(脚本自动创建)。
+   key 写到安装后的 `social-account-doctor/.env`（脚本从 `.env.example` 自动创建）。
 
 4. **确认系统依赖**:
    - Python 3.10+
    - `ffmpeg` —— Linux: `apt install ffmpeg`,macOS: `brew install ffmpeg`
 
-5. **提示用户重启 Claude Code**(或当前 agent 宿主),skill 才会被识别。
+5. **验证电商在线能力**:
+   ```bash
+   python3 <skill目录>/scripts/check_commerce_capabilities.py
+   ```
+   返回 `degraded` 时不是安装失败，而是 TikHub 在线商品工具缺失；commerce 必须改走用户截图/手动事实卡。
+
+6. **提示用户重启当前 agent 宿主**,skill 才会被识别。
 
 ## 装完怎么验证
 
@@ -42,10 +55,10 @@
 
 ## 如果用户已经装过
 
-`install_as_skill.sh` 会检测 `~/.claude/skills/social-account-doctor/` 是否存在并询问是否覆盖。覆盖不会丢 `.env`(脚本会保留)。
+`install_as_skill.sh` 会检测目标 Skill 目录是否存在并询问是否覆盖。覆盖不会丢 `.env`（脚本会保留）。
 
 ## 不要做的事
 
-- ❌ 不要把 key 写到 `~/.claude/skills/social-account-doctor/` 之外的任何 `.env`(skill 只读这一个)
+- ❌ 不要把 key 提交进仓库；写到安装后 Skill 自己的 `.env`
 - ❌ 不要改 `SKILL.md` 的 `name` / `description` frontmatter,那是 agent 识别入口
 - ❌ 不要用 `sudo` 跑安装脚本

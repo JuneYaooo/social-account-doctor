@@ -28,7 +28,8 @@ PLATFORMS_URL = "https://mcp.tikhub.io/platforms"
 SESSION_DIR = Path("/tmp")
 SESSION_TTL_SECONDS = 300  # 5 min — server-side TTL is unknown; refresh proactively
 
-ENV_FILE = Path.home() / ".claude" / ".env"
+SKILL_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+LEGACY_ENV_FILE = Path.home() / ".claude" / ".env"
 ENV_VAR = "TIKHUB_API_KEY"
 
 PROTOCOL_VERSION = "2024-11-05"
@@ -49,12 +50,17 @@ def _debug(msg: str) -> None:
 
 
 def load_api_key() -> str:
-    """Env var TIKHUB_API_KEY wins; fall back to ~/.claude/.env."""
+    """Load the key from the process, installed Skill, then legacy Claude config."""
     key = os.environ.get(ENV_VAR)
     if key:
         return key.strip()
-    if ENV_FILE.is_file():
-        for line in ENV_FILE.read_text().splitlines():
+    configured_file = os.environ.get("TIKHUB_ENV_FILE")
+    candidates = [Path(configured_file).expanduser()] if configured_file else []
+    candidates.extend((SKILL_ENV_FILE, LEGACY_ENV_FILE))
+    for env_file in candidates:
+        if not env_file.is_file():
+            continue
+        for line in env_file.read_text().splitlines():
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
@@ -64,7 +70,7 @@ def load_api_key() -> str:
             if k.strip() == ENV_VAR:
                 return v.strip().strip('"').strip("'")
     raise TikhubError(
-        f"missing {ENV_VAR}. Set env var or add `{ENV_VAR}=...` to {ENV_FILE}"
+        f"missing {ENV_VAR}. Set the env var or add it to {SKILL_ENV_FILE}"
     )
 
 

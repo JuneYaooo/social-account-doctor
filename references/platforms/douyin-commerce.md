@@ -187,9 +187,9 @@
 ├───────────────┬─────────────────┬───────────────────────────┤
 │   数据类型     │   获取方式       │   覆盖范围                 │
 ├───────────────┼─────────────────┼───────────────────────────┤
-│ 商品详情       │ ✅ TikHub API   │ 详情页信息、SKU、评价       │
-│ 商品评价       │ ✅ TikHub API   │ 评分 + 评价列表（分页）      │
-│ 商品优惠券     │ ✅ TikHub API   │ 券后价、满减活动             │
+│ 商品详情       │ ⚠️ 在线探测     │ 工具目录会变化，先跑能力门禁 │
+│ 商品评价       │ ⚠️ 在线探测     │ 评分 + 评价列表（分页）      │
+│ 商品优惠券     │ ⚠️ 在线探测     │ 券后价、满减活动             │
 │ 直播间商品     │ ✅ TikHub API   │ 直播间购物车商品列表         │
 │ 视频数据       │ ✅ TikHub API   │ 视频详情、统计、评论、弹幕   │
 │ 用户/达人数据  │ ✅ TikHub API   │ 用户信息、粉丝画像           │
@@ -214,6 +214,8 @@
 
 #### ⓪ commerce-product（商品事实卡）
 
+先运行 `python3 scripts/check_commerce_capabilities.py`。表中工具只是期望能力，不保证当前在线；门禁失败时不得继续调用缓存里存在但线上已下线的工具。
+
 | 步骤 | TikHub 工具 | 必填参数 | 获取内容 |
 |---|---|---|---|
 | 商品基础信息 | `douyin_web_fetch_product_detail` | `product_id` | 标题、品牌、类目、主图、详情图 |
@@ -224,7 +226,7 @@
 | 详情页兜底 | WebFetch 商品链接 | — | 当 API 缺字段时，直接抓 HTML 补充 |
 | 图片/视频 | WebFetch 下载 | — | 下载商品主图和详情图做视觉分析 |
 
-`product_id` 从商品链接中提取（正则：`/goods/(\d+)` 或 `/product/(\d+)`）；`author_id`/`sec_user_id` 从当前登录态或用户 URL 获取。
+`product_id` 从商品链接的 `/goods/<id>`、`/product/<id>` 或 query 参数 `id`/`product_id` 提取；`author_id`/`sec_user_id` 从当前登录态或用户 URL 获取。无法提取时要求用户提供完整分享链接或截图。
 
 #### ① commerce-find（带货对标）
 
@@ -411,23 +413,26 @@ commerce 模式的设计前提是：**千川数据不可自动获取，但不需
 ### 7.6 调用示例：从商品链接到 ProductFactCard
 
 ```python
-# 1. 从商品链接提取 product_id
+# 1. 先运行 scripts/check_commerce_capabilities.py。
+#    仅当 product_fact_ready=true 时继续；否则要求用户提供截图。
+
+# 2. 从商品链接提取 product_id
 # 链接: https://haohuo.jinritemai.com/views/product/detail?id=3612345678901234567
 product_id = "3612345678901234567"
 
-# 2. 调 TikHub 拿商品详情
+# 3. 按实时工具目录调 TikHub 拿商品详情；不要依据缓存目录直接调用
 detail = tikhub.call("douyin_web_fetch_product_detail", {
     "product_id": product_id,
     "aweme_id": "0",  # 非直播间场景可填 0
 })
 
-# 3. 调 SKU 列表（需要 author_id，从用户主页获取）
+# 4. 调 SKU 列表（需要 author_id，从用户主页获取）
 sku_list = tikhub.call("douyin_web_fetch_product_sku_list", {
     "product_id": product_id,
     "author_id": author_id,
 })
 
-# 4. 调评价数据
+# 5. 调评价数据
 review_score = tikhub.call("douyin_web_fetch_product_review_score", {
     "product_id": product_id,
     "shop_id": shop_id,
@@ -438,7 +443,7 @@ reviews = tikhub.call("douyin_web_fetch_product_review_list", {
     "count": 50,  # 拿 50 条评价做痛点分析
 })
 
-# 5. 组装 ProductFactCard
+# 6. 组装 ProductFactCard 2.0
 fact_card = build_product_fact_card(detail, sku_list, review_score, reviews)
 ```
 
