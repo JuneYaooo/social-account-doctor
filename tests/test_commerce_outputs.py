@@ -24,6 +24,18 @@ def load_script(name):
     return module
 
 
+def test_commerce_skill_keeps_video_links_and_comparative_diagnosis_separate_from_product_links():
+    skill = (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8")
+    workflow = (REPO_ROOT / "references" / "commerce-workflow.md").read_text(encoding="utf-8")
+
+    assert "平台带货视频链接或本地视频" in workflow
+    assert "视频链接与商品链接必须分开处理" in skill
+    assert "3-5 条同类对标" in skill
+    assert "只要求客观拆解时可先完成单条 `crack`" in skill
+    assert "真实调用成功" in skill
+    assert "不解析在线商品页" in skill
+
+
 # --- normalize_metrics.py tests ---
 
 
