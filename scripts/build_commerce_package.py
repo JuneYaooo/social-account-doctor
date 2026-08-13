@@ -20,6 +20,7 @@ from typing import Optional
 
 PACKAGE_VERSION = "2.0.0"
 BLOCK_NAMES = (
+    "商品名称",
     "商品事实",
     "SKU",
     "目标人群",
@@ -39,6 +40,7 @@ BLOCK_NAMES = (
     "CTA 候选",
     "风险标注",
     "待核验",
+    "价格确认时间",
     "价格抓取时间",
 )
 
@@ -161,10 +163,11 @@ def _extract_sku(md: str) -> list[dict]:
 
 def extract_fact_card(md: str) -> dict:
     """Extract the canonical ProductFactCard 2.0 contract."""
+    name_m = re.search(r"商品名称\s*[：:]\s*([^\n]+)", md)
     url_m = re.search(r"商品链接\s*[：:]\s*(https?://\S+)", md)
     if not url_m:
         url_m = re.search(r"(https?://[^\s\)]+(?:item|product|goods|detail)[^\s\)]*)", md)
-    captured_m = re.search(r"抓取时间\s*[：:]\s*([^\n]+)", md)
+    captured_m = re.search(r"(?:资料确认时间|抓取时间)\s*[：:]\s*([^\n]+)", md)
     valid_until_m = re.search(r"价格有效期(?:至)?\s*[：:]\s*([^\n]+)", md)
 
     fact_items = _list_items(extract_section(md, "商品事实"))
@@ -181,6 +184,7 @@ def extract_fact_card(md: str) -> dict:
     )
 
     return {
+        "product_name": name_m.group(1).strip() if name_m else None,
         "product_url": url_m.group(1).rstrip("，,。") if url_m else None,
         "captured_at": captured_m.group(1).strip() if captured_m else None,
         "price_valid_until": valid_until_m.group(1).strip() if valid_until_m else None,
@@ -260,7 +264,7 @@ def extract_risks(md: str) -> dict:
     declared = has_block(md, "风险标注")
     pending = _list_items(extract_section(md, "待核验")) or _inline_risk(md, "待核验")
     forbidden = _list_items(extract_section(md, "禁用表达")) or _inline_risk(md, "禁用表达")
-    time_m = re.search(r"价格抓取时间\s*[：:]\s*([^\n]+)", md)
+    time_m = re.search(r"(?:价格确认时间|价格抓取时间)\s*[：:]\s*([^\n]+)", md)
     return {
         "declared": declared,
         "pending_verification": pending,
@@ -288,10 +292,10 @@ def extract_titles(md: str) -> list[dict]:
 def validate_package(package: dict) -> list[str]:
     errors = []
     fact = package["product_fact"]
-    if not fact["product_url"]:
-        errors.append("ProductFactCard 缺少商品链接")
+    if not fact["product_name"]:
+        errors.append("ProductFactCard 缺少商品名称")
     if not fact["captured_at"]:
-        errors.append("ProductFactCard 缺少抓取时间")
+        errors.append("ProductFactCard 缺少资料确认时间")
     if not fact["facts_with_sources"]:
         errors.append("ProductFactCard 缺少商品事实")
     elif not any(item.get("source") for item in fact["facts_with_sources"]):

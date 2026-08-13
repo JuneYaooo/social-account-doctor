@@ -41,13 +41,7 @@
    - Python 3.10+
    - `ffmpeg` —— Linux: `apt install ffmpeg`,macOS: `brew install ffmpeg`
 
-5. **验证电商在线能力**:
-   ```bash
-   python3 <skill目录>/scripts/check_commerce_capabilities.py
-   ```
-   返回 `degraded` 时不是安装失败，而是 TikHub 在线商品工具缺失；commerce 必须改走用户截图/手动事实卡。
-
-6. **提示用户重启当前 agent 宿主**,skill 才会被识别。
+5. **提示用户重启当前 agent 宿主**,skill 才会被识别。
 
 ## 装完怎么验证
 

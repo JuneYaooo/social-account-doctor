@@ -191,7 +191,6 @@ main() {
     print_info "冒烟测试（可选）："
     print_info "  tikhub --health"
     print_info "  tikhub list xiaohongshu search"
-    print_info "  python3 $SKILL_DIR/scripts/check_commerce_capabilities.py"
     echo ""
 }
 

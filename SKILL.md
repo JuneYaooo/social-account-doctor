@@ -1,6 +1,6 @@
 ---
 name: social-account-doctor
-description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材打底 →) 找对标 → 拆爆款 → 套自己」四命令闭环，含抖音带货电商 Beta（commerce）；其他平台只做通用内容分析，不承诺商品 SKU/价格核验。给我的账号 / 选题方向 / 原始素材（文档/图片/视频）/ 商品链接，吐出"可发的下一条笔记初稿"或"带货视频文案+分镜"。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"、"我有素材帮我写一条能爆的"、"这份文档/这组图/这段视频能出一条爆款吗"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。带货触发词：爆款带货、带货视频、爆品、挂车、商品链接、人群/痛点/卖点/买点、佣金、转化、成交、商品卡、详情页、选品、预爆款、账号适配 — 走 commerce 路由。
+description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材打底 →) 找对标 → 拆爆款 → 套自己」四命令闭环，另支持证据驱动的带货素材审查与脚本生成（commerce）。给我的账号 / 选题方向 / 原始素材（文档/图片/视频），吐出可发初稿；给本地带货视频或商品详情/SKU/资质材料，输出带货拆解、事实卡、口播和分镜。当用户说"找对标"、"拆这条爆款"、"对着这条仿写"、"下一条该写什么"、"我这个号缺爆款选题"、"帮我写一条对标 XX 的笔记"、"我有素材帮我写一条能爆的"、"这份文档/这组图/这段视频能出一条爆款吗"时调用。诊断模式（"为什么不爆"）走 references/diagnostic-mode.md。带货触发词：带货素材、带货视频文件、商品详情截图、SKU 表、商品资质、带货脚本、口播、分镜、商品卡一致性 — 走 commerce 路由。不要因商品链接、选品或趋势请求触发 commerce；本 Skill 不提供在线商品抓取、带货对标搜索、选品或趋势监控。
 ---
 
 # social-account-doctor — 找对标 / 拆爆款 / 套自己
@@ -86,7 +86,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 | "对着这条仿写" / "下一条该怎么写" / "套这条的钩子写一条" | **crack + adapt** |
 | "我想发 XX 主题，有什么参考" / "缺爆款选题" | **find + crack + adapt**（全闭环） |
 | "我有素材帮我写一条能爆的" / "这份文档/这组图/这段视频能出一条爆款吗" / "基于这些材料做一条" | **compose + find + crack + adapt**（素材打底全闭环） |
-| "带货视频怎么拍" / "这个品怎么卖" / "给我写一条带货文案" / "拆这条带货爆款" / "找带货对标" / "商品链接帮我分析" / "选品建议" | **commerce**（带货电商模式，见 §1B） |
+| "分析这个带货视频文件" / "根据商品详情截图写带货脚本" / "检查商品卡一致性" | **commerce**（证据驱动模式，见 §1B） |
 ---
 
 ## 1A. compose 命令 SOP（素材 → 初稿的新入口）
@@ -154,52 +154,36 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 
 ---
 
-## 1B. commerce 命令 SOP（带货电商模式）
+## 1B. commerce 命令 SOP（证据驱动）
 
-> **触发**：用户提到带货/电商相关词（爆款带货、带货视频、爆品、挂车、商品链接、人群/痛点/卖点/买点、佣金、转化、成交、商品卡、详情页、选品、预爆款、账号适配）。
-> **作用**：在现有 find/crack/adapt 闭环上叠加电商维度 — 商品事实核验、利益点拆解、带货文案生成、合规风险标注。
-> **原则**：不重写主流程，保留 compose/find/crack/adapt/diagnostic 全部能力，commerce 是电商模式扩展层。
+> **作用**：只消费用户上传的本地视频、商品详情截图、SKU 表、资质文件和用户明确确认的事实，完成带货素材审查或脚本生成。
+> **不提供**：在线商品链接解析、平台带货视频抓取、自动找对标、选品、趋势监控、GMV/佣金推断。
 
-### commerce 能力边界与门禁
+### commerce 输入门禁
 
-- 商品数据自动核验当前仅支持**抖音电商 Beta**。快手/视频号/小红书只能复用通用 `find/crack/adapt`；除非用户提供详情页、SKU、价格和资质证据，否则不得声称已核验商品事实。
-- 每次 `commerce-product` 前先运行 `python3 scripts/check_commerce_capabilities.py`。只有输出 `product_fact_ready: true` 才走 TikHub 商品接口。
-- 能力检查为 `degraded/unavailable` 时，明确标记交付为`部分（缺商品 API 核验）`，让用户提供商品详情、SKU、价格、活动和资质截图，构建人工事实卡。禁止用缓存工具清单证明在线接口可用。
-- `commerce-selection` 和趋势监控不在本仓库的独立能力内。只有已安装相应外部 Skill 时才能承诺选品 Top10 或趋势分析；否则说明依赖缺失。
+检测到 commerce 请求后，按目标索要材料：
 
-### commerce 路由的强制补充输入
-
-检测到 commerce 触发词后，**必须先向用户索要**以下信息（缺什么问什么，不要跳过）：
-
-| 字段 | 必选/可选 | 说明 |
+| 目标 | 必选输入 | 可选输入 |
 |---|---|---|
-| 平台 | 必选 | 抖音商品核验 Beta；快手/视频号/小红书仅通用内容分析 |
-| 商品链接 | 必选（有商品时） | 详情页链接，用于解析 SKU/价格/规格 |
-| 账号定位 | 必选 | 一句话描述：谁、做什么内容、目标人群 |
-| 目标人群 | 必选 | 年龄段/性别/消费力/核心需求 |
-| 目标指标 | 可选 | 想优化的指标：播放量/点击率/转化率/成交额 |
-| 参考视频 | 可选 | 用户觉得好的带货视频链接 |
-| 达人表达风格 | 可选 | 口语化/专业测评/剧情演绎/对比评测 |
+| 审查现有带货素材 | 本地 `.mp4/.mov` 视频；商品名称 | 商品详情/SKU/资质截图、后台指标 JSON |
+| 生成带货脚本 | 商品名称；至少一份详情/SKU/资质/品牌资料；账号定位；目标人群 | 本地参考视频、表达风格、目标指标 |
 
-如果用户只给了一个商品链接没有其他信息，**先分析商品**，再追问账号定位和目标人群，不要直接脑补。
+- 只有平台视频链接：说明本 Skill 不抓取在线带货视频，请用户下载后上传本地文件。
+- 只有商品链接：说明本 Skill 不解析在线商品页，请用户上传详情页、SKU、价格活动和资质截图。
+- 只有品类词并要求选品/趋势：说明不支持，不生成伪 Top10，也不推荐外部未安装能力。
 
-### commerce 子命令路由
+### commerce 子命令
 
-| 用户说什么 | 走哪个子命令 |
+| 用户说什么 | 路由 |
 |---|---|
-| "这个品怎么拍" / "帮我写一条带货文案" / "根据商品生成脚本" | **commerce-adapt**：商品事实 → 带货文案 + 分镜 |
-| "拆这条带货爆款" / "这条带货视频为什么爆" | **commerce-crack**：4 维 + 电商 5 维拆解 |
-| "找带货对标" / "同类商品有什么爆款视频" | **commerce-find**：商品本质 → 带货对标搜索 |
-| "帮我分析这个商品链接" / "这个品有什么卖点" | **commerce-product**：商品链接 → 事实卡 |
-| "今天该选什么品" / "选品建议" | **commerce-selection**：账号画像 → 选品推荐（依赖外部 commerce-selection-advisor） |
+| "分析这个带货视频文件" / "检查这条素材" | **commerce-review**：本地视频多模态分析 → 4 维钩子 + 电商 5 维 + 风险 |
+| "根据这些商品资料写带货脚本" / "这个品怎么拍" | **commerce-adapt**：用户证据 → ProductFactCard → 文案 + 分镜 |
 
-### commerce-crack：电商维度扩展
+### commerce-review：本地视频审查
 
-在现有 4 维钩子（视觉/文字/口播/剧情）基础上，**追加 5 个电商维度**：
+先运行 `scripts/analyze_video.py <本地视频>`，再追加 5 个电商维度：
 
 ```
-对标：@xxx 的「商品名带货」(Nw 赞 / Nk 评 / Ns)
-
 钩子（4 维拆解）：
 ├ 视觉钩：...
 ├ 文字钩：...
@@ -211,18 +195,17 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 ├ 商品露出：出现时间点 + 露出方式（手持/桌面/对比/使用过程/开箱）
 ├ 利益点顺序：[痛点] → [产品引入] → [卖点1] → [证明动作] → [卖点2] → [CTA]
 ├ 转化链路：兴趣点（第 N 秒）→ 信任点（第 N 秒）→ 行动点（第 N 秒）
-├ 商品卡一致性：视频展示 vs 详情页 品牌/款式/规格/价格是否一致
+├ 商品卡一致性：仅在用户提供详情/SKU 证据时核对；否则写“未核验”
 └ 复刻风险评估：
    ├─ ✅ 可复用：结构/话术/镜头语言
    ├─ ⚠️ 谨慎复用：需授权素材/真人出镜/品牌专属
    └─ ❌ 不可复用：版权内容/虚假宣传/平台违规
 
 内容力：[0-10] 前 3 秒钩子强度
-流量点：[0-10] 引发互动/转发的设计
-转化点：[0-10] 推动下单/点击购物车的设计
+转化点：[0-10] 推动商品卡点击的结构设计（不是实际转化率）
 ```
 
-**评分**：电商 5 维每条 1-5 分。商品露出不清晰（<3 分）= 视频可能被判"商品主体不明确"。
+不得根据公开互动或视频内容推断销量、GMV、佣金、商品点击率和成交转化率。
 
 ### commerce-adapt：强制读取商品事实卡
 
@@ -230,6 +213,8 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 
 ```
 ProductFactCard（adapt 的前置输入）：
+├─ 商品名称（必填）
+├─ 商品链接（可选，仅记录，不自动抓取）
 ├─ 商品事实（3-5 条原子事实，每条有来源）
 ├─ SKU（名称 / 价格 / 库存状态；拿不到就留空并列入待核验）
 ├─ 目标人群（年龄段/性别/需求场景）
@@ -239,7 +224,7 @@ ProductFactCard（adapt 的前置输入）：
 ├─ 证明动作（可拍摄的演示/对比/实验）
 ├─ 可用文案（已核验的事实 → 可直接写的句子）
 ├─ 禁用表达（功效承诺/绝对化用语/价格误导/未授权声称）
-├─ 价格与活动条件（含抓取时间）
+├─ 价格与活动条件（含资料确认时间）
 ├─ 资质与授权状态
 └─ 待核验项（页面打不开/矛盾信息/缺少证据的点）
 ```
@@ -247,9 +232,9 @@ ProductFactCard（adapt 的前置输入）：
 **commerce-adapt 的铁律**（在现有 adapt 铁律基础上追加）：
 - 文案只能引用 ProductFactCard 中**已核验**的事实
 - 没有证据的功效、数量、价格、赠品和效果 → **必须标成 `⚠️ 待核验`**，不得写成确定性文案
-- 每个卖点必须能回指到：详情页截图/资质文件/用户评价/用户提供的资料
-- 价格、库存、赠品、活动期限必须标记抓取时间
-- 如果 ProductFactCard 尚未构建（用户只给了商品链接），**先跑 commerce-product 子流程**，再进 adapt
+- 每个卖点必须能回指到：用户上传的详情页截图/资质文件/品牌资料/用户确认信息
+- 价格、库存、赠品、活动期限必须标记资料确认时间
+- ProductFactCard 证据不足时停止并列出需要补充的材料，不生成确定性脚本
 
 ### commerce-adapt 的输出格式
 
@@ -278,7 +263,7 @@ ProductFactCard（adapt 的前置输入）：
 - [列出所有未核实的事实；没有则写“无”]
 ### 🚫 禁用表达
 - [列出 ProductFactCard 标记的禁用项；没有则写“无”]
-价格抓取时间：[时间戳]
+价格确认时间：[时间戳]
 ```
 
 落盘 JSON 前必须运行 `build_commerce_package.py`。脚本返回 `invalid` 时修复报告或补证据，不得交付旧 JSON；成功包契约版本为 `2.0.0`。
@@ -289,44 +274,16 @@ commerce 模式跑完，落盘到：
 
 ```
 ./reports/
-  commerce-find-{YYYYMMDD-HHMM}.md       # 带货对标搜索结果
-  commerce-crack-{YYYYMMDD-HHMM}.md      # 带货爆款拆解（含电商 5 维）
+  commerce-review-{YYYYMMDD-HHMM}.md     # 本地带货视频审查（含电商 5 维）
   commerce-adapt-{YYYYMMDD-HHMM}.md      # 带货文案+分镜+风险标注
   product-fact-{YYYYMMDD-HHMM}.md        # 商品事实卡
-  selection-top10-{YYYYMMDD-HHMM}.md     # 选品 Top10（依赖外部 advisor）
-```
-
-### commerce 与其他 Skill 的调用关系
-
-commerce 模式在运行时可能调用或建议用户使用其他 Skill：
-
-```
-commerce-find / commerce-crack
-  └─ 本 Skill 独立完成（复用 find/crack 能力 + 电商维度）
-
-commerce-adapt
-  └─ 本 Skill 独立完成（依赖 ProductFactCard）
-  
-commerce-product（商品链接分析）
-  ├─ 抖音且在线能力门禁通过：TikHub + WebFetch 完成基础解析
-  ├─ 门禁失败或其他平台：用户截图/资料 → 人工事实卡
-  └─ 复杂商品建议调用 commerce-product-intelligence Skill
-
-commerce-selection（选品 Top10）
-  └─ 建议调用 commerce-selection-advisor Skill（独立 Skill）
-
-定时监控 / 预爆款提醒
-  └─ 不在此 Skill 范围内 → 调用 commerce-trend-radar Skill
-
-发布前合规审核
-  └─ 建议调用 self-media-compliance-review Skill（电商模式）
 ```
 
 ### commerce 的铁律
-1. **不编商品事实**：详情页打不开时不能猜商品信息；详情页内部矛盾时先列冲突，不直接生成文案
-2. **每个卖点可溯源**：必须能回指到详情页/资质/评价/用户提供的资料
+1. **不编商品事实**：用户没有上传证据就不能猜；材料内部矛盾时先列冲突，不生成文案
+2. **每个卖点可溯源**：必须能回指到用户上传材料的文件名 + 页码/截图/行号
 3. **禁用表达前置**：文案生成前先列出哪些话不能说（功效承诺/绝对化/价格误导）
-4. **价格有时效**：价格、库存、赠品、活动期限必须标记抓取时间
+4. **价格有时效**：价格、库存、赠品、活动期限必须标记资料确认时间
 5. **合规不是可选项**：带货文案必须标注风险项，禁止把"待核验"写成确定性表达
 
 ---
@@ -503,11 +460,9 @@ CTA（命中互动钩子模板）：
   {YYYYMMDD-HHMM}-find-{我的账号末8位}.md      # 5-10 对标 + 为什么是真对标
   {YYYYMMDD-HHMM}-crack-{对标末8位}.md         # 每条 4 行清单
   {YYYYMMDD-HHMM}-adapt-{选题短码}.md          # 标题 + 封面 + 首段 + CTA（compose 模式必须含"素材溯源列"）
-  commerce-find-{YYYYMMDD-HHMM}.md             # commerce 模式：带货对标搜索结果
-  commerce-crack-{YYYYMMDD-HHMM}.md            # commerce 模式：带货爆款拆解（含电商 5 维）
+  commerce-review-{YYYYMMDD-HHMM}.md           # commerce 模式：本地带货视频审查（含电商 5 维）
   commerce-adapt-{YYYYMMDD-HHMM}.md            # commerce 模式：带货文案+分镜+风险标注
   product-fact-{YYYYMMDD-HHMM}.md              # commerce 模式：商品事实卡
-  selection-top10-{YYYYMMDD-HHMM}.md           # commerce 模式：选品 Top10（依赖外部 advisor）
 
 ./assets/                                     # 副产品，跨任务累积
   hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md
@@ -624,11 +579,10 @@ B 站是 16:9 横屏 + 长视频文化，**算法核心信号是三连率（点�
 - `dispatch_account.py <账号URL>`：链接 → platform + user_id
 - `render_report_pdf.py <md> [-o out.pdf] [--keep-html]`：md 报告 → PDF（**按需，不默认**，详见 §5.1）
 - `normalize_metrics.py <input.json> [--platform douyin/kuaishou/xhs] [--baseline account_id]`（commerce 模式）：跨平台指标归一化，输出账号基线倍数和增长异常标记。按粉丝规模分桶（0-1k/1k-10k/10k-100k/100k+），取同类账号中位数做基线
-- `check_commerce_capabilities.py`（commerce 模式）：读取 TikHub 在线工具目录；商品主接口缺失时返回降级状态并要求人工事实卡
 - `build_commerce_package.py <product_fact.md> <adapt_output.md> [--output commerce-package.json]`（commerce 模式）：按 ProductFactCard 2.0 契约校验并打包；关键字段缺失时不写输出文件
 
 ### commerce 参考文件（references/）
-- `references/commerce-workflow.md`：commerce 模式完整工作流、子命令路由规则、与其他 Skill 的调用协议
+- `references/commerce-workflow.md`：commerce 模式输入要求、事实卡构建与本地素材审查流程
 - `references/commerce-metrics.md`：带货视频核心指标（ECPM/点击率/转化率/商品点击率）、各平台带货阈值经验值、内容力/流量点/转化点评分标准
 - `references/product-video-framework.md`：商品展示配方（开箱/对比/使用过程/口播种草/剧情带货）、镜头语言、商品露出时机和方式的最佳实践
 - `references/platforms/douyin-commerce.md`：抖音电商专属规则 — 商品卡规范、千川低质素材避坑、商品三一致要求、禁用表达清单

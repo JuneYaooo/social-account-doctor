@@ -187,6 +187,8 @@ def test_extract_fact_card_from_markdown():
     md = """
 # 商品事实卡
 
+商品名称: 测试玻尿酸精华
+
 商品链接: https://example.com/product/123
 
 抓取时间: 2026-08-10T14:30:00
@@ -218,6 +220,7 @@ def test_extract_fact_card_from_markdown():
 - 详情页未展示成分表完整信息
 """
     result = module.extract_fact_card(md)
+    assert result["product_name"] == "测试玻尿酸精华"
     assert result["product_url"] == "https://example.com/product/123"
     assert result["captured_at"] == "2026-08-10T14:30:00"
     assert len(result["facts_with_sources"]) >= 1
@@ -336,7 +339,7 @@ CTA 候选（2 个）：
 风险标注：
   ⚠️ 待核验：价格；库存
   🚫 禁用表达：全网最低
-  📅 价格抓取时间：2026-08-13T00:00:00Z
+  📅 价格确认时间：2026-08-13T00:00:00Z
 """
     assert module.extract_titles(md)[0]["text"] == "测试标题"
     assert module.extract_scripts(md) == {
@@ -359,6 +362,8 @@ def test_build_full_package(tmp_path):
 
     fact_md.write_text("""
 # 商品事实卡
+
+商品名称: 测试精华
 
 商品链接: https://example.com/product/test
 
@@ -435,7 +440,8 @@ def test_invalid_package_does_not_write_output(tmp_path):
     fact_md = tmp_path / "product_fact.md"
     adapt_md = tmp_path / "adapt_output.md"
     output_json = tmp_path / "commerce-package.json"
-    fact_md.write_text("""商品链接: https://example.com/product/test
+    fact_md.write_text("""商品名称: 测试精华
+商品链接: https://example.com/product/test
 抓取时间: 2026-08-10T14:30:00
 ## 商品事实
 - 产品规格：30ml，来源：详情页
@@ -454,16 +460,25 @@ def test_invalid_package_does_not_write_output(tmp_path):
     assert not output_json.exists()
 
 
-def test_commerce_capability_assessment_detects_removed_detail_tool():
-    module = load_script("check_commerce_capabilities")
-    names = set(module.REQUIRED_TOOLS.values()) | set(module.OPTIONAL_TOOLS.values())
-    names.remove("douyin_web_fetch_product_detail")
-    result = module.assess(names, "test")
-
-    assert result["status"] == "degraded"
-    assert result["product_fact_ready"] is False
-    assert "douyin_web_fetch_product_detail" in result["missing_required_tools"]
-    assert result["fallback"]
+def test_product_url_is_optional_when_user_evidence_is_present():
+    module = load_script("build_commerce_package")
+    card = module.extract_fact_card("""
+商品名称: 测试精华
+资料确认时间: 2026-08-13T00:00:00Z
+## 商品事实
+- 规格为 30ml，来源：用户上传 SKU 截图第 1 行
+""")
+    assert card["product_name"] == "测试精华"
+    assert card["product_url"] is None
+    package = {
+        "product_fact": card,
+        "titles": [{"text": "测试"}],
+        "scripts": {"15s": "a", "30s": "b", "60s": "c"},
+        "storyboard": [{"index": 1}],
+        "ctas": ["去商品卡看看"],
+        "risk_annotations": {"declared": True},
+    }
+    assert module.validate_package(package) == []
 
 
 def test_tikhub_key_can_come_from_explicit_skill_env(tmp_path, monkeypatch):

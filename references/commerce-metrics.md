@@ -18,27 +18,19 @@
 
 📅 **数据采集日期：2026-08 / 建议复核周期：6 个月**。
 
-### 0.1 各指标的数据可获取性
+### 0.1 数据输入要求
 
-以下标注了本文档中每个指标能否通过 TikHub API 自动获取：
+commerce 不自动拉取任何平台或电商后台指标。只有用户提供后台导出 JSON、CSV 或清晰截图时才计算实际指标。
 
-| 指标 | 获取方式 | 说明 |
-|---|---|---|
-| 播放量、点赞、评论、分享、收藏 | ✅ TikHub `fetch_video_statistics` | 批量获取，逗号分隔 aweme_ids |
-| 视频时长 | ✅ TikHub `fetch_one_video` | 视频详情中包含 |
-| 粉丝数 | ✅ TikHub `handler_user_profile` | 用户信息接口 |
-| 商品标题/价格/SKU | ✅ TikHub `fetch_product_detail` + `fetch_product_sku_list` | 需要 product_id |
-| 商品评价/评分 | ✅ TikHub `fetch_product_review_score` + `fetch_product_review_list` | 需要 product_id + shop_id |
-| 5s 完播率 | ❌ 无 API | 仅创作者后台可见，用「高留存互动率」间接推测 |
-| 整体完播率 | ❌ 无 API | 同上，创作者后台数据 |
-| 商品点击率 | ❌ 无 API | 抖店后台/千川后台可见，不可自动获取 |
-| 下单率/成交转化率 | ❌ 无 API | 仅商家后台可见 |
-| GPM/ECPM | ❌ 无 API | 需千川或抖店罗盘，不可自动获取 |
-| 购物车打开率 | ❌ 无 API | 仅创作者后台可见 |
-| 曝光量（非播放量） | ❌ 无 API | 抖音不公开曝光数据 |
-| 佣金比例/实际收入 | ❌ 无 API | 精选联盟选品时可见，无 API |
+| 指标 | 用户需要提供 |
+|---|---|
+| 播放、点赞、评论、分享 | 创作者后台导出或用户整理的 JSON |
+| 5s/整体完播率 | 创作者后台截图或导出 |
+| 商品点击率、购物车打开率 | 抖店/投放后台截图或导出 |
+| 下单率、成交转化率、GPM | 商家后台截图或导出 |
+| 佣金与实际收入 | 用户自己的结算数据 |
 
-> **结论**：内容漏斗的「互动数据」可通过 TikHub 获取，但「转化漏斗」的几乎所有指标都无法自动获取。commerce-crack 依赖公开互动数据做分析，转化指标仅作为理论框架参考。详细策略见 `douyin-commerce.md` §7。
+没有对应后台数据时，只做视频内容结构评分，不用公开互动或行业均值估算转化结果。
 
 ---
 
@@ -155,50 +147,31 @@
 
 ---
 
-## 6. 千川低质素材常见特征（需在 crack/adapt 中规避）
+## 6. 千川低质素材常见特征（需在 review/adapt 中规避）
 
 来源：飞书课程《低质素材避坑指南》+ 抖音电商学习中心。
 
 | 特征 | 判定 | 规避方法 |
 |---|---|---|
 | 商品堆砌式累加 | 一个视频塞 5+ 个不同品 | 一条视频只讲 1 个品 |
-| 品牌/款式/颜色/形状不一致 | 视频展示 A 款，链接是 B 款 | crack 时检查商品卡一致性 |
+| 品牌/款式/颜色/形状不一致 | 视频展示 A 款，链接是 B 款 | review 时检查商品卡一致性 |
 | 口播/画面/详情页规格不一致 | 口播说 500ml，详情页是 300ml | adapt 强制读取 SKU |
 | 卖惨/演戏炒作/清仓话术 | "老板跑路了""血亏清仓" | adapt 禁用表达清单 |
 | 红包/价格/赠品条件不完整 | "买一送一"但没说是送同款还是小样 | adapt 必须标注完整条件 |
 | 图片轮播/大字报/高饱和度 | 无实拍，纯图文拼接 | 分镜必须含实拍建议 |
-| 黑边/遮挡/水印/模糊变形 | 搬运素材特征 | crack 标注素材来源和授权风险 |
+| 黑边/遮挡/水印/模糊变形 | 搬运素材特征 | review 标注素材来源和授权风险 |
 | 商品主体不明确 | 配料表/尺码表替代商品主体 | 分镜提示明确商品在画面中的位置和大小 |
 
 ---
 
-## 7. 公共数据契约
-
-以下对象结构是 `social-account-doctor`（commerce 模式）、`commerce-product-intelligence`、`commerce-trend-radar`、`commerce-selection-advisor`、`self-media-compliance-review` 之间的公共数据契约。
-
-### AccountProfile
-
-```json
-{
-  "platform": "douyin",
-  "account_id": "",
-  "positioning": "一句话定位",
-  "audience": {"age_range": "", "gender": "", "interests": [], "needs": []},
-  "preferred_categories": [],
-  "forbidden_categories": [],
-  "style_traits": ["口语化", "专业测评", "剧情演绎"],
-  "historical_winners": [{"video_id": "", "views": 0, "gmv": 0}],
-  "historical_metrics": {"avg_views": 0, "avg_engagement_rate": 0, "avg_conversion_rate": 0}
-}
-```
-
-### ProductFactCard
+## 7. ProductFactCard 2.0 契约
 
 `build_commerce_package.py` 输出并校验以下 2.0 契约。其他文档不得另定义同名对象。
 
 ```json
 {
-  "product_url": "",
+  "product_name": "",
+  "product_url": null,
   "captured_at": "ISO8601",
   "price_valid_until": null,
   "sku": [{"name": "", "price": 0, "stock": 0}],
@@ -217,41 +190,4 @@
 }
 ```
 
-### TrendSnapshot
-
-```json
-{
-  "platform": "douyin",
-  "account_id": "",
-  "category": "",
-  "video_id": "",
-  "metrics": {"views": 0, "likes": 0, "comments": 0, "shares": 0, "product_clicks": 0, "gmv": 0},
-  "baseline_delta": {"views_vs_baseline": 0, "engagement_vs_baseline": 0},
-  "growth_rate": 0,
-  "paid_traffic_flag": false,
-  "captured_at": "ISO8601",
-  "data_completeness": "full/partial/missing"
-}
-```
-
-### ComplianceReport
-
-```json
-{
-  "platform": "douyin",
-  "content_type": "commerce_video",
-  "rule_version": "douyin-ecommerce-2026-08",
-  "risk_level": "low/medium/high/blocker",
-  "findings": [
-    {
-      "severity": "high",
-      "rule_id": "",
-      "evidence": "",
-      "reason": "",
-      "fix": ""
-    }
-  ],
-  "pending_verification": [],
-  "remediation": []
-}
-```
+`product_name`、`captured_at` 和至少一条带来源的事实是必填项。`product_url` 仅作记录，可为 `null`。
