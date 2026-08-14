@@ -72,10 +72,13 @@ body {
 }
 h1 { font-size: 22pt; border-bottom: 3px solid #d4145a; padding-bottom: 8px; }
 h1 small { font-size: 13pt; color: #666; font-weight: normal; }
-h2 { font-size: 15pt; color: #d4145a; margin-top: 28px; border-left: 5px solid #d4145a; padding-left: 10px; }
-h3 { font-size: 12pt; margin-bottom: 4px; color: #333; }
+h2 { font-size: 15pt; color: #d4145a; margin-top: 28px; border-left: 5px solid #d4145a;
+     padding-left: 10px; break-after: avoid-page; page-break-after: avoid; }
+h3 { font-size: 12pt; margin-bottom: 4px; color: #333;
+     break-after: avoid-page; page-break-after: avoid; }
 blockquote { border-left: 4px solid #aaa; padding: 6px 12px; background: #f6f6f6; color: #555; margin: 8px 0; font-size: 10pt; }
-table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 10pt; }
+table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 10pt;
+        break-inside: avoid; page-break-inside: avoid; }
 th, td { border: 1px solid #d0d0d0; padding: 6px 9px; text-align: left; vertical-align: top; }
 th { background: #fef2f5; font-weight: 600; }
 code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px;
@@ -110,8 +113,9 @@ img { max-width: 100%; }
 .card-table td { font-size: 9.5pt; }
 
 /* Inline image triplets (e.g. cover/page2/page3 of a note) */
-.user-img { display: inline-block; width: 32%; margin: 4px 0.5%;
-            vertical-align: top; text-align: center; }
+.user-img { display: inline-block; width: 31%; margin: 4px 0.6%;
+            vertical-align: top; text-align: center; break-inside: avoid;
+            page-break-inside: avoid; }
 .user-img img { width: 100%; border: 1px solid #ddd; border-radius: 4px; }
 .user-img .caption { font-size: 9pt; color: #666; margin-top: 4px; line-height: 1.3; }
 

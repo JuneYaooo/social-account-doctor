@@ -382,11 +382,18 @@ def cut_segments(video_path: str, workdir: Path, total_dur: float, seg_seconds: 
     return segments
 
 
-def call_visual_segment(seg: dict, total_segs: int) -> dict:
+def call_visual_segment(seg: dict, total_segs: int, transcript_hint: str = "") -> dict:
     user_prompt = VISUAL_SEGMENT_USER.format(
         seg_index=seg["index"], seg_total=total_segs,
         seg_dur=int(seg["duration"]), start=int(seg["start"]), end=int(seg["end"]),
     )
+    if transcript_hint.strip():
+        user_prompt += (
+            "\n\n下面是该视频音轨的自动转写，可能有少量错字，但必须作为内容品类锚点：\n"
+            f'"""\n{transcript_hint.strip()[:3000]}\n"""\n'
+            "画面判断必须与可见视频和这段转写相互校验。若不能确认某个文字、人物、产品或动作，"
+            "请写未观察到，不得套用与转写品类无关的通用案例。"
+        )
     user_content = [{"type": "text", "text": user_prompt}]
     if use_video_url_payload(seg["path"]):
         b64 = b64_file(seg["path"])
@@ -423,6 +430,77 @@ def call_visual_segment(seg: dict, total_segs: int) -> dict:
     if "error" in result:
         result["segment_index"] = seg["index"]
     return result
+
+
+DOMAIN_TERMS = {
+    "food": {
+        "吃", "零食", "花生", "水果", "蛋糕", "甜", "脆", "香", "口感",
+        "果肉", "豆腐", "芒果", "配料", "包装", "早餐", "追剧",
+    },
+    "parenting": {
+        "宝宝", "孩子", "母婴", "宝妈", "妈妈", "婴儿", "玩具", "餐椅",
+        "口欲", "学爬", "安抚", "喂饭", "手部", "误吞",
+    },
+    "tech": {
+        "AI", "APP", "手机", "效率", "打工人", "加班", "PPT", "工具",
+        "流量", "职场", "录屏", "软件", "技巧",
+    },
+}
+
+
+def _matched_terms(text: str, terms: set[str]) -> list[str]:
+    lowered = text.lower()
+    return sorted(term for term in terms if term.lower() in lowered)
+
+
+def assess_cross_modal_consistency(transcript: str, visual_result: dict) -> dict:
+    """Reject obvious domain-swapped visual hallucinations before synthesis."""
+    transcript = (transcript or "").strip()
+    if len(transcript) < 20:
+        return {
+            "status": "insufficient_transcript",
+            "transcript_domain": "unknown",
+            "conflict_terms": [],
+        }
+
+    visual_text = json.dumps(visual_result, ensure_ascii=False)
+    transcript_hits = {
+        domain: _matched_terms(transcript, terms)
+        for domain, terms in DOMAIN_TERMS.items()
+    }
+    visual_hits = {
+        domain: _matched_terms(visual_text, terms)
+        for domain, terms in DOMAIN_TERMS.items()
+    }
+    transcript_domain = max(
+        transcript_hits,
+        key=lambda domain: len(transcript_hits[domain]),
+    )
+    if not transcript_hits[transcript_domain]:
+        transcript_domain = "unknown"
+
+    conflicting_domains = []
+    if transcript_domain in {"food", "parenting"}:
+        if len(visual_hits["tech"]) >= 2 and not transcript_hits["tech"]:
+            conflicting_domains.append("tech")
+    elif transcript_domain == "tech":
+        for domain in ("food", "parenting"):
+            if len(visual_hits[domain]) >= 2 and not transcript_hits[domain]:
+                conflicting_domains.append(domain)
+
+    conflict_terms = sorted(
+        {
+            term
+            for domain in conflicting_domains
+            for term in visual_hits[domain]
+        }
+    )
+    return {
+        "status": "conflict" if conflict_terms else "consistent",
+        "transcript_domain": transcript_domain,
+        "transcript_anchor_terms": transcript_hits.get(transcript_domain, []),
+        "conflict_terms": conflict_terms,
+    }
 
 
 # ============ 关键帧抽取（keyframe mode） ============
@@ -666,9 +744,8 @@ def detect_content_type(video_path: str, workdir: Path, total_dur: float) -> dic
 
 def run_visual_mode(video_path: str, workdir: Path, total_dur: float) -> dict:
     segments = cut_segments(video_path, workdir, total_dur, SEGMENT_SECONDS_VISUAL)
-    visual_results = [call_visual_segment(s, len(segments)) for s in segments]
 
-    # ASR 可选
+    # ASR 可选。先转写，再把内容品类作为视觉分析锚点，避免模型套用无关模板。
     transcript = {"skipped": True, "reason": "visual mode skips ASR by default"}
     audio_chunks = []
     if os.environ.get("AUDIO_TRANSCRIPTION_API_KEY"):
@@ -678,6 +755,23 @@ def run_visual_mode(video_path: str, workdir: Path, total_dur: float) -> dict:
             transcript = call_sensevoice(audio_chunks)
         except Exception as e:
             transcript = {"error": str(e)}
+
+    transcript_hint = transcript.get("full_text", "") if isinstance(transcript, dict) else ""
+    visual_results = [
+        call_visual_segment(s, len(segments), transcript_hint=transcript_hint)
+        for s in segments
+    ]
+    consistency = [
+        assess_cross_modal_consistency(transcript_hint, result)
+        for result in visual_results
+    ]
+    for result, assessment in zip(visual_results, consistency):
+        result["cross_modal_consistency"] = assessment
+    visual_grounding_status = (
+        "rejected_cross_modal_conflict"
+        if any(item["status"] == "conflict" for item in consistency)
+        else "accepted"
+    )
 
     key_moments = []
     for v in visual_results:
@@ -701,6 +795,7 @@ def run_visual_mode(video_path: str, workdir: Path, total_dur: float) -> dict:
         "segments": [{"index": s["index"], "start": s["start"], "end": s["end"]}
                      for s in segments],
         "visual_analysis": visual_results,
+        "visual_grounding_status": visual_grounding_status,
         "transcript": transcript,
         "key_moments": key_moments,
     }
