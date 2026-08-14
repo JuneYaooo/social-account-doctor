@@ -87,6 +87,25 @@ def test_sanitize_preserves_image_source_while_hiding_visible_paths():
     assert "/Users/" not in sanitized
 
 
+def test_sanitize_removes_client_preface_but_preserves_conclusion_quote():
+    module = load_script()
+    markdown = """# 蜂巢小蛋糕爆款视频拆解
+
+> 基于 26.53 秒原视频逐段复核。本报告分析的是内容机制，不把播放、销量或结算金额归因于这条视频。
+
+## 一页结论
+
+> 一句话结论：视觉证明强，购买收口弱。
+"""
+
+    sanitized = module.sanitize_markdown_for_export(markdown)
+
+    assert "基于 26.53 秒原视频" not in sanitized
+    assert "本报告分析的是内容机制" not in sanitized
+    assert "## 一页结论" in sanitized
+    assert "一句话结论：视觉证明强，购买收口弱" in sanitized
+
+
 def test_sanitize_removes_internal_sections_and_command_blocks():
     module = load_script()
     markdown = """# 爆款拆解

@@ -195,6 +195,46 @@ INTERNAL_SECTION_TITLES = {
 }
 
 
+CLIENT_PREFACE_PATTERNS = (
+    r"基于.{0,80}(?:原视频|素材).{0,80}(?:复核|分析)",
+    r"本报告(?:分析|仅)",
+    r"(?:播放|销量|结算金额).{0,40}(?:归因|验证)",
+    r"不能替代(?:检测|专业)",
+    r"分析完整度",
+)
+
+
+def strip_client_preface(markdown: str) -> str:
+    """Drop methodology/disclaimer copy placed between the title and report."""
+    lines = markdown.splitlines()
+    title_index = next(
+        (index for index, line in enumerate(lines) if re.match(r"^#\s+", line)),
+        None,
+    )
+    if title_index is None:
+        return markdown
+
+    start = title_index + 1
+    while start < len(lines) and not lines[start].strip():
+        start += 1
+    if start >= len(lines) or not lines[start].lstrip().startswith(">"):
+        return markdown
+
+    end = start
+    quote_lines: list[str] = []
+    while end < len(lines) and lines[end].lstrip().startswith(">"):
+        quote_lines.append(lines[end].lstrip()[1:].strip())
+        end += 1
+    quote = " ".join(quote_lines)
+    if not any(re.search(pattern, quote) for pattern in CLIENT_PREFACE_PATTERNS):
+        return markdown
+
+    while end < len(lines) and not lines[end].strip():
+        end += 1
+    del lines[start:end]
+    return "\n".join(lines).strip() + "\n"
+
+
 def strip_internal_sections(markdown: str) -> str:
     """Remove operator-only sections and command blocks from client reports."""
     lines = markdown.splitlines()
@@ -254,7 +294,7 @@ def sanitize_markdown_for_export(markdown: str) -> str:
         return f"REPORTIMAGEPLACEHOLDER{len(image_markup) - 1}"
 
     repo_root = Path(__file__).resolve().parents[1].as_posix().rstrip("/") + "/"
-    text = strip_internal_sections(markdown)
+    text = strip_client_preface(strip_internal_sections(markdown))
     text = re.sub(r"!\[[^\]]*\]\([^\n)]+\)", protect_image, text)
     text = re.sub(r"<img\b[^>]*>", protect_image, text, flags=re.I)
     text = text.replace(repo_root, "")
