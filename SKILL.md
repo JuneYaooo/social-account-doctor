@@ -512,11 +512,19 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 脚本特性：
 - A4 + 思源黑体 (CJK 必装 Source Han Sans SC) + 粉色诊断主题
 - md 中本地图片 `![](path)` 自动 base64 内嵌（PDF 自包含，可单文件传播）
+- 结构化 fallback 同样支持本地关键帧画廊；同一段连续放 1-3 张 Markdown 图片时自动横向排版并保留图片 alt 作为图注
 - 富排版（卡片式 top N 对标 / TL;DR 红框 / 三图横排）需在 md 里**直接写 inline HTML**，CSS 已经准备好对应 class：
   - `<div class="tldr"><div class="verdict">...</div>...</div>` — TL;DR 高亮框
   - `<div class="card"><div class="card-img"><img/></div><div class="card-body">...</div></div>` — 对标卡片
   - `<div class="user-img"><img/><div class="caption">...</div></div>` — 三图横排
 - 想保留中间 HTML 自己改样式：加 `--keep-html`
+
+**客户版 PDF 内容铁律**：
+- PDF 是分析交付，不是运行日志。不得出现执行命令、脚本/API/模型名、绝对路径、JSON/TXT 文件名、临时目录、技术状态码或“素材证据包”。
+- 单条视频至少选 4-6 张覆盖开头、中段和结尾的关键帧。每张图注必须写“时间点 + 画面任务”，并在相邻正文说明它服务于钩子、卖点、证明、场景还是 CTA；不能只堆截图。
+- 默认结构：一页结论 → 关键画面链 → 节拍/文案逻辑 → 流量逻辑 → 转化逻辑 → 可复刻路径 → 风险与单变量实验。
+- 默认不放完整逐字稿，只摘与结构判断相关的关键句。用户明确要逐字稿时再放附录。
+- 技术证据和产物路径留在内部 `.md`/运行目录；PDF 只呈现用户做内容决策所需的信息。
 
 **何时主动询问 PDF**：用户说「分享给客户」「打印」「存档」「发出去」等需要可携带版本的语义时，可以**主动问一句**「要不要顺便出一份 PDF？」 — 不要不问就出。
 

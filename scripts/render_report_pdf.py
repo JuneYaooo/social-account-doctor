@@ -184,10 +184,80 @@ def markdown_to_plain_text(markdown: str) -> str:
     return text.strip() + "\n"
 
 
+INTERNAL_SECTION_TITLES = {
+    "素材证据包",
+    "执行记录",
+    "运行记录",
+    "运行说明",
+    "技术说明",
+    "产物路径",
+    "调试信息",
+}
+
+
+def strip_internal_sections(markdown: str) -> str:
+    """Remove operator-only sections and command blocks from client reports."""
+    lines = markdown.splitlines()
+    kept: list[str] = []
+    skipped_heading_level: int | None = None
+    in_fence = False
+    fence_lines: list[str] = []
+
+    def flush_fence() -> None:
+        nonlocal fence_lines
+        content = "\n".join(fence_lines)
+        is_command = any(
+            re.match(r"^\s*(?:\$\s*)?(?:python3?|tikhub|ffmpeg|curl|wget|pip3?|bash|sh)\b", line)
+            for line in fence_lines[1:-1]
+        )
+        if not is_command:
+            kept.extend(fence_lines)
+        fence_lines = []
+
+    for line in lines:
+        if line.lstrip().startswith("```"):
+            if in_fence:
+                fence_lines.append(line)
+                flush_fence()
+                in_fence = False
+            else:
+                in_fence = True
+                fence_lines = [line]
+            continue
+        if in_fence:
+            fence_lines.append(line)
+            continue
+
+        heading = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
+        if heading:
+            level = len(heading.group(1))
+            title = re.sub(r"[*_`]", "", heading.group(2)).strip()
+            if skipped_heading_level is not None and level <= skipped_heading_level:
+                skipped_heading_level = None
+            if title in INTERNAL_SECTION_TITLES:
+                skipped_heading_level = level
+                continue
+        if skipped_heading_level is None:
+            kept.append(line)
+
+    if fence_lines:
+        flush_fence()
+    return "\n".join(kept).strip() + "\n"
+
+
 def sanitize_markdown_for_export(markdown: str) -> str:
     """Remove machine-specific absolute paths from portable reports."""
+    image_markup: list[str] = []
+
+    def protect_image(match: re.Match[str]) -> str:
+        image_markup.append(match.group(0))
+        return f"REPORTIMAGEPLACEHOLDER{len(image_markup) - 1}"
+
     repo_root = Path(__file__).resolve().parents[1].as_posix().rstrip("/") + "/"
-    text = markdown.replace(repo_root, "")
+    text = strip_internal_sections(markdown)
+    text = re.sub(r"!\[[^\]]*\]\([^\n)]+\)", protect_image, text)
+    text = re.sub(r"<img\b[^>]*>", protect_image, text, flags=re.I)
+    text = text.replace(repo_root, "")
     text = re.sub(r"/Users/[^/\s]+/code/data/tmp/baokuan/", "本地素材/", text)
     text = re.sub(r"output/video_distillation/[^/\s`]+/", "本次蒸馏产物/", text)
     text = re.sub(r"/tmp/", "临时产物/", text)
@@ -222,6 +292,8 @@ def sanitize_markdown_for_export(markdown: str) -> str:
     text = text.replace("`multimodal_status: limited`", "分析完整度：实际视频已取得，部分模型能力受限")
     text = text.replace("`ffprobe + 本地 ASR + 关键帧 + 逐帧视觉复核`", "媒体信息、音频转写、关键画面和逐帧视觉复核")
     text = text.replace("`V3_keyframe_ready`", "关键画面与转写已完成")
+    for index, markup in enumerate(image_markup):
+        text = text.replace(f"REPORTIMAGEPLACEHOLDER{index}", markup)
     return text
 
 
@@ -280,7 +352,90 @@ def _display_weight(value: str) -> int:
     return sum(2 if ord(char) > 127 else 1 for char in value)
 
 
-def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
+def _inline_images(token) -> list[tuple[str, str]]:
+    images = []
+    for child in getattr(token, "children", None) or []:
+        if child.type != "image":
+            continue
+        src = child.attrGet("src") or ""
+        if src:
+            images.append((src, child.content.strip() or "关键画面"))
+    return images
+
+
+def _resolve_image_path(src: str, base_dir: Path | None) -> Path | None:
+    if src.startswith(("http://", "https://", "data:")):
+        return None
+    candidate = Path(src) if src.startswith("/") else (base_dir or Path.cwd()) / src
+    candidate = candidate.resolve()
+    return candidate if candidate.is_file() else None
+
+
+def render_image_gallery(
+    pdf: ReportPDF,
+    images: list[tuple[str, str]],
+    base_dir: Path | None,
+) -> None:
+    """Render local keyframes in rows of up to three with concise captions."""
+    gap = 4.0
+    image_height = 62.0
+    caption_height = 13.0
+    block_height = image_height + caption_height + 5.0
+
+    for start in range(0, len(images), 3):
+        group = images[start:start + 3]
+        if pdf.get_y() + block_height > pdf.h - pdf.b_margin:
+            pdf.add_page()
+        count = len(group)
+        cell_width = (pdf.epw - gap * (count - 1)) / count
+        row_width = cell_width * count + gap * (count - 1)
+        row_x = pdf.l_margin + (pdf.epw - row_width) / 2
+        row_y = pdf.get_y()
+
+        for offset, (src, caption) in enumerate(group):
+            cell_x = row_x + offset * (cell_width + gap)
+            image_path = _resolve_image_path(src, base_dir)
+            pdf.set_fill_color(246, 246, 246)
+            pdf.rect(cell_x, row_y, cell_width, image_height, style="F")
+            if image_path:
+                pdf.image(
+                    image_path,
+                    x=cell_x + 1,
+                    y=row_y + 1,
+                    w=cell_width - 2,
+                    h=image_height - 2,
+                    keep_aspect_ratio=True,
+                    alt_text=caption,
+                )
+            else:
+                pdf.set_xy(cell_x + 2, row_y + image_height / 2 - 3)
+                pdf.set_font("ReportCJK", size=8.5)
+                pdf.set_text_color(125, 125, 125)
+                pdf.multi_cell(cell_width - 4, 5, "画面未随报告提供", align="C")
+
+            pdf.set_xy(cell_x, row_y + image_height + 1.5)
+            pdf.set_font("ReportCJK", size=8.3)
+            pdf.set_text_color(75, 75, 75)
+            pdf.multi_cell(
+                cell_width,
+                4.2,
+                caption[:48],
+                align="C",
+                wrapmode="CHAR",
+                max_line_height=4.2,
+            )
+
+        pdf.set_y(row_y + block_height)
+        pdf.set_x(pdf.l_margin)
+        pdf.set_font("ReportCJK", size=10)
+        pdf.set_text_color(35, 35, 35)
+
+
+def render_with_fpdf(
+    markdown: str,
+    pdf_path: Path,
+    base_dir: Path | None = None,
+) -> Path:
     """Render structured Markdown with embedded CJK fonts and A4 layout."""
     if FPDF is None or FontFace is None:
         raise RuntimeError("fpdf2 not installed")
@@ -303,7 +458,7 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
     pdf.set_title(title)
     pdf.set_author("social-account-doctor")
     pdf.add_page()
-    pdf.set_font("ReportCJK", size=10.5)
+    pdf.set_font("ReportCJK", size=10)
     pdf.set_text_color(35, 35, 35)
 
     index = 0
@@ -325,7 +480,7 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
                 pdf.line(pdf.l_margin, pdf.get_y() + 1, pdf.w - pdf.r_margin, pdf.get_y() + 1)
                 pdf.ln(3)
             pdf.set_text_color(35, 35, 35)
-            pdf.set_font("ReportCJK", size=10.5)
+            pdf.set_font("ReportCJK", size=10)
             index += 3
             continue
 
@@ -340,7 +495,7 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
             pdf.set_text_color(85, 85, 85)
             pdf.set_x(pdf.l_margin)
             pdf.multi_cell(
-                0, 6, "\n".join(parts), align="L", fill=True,
+                0, 5.7, "\n".join(parts), align="L", fill=True,
                 padding=3, wrapmode="CHAR",
             )
             pdf.set_text_color(35, 35, 35)
@@ -384,7 +539,7 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
                     width=pdf.epw,
                 ):
                     pass
-                pdf.set_font("ReportCJK", size=10.5)
+                pdf.set_font("ReportCJK", size=10)
                 pdf.set_x(pdf.l_margin)
                 pdf.ln(2)
             index += 1
@@ -400,7 +555,7 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
                     prefix = f"{list_index}. " if ordered else "• "
                     pdf.set_x(pdf.l_margin + 3)
                     pdf.multi_cell(
-                        pdf.epw - 3, 6, prefix + _inline_text(tokens[index]),
+                        pdf.epw - 3, 5.7, prefix + _inline_text(tokens[index]),
                         align="L", wrapmode="CHAR",
                     )
                     if ordered:
@@ -411,12 +566,18 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
             continue
 
         if token.type == "paragraph_open" and index + 1 < len(tokens):
-            content = _inline_text(tokens[index + 1])
+            inline_token = tokens[index + 1]
+            images = _inline_images(inline_token)
+            if images:
+                render_image_gallery(pdf, images, base_dir)
+                index += 3
+                continue
+            content = _inline_text(inline_token)
             if content:
-                pdf.set_font("ReportCJK", size=10.5)
+                pdf.set_font("ReportCJK", size=10)
                 pdf.set_x(pdf.l_margin)
-                pdf.multi_cell(0, 6.2, content, align="L", wrapmode="CHAR")
-                pdf.ln(1.5)
+                pdf.multi_cell(0, 5.9, content, align="L", wrapmode="CHAR")
+                pdf.ln(1.2)
             index += 3
             continue
 
@@ -428,7 +589,7 @@ def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
                 0, 5.5, token.content.rstrip(), align="L", fill=True,
                 padding=3, wrapmode="CHAR",
             )
-            pdf.set_font("ReportCJK", size=10.5)
+            pdf.set_font("ReportCJK", size=10)
             pdf.ln(2)
             index += 1
             continue
@@ -461,7 +622,12 @@ def render_with_cupsfilter(markdown: str, pdf_path: Path) -> Path:
             check=False,
         )
         if proc.returncode != 0 or not proc.stdout.startswith(b"%PDF"):
-            detail = (proc.stderr or b"").decode("utf-8", errors="replace")[-1000:]
+            stderr = proc.stderr or b""
+            detail = (
+                stderr.decode("utf-8", errors="replace")
+                if isinstance(stderr, bytes)
+                else str(stderr)
+            )[-1000:]
             raise RuntimeError(f"cupsfilter failed: {detail}")
         pdf_path.write_bytes(proc.stdout)
     return pdf_path
@@ -523,7 +689,7 @@ def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
 
     fallback_errors = []
     try:
-        result = render_with_fpdf(md_text, pdf_path)
+        result = render_with_fpdf(md_text, pdf_path, base_dir=base_dir)
         print(
             "WARNING: Chrome/Chromium PDF rendering was unavailable; "
             "used structured fpdf2 fallback.",

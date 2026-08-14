@@ -76,6 +76,47 @@ def test_sanitize_markdown_for_export_removes_machine_paths():
     assert "Whisper" not in report_fragment
 
 
+def test_sanitize_preserves_image_source_while_hiding_visible_paths():
+    module = load_script()
+    source = "../output/video_distillation/run/03_keyframes/frame.jpg"
+    markdown = f"![0.6 秒：钩子画面]({source})\n\n素材路径：`/Users/name/video.mp4`"
+
+    sanitized = module.sanitize_markdown_for_export(markdown)
+
+    assert f"![0.6 秒：钩子画面]({source})" in sanitized
+    assert "/Users/" not in sanitized
+
+
+def test_sanitize_removes_internal_sections_and_command_blocks():
+    module = load_script()
+    markdown = """# 爆款拆解
+
+## 素材证据包
+
+- 文件：`/Users/name/video.mp4`
+
+## 流量逻辑
+
+先用结果画面建立期待。
+
+```bash
+python3 scripts/analyze_video.py ./video.mp4
+```
+
+```text
+结果画面 → 差异证明 → 使用场景
+```
+"""
+
+    sanitized = module.sanitize_markdown_for_export(markdown)
+
+    assert "素材证据包" not in sanitized
+    assert "文件：" not in sanitized
+    assert "python3" not in sanitized
+    assert "流量逻辑" in sanitized
+    assert "结果画面 → 差异证明 → 使用场景" in sanitized
+
+
 def test_render_with_fpdf_produces_structured_cjk_pdf(tmp_path):
     module = load_script()
     if module.FPDF is None or not module.find_cjk_font():
@@ -114,6 +155,27 @@ def test_render_with_fpdf_produces_structured_cjk_pdf(tmp_path):
         assert "零食糕点" in extracted
 
 
+def test_render_with_fpdf_embeds_keyframe_gallery(tmp_path):
+    module = load_script()
+    if module.FPDF is None or not module.find_cjk_font():
+        pytest.skip("fpdf2 or a CJK font is unavailable")
+
+    from PIL import Image
+
+    frame = tmp_path / "frame.jpg"
+    Image.new("RGB", (360, 640), color=(210, 48, 92)).save(frame)
+    output = tmp_path / "gallery.pdf"
+    module.render_with_fpdf(
+        "# 画面拆解\n\n![0-3 秒：结果画面](frame.jpg)\n",
+        output,
+        base_dir=tmp_path,
+    )
+
+    content = output.read_bytes()
+    assert content.startswith(b"%PDF")
+    assert b"/Subtype /Image" in content
+
+
 def test_render_does_not_accept_stale_pdf_after_browser_failure(tmp_path, monkeypatch):
     module = load_script()
     markdown = tmp_path / "report.md"
@@ -128,8 +190,9 @@ def test_render_does_not_accept_stale_pdf_after_browser_failure(tmp_path, monkey
         lambda *args, **kwargs: SimpleNamespace(returncode=1, stdout="", stderr="browser failed"),
     )
 
-    def fake_fpdf(markdown_text, pdf_path):
+    def fake_fpdf(markdown_text, pdf_path, base_dir=None):
         assert not pdf_path.exists()
+        assert base_dir == tmp_path
         pdf_path.write_bytes(b"%PDF-new-structured-output")
         return pdf_path
 
