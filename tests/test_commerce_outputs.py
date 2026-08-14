@@ -36,6 +36,42 @@ def test_commerce_skill_keeps_video_links_and_comparative_diagnosis_separate_fro
     assert "不解析在线商品页" in skill
 
 
+def test_commerce_analysis_template_preserves_evidence_and_adds_operator_outputs():
+    template = (REPO_ROOT / "references" / "commerce-analysis-template.md").read_text(
+        encoding="utf-8"
+    )
+    skill = (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+    for required in (
+        "结果概览卡",
+        "原文与节拍映射",
+        "流量点",
+        "转化点",
+        "复刻框架卡",
+        "食品/糕点",
+        "母婴/儿童用品",
+        "账号相对赢家",
+        "继续保持",
+        "从对标补齐",
+        "不要照抄",
+    ):
+        assert required in template
+    assert "references/commerce-analysis-template.md" in skill
+
+
+def test_generic_account_diagnosis_synthesizes_repeatable_patterns_from_top_and_bottom():
+    diagnostic = (REPO_ROOT / "references" / "diagnostic-mode.md").read_text(
+        encoding="utf-8"
+    )
+    skill = (REPO_ROOT / "SKILL.md").read_text(encoding="utf-8")
+
+    assert "账号相对赢家指数" in diagnostic
+    assert "跨样本公式综合" in diagnostic
+    assert "我方 bottom 命中" in diagnostic
+    assert "单条假设" in diagnostic
+    assert "至少在 2 条赢家中重复" in skill
+
+
 # --- normalize_metrics.py tests ---
 
 
