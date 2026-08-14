@@ -32,7 +32,8 @@ CARD-STYLE TOP-N OBJECTS
 
 REQUIREMENTS
     - python: markdown-it-py
-    - system: google-chrome (headless mode)
+    - preferred system: Chrome/Chromium (headless mode)
+    - macOS fallback: cupsfilter (text-first A4 PDF, no extra dependency)
     - fonts:  Source Han Sans SC (思源黑体) installed system-wide for CJK
 """
 from __future__ import annotations
@@ -40,9 +41,12 @@ from __future__ import annotations
 import argparse
 import base64
 import mimetypes
+import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 try:
@@ -122,6 +126,77 @@ def embed_image(src: str, base_dir: Path) -> str:
     return f"data:{mime};base64,{data}"
 
 
+def find_chrome() -> str | None:
+    """Find a browser executable without assuming the Linux command name."""
+    configured = os.environ.get("CHROME_BIN", "").strip()
+    candidates = [configured] if configured else []
+    candidates.extend(
+        [
+            "google-chrome",
+            "google-chrome-stable",
+            "chromium",
+            "chromium-browser",
+            "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+            "/Applications/Chromium.app/Contents/MacOS/Chromium",
+        ]
+    )
+    for candidate in candidates:
+        if not candidate:
+            continue
+        resolved = shutil.which(candidate) or candidate
+        if Path(resolved).is_file() and os.access(resolved, os.X_OK):
+            return resolved
+    return None
+
+
+def markdown_to_plain_text(markdown: str) -> str:
+    """Keep a readable text representation for the cupsfilter fallback."""
+    text = re.sub(r"!\[([^\]]*)\]\([^)]*\)", r"[图片: \1]", markdown)
+    text = re.sub(r"<img[^>]*alt=[\"']([^\"']*)[\"'][^>]*>", r"[图片: \1]", text, flags=re.I)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub(r"^\s*```[^\n]*$", "", text, flags=re.M)
+    text = re.sub(r"^\s*```\s*$", "", text, flags=re.M)
+    normalized_lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith(">"):
+            line = stripped[1:].lstrip()
+        elif stripped.startswith("|"):
+            cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+            if cells and all(re.fullmatch(r":?-{2,}:?", cell) for cell in cells):
+                continue
+            line = "  |  ".join(cells)
+        normalized_lines.append(line)
+    text = "\n".join(normalized_lines)
+    text = re.sub(r"^\s*[-*]\s+", "• ", text, flags=re.M)
+    text = re.sub(r"^\s*#+\s*", "", text, flags=re.M)
+    text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1 (\2)", text)
+    text = re.sub(r"[*_`]", "", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip() + "\n"
+
+
+def render_with_cupsfilter(markdown: str, pdf_path: Path) -> Path:
+    """Render a portable, text-first PDF using the macOS print filter."""
+    cupsfilter = shutil.which("cupsfilter")
+    if not cupsfilter:
+        raise RuntimeError("Chrome/Chromium unavailable and cupsfilter not installed")
+    with tempfile.TemporaryDirectory(prefix="social_account_pdf_") as tmp:
+        text_path = Path(tmp) / "report.txt"
+        text_path.write_text(markdown_to_plain_text(markdown), encoding="utf-8")
+        proc = subprocess.run(
+            [cupsfilter, "-m", "application/pdf", "-o", "media=A4", str(text_path)],
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
+        if proc.returncode != 0 or not proc.stdout.startswith(b"%PDF"):
+            detail = (proc.stderr or b"").decode("utf-8", errors="replace")[-1000:]
+            raise RuntimeError(f"cupsfilter failed: {detail}")
+        pdf_path.write_bytes(proc.stdout)
+    return pdf_path
+
+
 def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
     base_dir = md_path.parent
     md_text = md_path.read_text(encoding="utf-8")
@@ -151,20 +226,46 @@ def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
     html_path = pdf_path.with_suffix(".html")
     html_path.write_text(html, encoding="utf-8")
 
-    proc = subprocess.run(
-        ["google-chrome", "--headless", "--disable-gpu", "--no-sandbox",
-         "--no-pdf-header-footer",
-         f"--print-to-pdf={pdf_path}",
-         f"file://{html_path}"],
-        capture_output=True, text=True, timeout=120,
-    )
-    if not pdf_path.exists():
-        print(proc.stderr[-2000:], file=sys.stderr)
-        sys.exit("ERROR: chrome did not produce a PDF")
+    chrome = find_chrome()
+    chrome_error = ""
+    if chrome:
+        timeout = max(5, int(os.environ.get("PDF_RENDER_TIMEOUT_SECONDS", "20")))
+        try:
+            with tempfile.TemporaryDirectory(prefix="social_account_chrome_") as profile:
+                proc = subprocess.run(
+                    [chrome, "--headless=new", "--disable-gpu", "--no-sandbox",
+                     "--disable-dev-shm-usage", "--no-first-run",
+                     "--no-default-browser-check", "--no-pdf-header-footer",
+                     f"--user-data-dir={profile}",
+                     f"--print-to-pdf={pdf_path}",
+                     f"file://{html_path}"],
+                    capture_output=True, text=True, timeout=timeout,
+                )
+            if pdf_path.exists() and pdf_path.stat().st_size > 0:
+                if not keep_html:
+                    html_path.unlink()
+                return pdf_path
+            chrome_error = (proc.stderr or "")[-2000:]
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            chrome_error = str(exc)
 
-    if not keep_html:
-        html_path.unlink()
-    return pdf_path
+    try:
+        result = render_with_cupsfilter(md_text, pdf_path)
+        print(
+            "WARNING: Chrome/Chromium PDF rendering was unavailable; "
+            "used cupsfilter text fallback.",
+            file=sys.stderr,
+        )
+        if chrome_error:
+            print(f"  browser detail: {chrome_error[-500:]}", file=sys.stderr)
+        if not keep_html:
+            html_path.unlink()
+        return result
+    except RuntimeError as fallback_error:
+        if not keep_html:
+            html_path.unlink(missing_ok=True)
+        detail = chrome_error or str(fallback_error)
+        raise RuntimeError(f"PDF rendering failed: {detail}") from fallback_error
 
 
 def main() -> None:
@@ -185,7 +286,10 @@ def main() -> None:
     pdf_path = (Path(args.output).expanduser().resolve()
                 if args.output else md_path.with_suffix(".pdf"))
 
-    render(md_path, pdf_path, keep_html=args.keep_html)
+    try:
+        render(md_path, pdf_path, keep_html=args.keep_html)
+    except RuntimeError as exc:
+        sys.exit(f"ERROR: {exc}")
     print(f"PDF: {pdf_path} ({pdf_path.stat().st_size:,} bytes)")
 
 
