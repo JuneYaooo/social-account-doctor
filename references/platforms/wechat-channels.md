@@ -13,7 +13,7 @@
 - 新榜 / 西瓜数据 / 友望数据 — 视频号头部账号公开数据反推
 - 微信生态创作者社群（KK 黄有璨 / 朋友圈刷屏案例集） — 分享率 / 朋友圈点赞率经验值
 
-**API 数据可得性**：tikhub-wechat MCP **完整覆盖**视频号（视频详情 / 下载 / 搜索 / 用户 / 评论 / 热榜）+ 公众号（文章 / 阅读量 / 评论），见 §4。但视频号**没有像抖音星图 / 小红书蒲公英那样的开放创作者后台 API** — 私有指标（分享率 / 朋友点赞率 / 关注转化）只能从用户提供的视频号助手 App 截图里拿。所以实战中**用户输入主要是「链接 + 截图 + 描述」混合**，工具链按 §4.1 路由。
+**API 数据可得性**：TikHub REST API（wechat） **完整覆盖**视频号（视频详情 / 下载 / 搜索 / 用户 / 评论 / 热榜）+ 公众号（文章 / 阅读量 / 评论），见 §4。但视频号**没有像抖音星图 / 小红书蒲公英那样的开放创作者后台 API** — 私有指标（分享率 / 朋友点赞率 / 关注转化）只能从用户提供的视频号助手 App 截图里拿。所以实战中**用户输入主要是「链接 + 截图 + 描述」混合**，工具链按 §4.1 路由。
 
 ⚠️ **视频号算法不透明度比抖音 / 小红书更高**，本手册数字仅作方向判断；**核心定性结论"分享 > 一切"在多源反复验证，是稳的**。
 
@@ -125,27 +125,25 @@
 
 ---
 
-## 4. tikhub MCP 工具映射（视频号 + 公众号）
+## 4. TikHub REST API 工具映射（视频号 + 公众号）
 
-> tikhub-wechat MCP 同时覆盖**公众号（mp）+ 视频号（channels）**，接口齐全（视频详情 / 下载 / 搜索 / 用户 / 评论 / 公众号文章 / 阅读量）。
+> TikHub REST API（wechat） 同时覆盖**公众号（mp）+ 视频号（channels）**，接口齐全（视频详情 / 下载 / 搜索 / 用户 / 评论 / 公众号文章 / 阅读量）。
 
-### 4.0 工具一览（实测 2026-04-21）
+### 4.0 工具一览（REST OpenAPI V5.3.2，2026-08-14 刷新）
 
 | 任务 | 工具 | 稳定性 |
 |---|---|---|
-| 视频号视频详情 | `tikhub wechat wechat_channels_fetch_video_detail`（`id` 优先 `exportId`） | ✅ 稳 |
-| 视频号关键词综合搜索 | `tikhub wechat wechat_channels_fetch_search_ordinary` | ✅ 稳 |
-| 视频号关键词最新搜索 | `tikhub wechat wechat_channels_fetch_search_latest` | 🟡 偶发 503，retry 1 次 |
-| 视频号账号搜索 | `tikhub wechat wechat_channels_fetch_user_search` | ❌ **高频 503**，必须 fallback（见 §4.2） |
-| 视频号用户主页 | `tikhub wechat wechat_channels_fetch_home_page` | 🟡 依赖 user_search，连带挂 |
-| 视频号视频评论 | `tikhub wechat wechat_channels_fetch_comments` | ✅ 稳 |
-| 视频号直播回放 | `tikhub wechat wechat_channels_fetch_live_history` | ✅ 稳（需 `username`） |
-| 视频号热门话题 | `tikhub wechat wechat_channels_fetch_hot_words` | ✅ 稳 |
-| 公众号文章详情（JSON） | `tikhub wechat wechat_mp_web_fetch_mp_article_detail_json` | ✅ 稳 |
-| 公众号文章阅读量 | `tikhub wechat wechat_mp_web_fetch_mp_article_read_count` | ✅ 稳（需 `comment_id` 从 detail_json 拿） |
-| 公众号文章评论 | `tikhub wechat wechat_mp_web_fetch_mp_article_comment_list` | ✅ 稳 |
-| 公众号文章列表 | `tikhub wechat wechat_mp_web_fetch_mp_article_list`（需 `ghid`） | ✅ 稳 |
-| 公众号关联文章 | `tikhub wechat wechat_mp_web_fetch_mp_related_articles` | ✅ 稳 |
+| 视频号视频详情 | `tikhub wechat wechat_channels_v2_fetch_video_detail` | 当前目录存在 |
+| 视频号关键词搜索 | `tikhub wechat wechat_channels_v2_fetch_search_channel_videos` | 当前目录存在 |
+| 视频号用户资料 | `tikhub wechat wechat_channels_v2_fetch_user_profile` | 当前目录存在 |
+| 视频号用户作品 | `tikhub wechat wechat_channels_v2_fetch_user_videos` | 当前目录存在 |
+| 视频号视频评论 | `tikhub wechat wechat_channels_v2_fetch_video_comments` | 当前目录存在 |
+| 视频号直播回放 | `tikhub wechat wechat_channels_v2_fetch_live_history` | 当前目录存在 |
+| 公众号文章详情 | `tikhub wechat wechat_mp_v2_fetch_article_detail` | 当前目录存在 |
+| 公众号文章统计 | `tikhub wechat wechat_mp_v2_fetch_article_stats` | 当前目录存在 |
+| 公众号文章评论 | `tikhub wechat wechat_mp_v2_fetch_article_comments` | 当前目录存在 |
+| 公众号文章列表 | `tikhub wechat wechat_mp_v2_fetch_account_articles` | 当前目录存在 |
+| 公众号关联文章 | `tikhub wechat wechat_mp_v2_fetch_related_articles` | 当前目录存在 |
 
 📅 复核周期：3 个月。下次实测：2026-07。
 
@@ -154,7 +152,7 @@
 视频号**没有像抖音星图 / 小红书蒲公英那样的开放创作者后台 API** — 个人创作者只能从视频号助手 App 截图拿数据。所以实战中用户给的输入按下面优先级路由：
 
 ```
-1. 视频号账号名 / 关键词       → 走 §4.2 锁定本号 → 拿 video id → tikhub-wechat MCP
+1. 视频号账号名 / 关键词       → 搜索真实作品 → 作品详情确认账号 → 用户资料/作品列表
 2. 用户给的后台截图           → ocr_screenshot.py 提分享率 / 朋友点赞率 / 关注转化等私有指标
 3. 用户口述描述               → 直接做诊断，标注"未实测，基于描述推断"
 ```
@@ -163,27 +161,26 @@
 
 ⭐ **铁律**：诊断视频号必须**至少拿到分享率**这一个数（命门指标）。如果用户给的截图没有，必须明确问："分享数 / 转发数是多少？" 不要凭点赞/播放反推 — 视频号的算法权重跟其他平台完全不同。
 
-### 4.2 user_search 503 兜底流程（**实战必背**）
+### 4.2 从搜索作品锁定账号
 
-`user_search` 是 tikhub-wechat 里**最不稳定**的接口（实测 2026-04-21 高频 503）。锁定本号永远先走 `_search_ordinary`：
+当前 REST 目录不提供旧版昵称搜索端点。锁定账号要从真实作品反查：
 
 ```
 输入：账号名（如「哈吉老猫」）
 
-Step 1  wechat_channels_fetch_search_ordinary(keywords=账号名)
-        → 拿到 items[]，每条含 source.title / source.iconUrl
+Step 1  wechat_channels_v2_fetch_search_channel_videos(keyword=账号名)
+        → 拿到候选作品
 
 Step 2  本号判定（必须双重校验，缺一不可）：
-        a. 剥掉 source.title 里的 <em class="highlight"> 高亮 HTML
-        b. 剥后字符串与目标账号名 **完全相等**（不是包含）
-        c. iconUrl 在多条本号视频间一致（同一个 finderhead URL）
-        → 满足 a+b+c 的才是真号
+        a. 拉候选作品详情，读取稳定账号标识和昵称
+        b. 昵称与目标一致，并确认头像/账号标识在多条作品中一致
+        → 缺稳定账号标识时不能只按昵称认定同一账号
 
-Step 3  从该条拿 exportId / hashDocID
-        → wechat_channels_fetch_video_detail(exportId 或 id)
-        → 返回的 contact 节点里就有 nickname / username / feed_count / signature / live_status / ip_region
+Step 3  取得 username
+        → wechat_channels_v2_fetch_user_profile
+        → wechat_channels_v2_fetch_user_videos
 
-Step 4  跳过 user_search，直接进诊断
+Step 4  对用户作品做账号内 top/bottom 排序后再进诊断
 ```
 
 **为什么不能只看 source.title 包含目标名**：搜索"哈吉老猫"会同时出"是哈吉仙人"、"哈基米"、"老猫成仙"等同主题号，包含关键字 ≠ 是本号。**真号常常只有 1 条**（综合搜索 12 条结果里只 1 条匹配）。

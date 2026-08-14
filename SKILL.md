@@ -15,7 +15,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 这些规则适用于 find / crack / adapt / diagnostic。违反时不要硬写报告；在对话里明说缺哪一步、为什么缺、用户可以怎么补。
 
 **H1 — find 必须有真对标搜索**
-- `find` 模式至少跑过 1 次平台搜索，并拿到真实账号或作品候选：小红书 `xiaohongshu_app_search_notes` / 抖音账号搜索或视频搜索 / 快手 `kuaishou_app_search_video_v2` / 视频号 `wechat_channels_fetch_search_ordinary` / B 站 `bilibili_web_fetch_general_search`。
+- `find` 模式至少跑过 1 次平台搜索，并拿到真实账号或作品候选：小红书 `xiaohongshu_app_v2_search_notes` / 抖音账号搜索或视频搜索 / 快手 `kuaishou_app_search_video_v2` / 视频号 `wechat_channels_v2_fetch_search_channel_videos` / B 站 `bilibili_web_fetch_general_search`。
 - 只拿了我的账号信息或作品列表就写“对标结论” = 违规。没有对标搜索，就只能标成“仅基于我方数据的初步判断”。
 
 **H2 — 视觉判断必须先跑多模态**
@@ -361,12 +361,12 @@ commerce 模式跑完，落盘到：
 每个矩阵词调一次 search → 按互动量倒序取 top 10 → 汇总到候选池（20-50 条，去重）。
 
 工具：
-- 小红书 `xiaohongshu_app_search_notes`（**只用这个**，V2/Web V2 全挂 — 见 §9.1）
-- 抖音优先 `douyin_billboard_fetch_hot_account_search_list --cursor 0` 找账号；再用 `douyin_app_v3_fetch_hashtag_search_result` → `douyin_app_v3_fetch_hashtag_video_list` 反查作者；`douyin_app_v3_fetch_video_search_result_v2` 只做补充且必须加超时
+- 小红书 `xiaohongshu_app_v2_search_notes`
+- 抖音优先 `douyin_billboard_fetch_hot_account_search_list --cursor 0` 找账号；再用 `douyin_search_fetch_challenge_search_v2` → `douyin_app_v3_fetch_hashtag_video_list` 反查作者；`douyin_search_fetch_video_search_v2` 只做补充且必须加超时
 - 快手 `kuaishou_app_search_video_v2`
-- 视频号 `wechat_channels_fetch_search_ordinary`（综合）+ `wechat_channels_fetch_search_latest`（最新）双源对比 — 见 §9.2
+- 视频号 `wechat_channels_v2_fetch_search_channel_videos`
 
-**接口失败兜底**：连续 3 次 retry 失败 → 不再硬刚，让用户手甩 3-5 个对标链接 → 直接 `fetch_feed_notes_v2`（小红书）/ `fetch_video_detail`（视频号）→ 跳到 crack。
+**接口失败兜底**：客户端完成 3 次退避重试仍失败 → 不再重复计费调用，让用户提供 3-5 个对标链接或本地素材 → 直接走作品详情 → 跳到 crack。
 
 **视频号特殊铁律**：视频号客户端**不输出可复制的链接 / 视频 ID**（分享出去是卡片）。**唯一入口是账号名/关键词搜索 → 锁定本号视频 → 拿 id**。不要让用户提供"视频号链接"，他给不出。
 
@@ -541,7 +541,7 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 
 ### tikhub CLI（按平台 × 任务）
 
-> 调用走 `tikhub <platform> <tool> --args`（CLI 自包含在仓库 `tikhub/` 目录，纯 Python stdlib + HTTP JSON-RPC + session 缓存）。不知道工具名时 `tikhub list <platform> <关键词>` 模糊查；看完整 schema 用 `tikhub describe <platform> <tool>`。
+> 调用走 `tikhub <platform> <endpoint> --args`。CLI 自包含在仓库 `tikhub/` 目录，底层直接请求 TikHub REST API（`https://api.tikhub.io/api/v1/...`），**禁止调用 TikHub MCP 或 `mcp.tikhub.io`**。不知道端点名时用 `tikhub list <platform> <关键词>`；看 HTTP 方法、REST 路径和参数 schema 用 `tikhub describe <platform> <endpoint>`。
 
 **参数类型铁律（防"看着对其实数据被破坏"）**：
 - CLI 默认所有 `--key=value` **按 string 透传**，只 `true/false/null/none` 字面量被 coerce
@@ -551,13 +551,13 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 
 | 任务 | 小红书 | 抖音 | 快手 | B 站 |
 |---|---|---|---|---|
-| **find Step 3 关键词搜** | `xiaohongshu_app_search_notes`（笔记） / `xiaohongshu_web_search_users`（用户） | `douyin_billboard_fetch_hot_account_search_list --cursor 0`（账号优先） / `douyin_app_v3_fetch_hashtag_search_result`（话题） / `douyin_app_v3_fetch_video_search_result_v2`（视频补充） | `kuaishou_app_search_video_v2` | `bilibili_web_fetch_general_search` |
-| **find Step 5 账号信息** | `xiaohongshu_app_get_user_info` | `douyin_web_handler_user_profile` | `kuaishou_app_fetch_one_user_v2` | `bilibili_web_fetch_user_profile` + `_user_up_stat` + `_user_relation_stat` |
-| **crack 笔记/视频详情（最稳兜底）** | `xiaohongshu_app_get_note_info`（需 xsec_token） / `xiaohongshu_web_get_note_info_v7` | `douyin_app_v3_fetch_one_video` | `kuaishou_app_fetch_one_video` | `bilibili_web_fetch_one_video` |
+| **find Step 3 关键词搜** | `xiaohongshu_app_v2_search_notes`（笔记） / `xiaohongshu_app_v2_search_users`（用户） | `douyin_billboard_fetch_hot_account_search_list --cursor 0`（账号优先） / `douyin_search_fetch_challenge_search_v2`（话题） / `douyin_search_fetch_video_search_v2`（视频补充） | `kuaishou_app_search_video_v2` | `bilibili_web_fetch_general_search` |
+| **find Step 5 账号信息** | `xiaohongshu_app_v2_get_user_info` | `douyin_app_v3_handler_user_profile` | `kuaishou_app_fetch_one_user_v2` | `bilibili_web_fetch_user_profile` + `_user_up_stat` + `_user_relation_stat` |
+| **crack 笔记/视频详情（最稳兜底）** | `xiaohongshu_web_v3_fetch_note_detail` / `xiaohongshu_app_v2_get_video_note_detail` | `douyin_app_v3_fetch_one_video` | `kuaishou_app_fetch_one_video` | `bilibili_web_fetch_one_video` |
 | **crack 拿封面/视频** | 用笔记详情返回的 `image_list` URL；不要用已挂的独立 image 接口 | `douyin_app_v3_fetch_video_high_quality_play_url` | `kuaishou_app_fetch_one_video`（含 play_url） | `bilibili_web_fetch_video_subtitle`（字幕拆口播） |
-| **crack 拿评论** | `xiaohongshu_app_get_note_comments` | `douyin_app_v3_fetch_video_comments` | `kuaishou_app_fetch_one_video_comment` | `bilibili_web_fetch_video_comments` + `_comment_reply` |
+| **crack 拿评论** | `xiaohongshu_app_v2_get_note_comments` | `douyin_app_v3_fetch_video_comments` | `kuaishou_web_fetch_one_video_comment` | `bilibili_web_fetch_video_comments` + `_comment_reply` |
 | **B 站独家：弹幕** | — | — | — | `bilibili_web_fetch_video_danmaku`（4 类信号见 platforms/bilibili.md §3） |
-| **解析分享链接** | `xiaohongshu_web_get_note_id_and_xsec_token` | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` | `bilibili_web_bv_to_aid`（bv ↔ aid 转换） |
+| **解析分享链接** | `xiaohongshu_web_v3_fetch_note_detail`（支持分享文本时直接传） | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` | `bilibili_web_bv_to_aid`（bv ↔ aid 转换） |
 
 ### 视频号（独立路径 — 没分享链接）
 
@@ -565,17 +565,14 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 
 | 任务 | 工具 | 注意 |
 |---|---|---|
-| **find Step 3 关键词搜（综合）** | `wechat_channels_fetch_search_ordinary` | 算法综合排序，含权重 + 关系链 |
-| **find Step 3 关键词搜（最新）** | `wechat_channels_fetch_search_latest` | 时间序，与综合求差集找蓝海窗口 |
-| **find Step 5 账号搜索** | `wechat_channels_fetch_user_search` | ⚠️ 实测易 503 — fallback：用 `_search_ordinary` 精确匹配 nickname |
-| **crack 视频详情** | `wechat_channels_fetch_video_detail`（`id` 优先于 `exportId`） | 含完整互动数据 + `feed_count`（账号总作品数） |
-| **crack 拿评论** | `wechat_channels_fetch_comments` | — |
-| **账号主页 / 直播回放** | `wechat_channels_fetch_home_page` / `wechat_channels_fetch_live_history` | — |
-| **热榜 / 抢窗口** | `wechat_channels_fetch_hot_words` | 视频号专属：朋友圈关系链 + 热榜双驱动 |
+| **find Step 3 关键词搜** | `wechat_channels_v2_fetch_search_channel_videos` | 按关键词发现视频号作品 |
+| **find Step 5 账号信息** | `wechat_channels_v2_fetch_user_profile` | 从搜索或详情取得 `username` 后调用 |
+| **账号作品列表** | `wechat_channels_v2_fetch_user_videos` | 用真实作品样本做账号内排序 |
+| **crack 视频详情** | `wechat_channels_v2_fetch_video_detail` | 拉取公开互动与媒体字段 |
+| **crack 拿评论** | `wechat_channels_v2_fetch_video_comments` | — |
+| **直播回放** | `wechat_channels_v2_fetch_live_history` | — |
 
-**视频号 find 的 5 步要做两个调整**：
-1. Step 3 关键词搜要**双源跑**（ordinary + latest），交集 = 已被算法验证的爆款，差集 = 新发未推 / 老爆款长尾
-2. Step 5 账号信息时，user_search 503 是常态 — fallback 是从 `search_ordinary` 结果里按 nickname 精确匹配 + 头像 url 校验
+**视频号 find 调整**：先用关键词搜索拿到真实作品，再从作品详情识别账号并调用用户资料/作品列表；不要用昵称相似代替账号身份校验。
 
 ### B 站（横版 + 三连 + 弹幕，跟其他四平台都不同）
 
@@ -621,61 +618,50 @@ B 站是 16:9 横屏 + 长视频文化，**算法核心信号是三连率（点�
 
 ## 9. 接口稳定性表（按平台分小节）
 
-### 9.1 小红书（**复测 2026-04-23 — 用户作品列表切 Web V2 `fetch_home_notes_app`；其余 App V1 首选**）
+### 9.1 小红书（REST OpenAPI V5.3.2，2026-08-14 刷新）
 
-> ⚠️ **2026-04-23 增量更新**：用户作品列表的 App V1 (`xiaohongshu_app_get_user_notes`) 复测也挂，`app_v2_get_user_posted_notes` 仍挂。当前只有 `xiaohongshu_web_v2_fetch_home_notes_app` 能跑通并拿到 cover / title / like / collect。虽然官方说 Web V2 停止维护，但这一行目前没得选。
->
-> ⚠️ **旧结论（2026-04-22）**：除用户作品列表外，search / note_info / comments / user_info 仍优先用 App V1。App V2 全系列实测 RetryError；Web V2 能用的也按“备用、随时可能挂”处理。
->
-> **官方明确弃用**：`xiaohongshu_app_search_notes_v2`、`xiaohongshu_app_get_video_note_info`、`xiaohongshu_app_get_notes_by_topic`、`xiaohongshu_app_search_users`。见到这些不要用。
+> 只使用当前 `/openapi.json` 目录中存在的 REST 端点。旧 App V1、Web V1、Web V2 名称已经不在当前目录中，不再调用，也不再沿用旧 MCP 时期的稳定性结论。
 
 | 任务 | ✅ 首选 | ⚠️ 备选 | ❌ 不要用 |
 |---|---|---|---|
-| **关键词搜笔记** | `xiaohongshu_app_search_notes` | `xiaohongshu_web_search_notes`（Web V1，限流时切） | `app_v2_search_notes` / `web_v2_fetch_search_notes` / `app_search_notes_v2` |
-| **关键词搜用户** | — | `xiaohongshu_web_search_users`（Web V1，唯一能用） | `app_search_users` / `app_v2_search_users` / `web_v2_fetch_search_users` |
-| **笔记详情** | `xiaohongshu_app_get_note_info`（需 `xsec_token`） | `xiaohongshu_web_get_note_info_v7` / `xiaohongshu_web_v2_fetch_feed_notes_v2`（备用） | `app_v2_get_image_note_detail` / `app_v2_get_video_note_detail` |
-| **笔记评论** | `xiaohongshu_app_get_note_comments` | `xiaohongshu_web_v2_fetch_note_comments`（备用） | `app_v2_get_note_comments` |
-| **二级评论** | `xiaohongshu_app_get_sub_comments` | `xiaohongshu_web_v2_fetch_sub_comments`（备用） | `app_v2_get_note_sub_comments` |
-| **账号信息** | `xiaohongshu_app_get_user_info` | — | `app_v2_get_user_info` / `web_get_user_info_v2` |
-| **用户作品列表** | `xiaohongshu_web_v2_fetch_home_notes_app`（2026-04-23 唯一能用） | — | `xiaohongshu_app_get_user_notes` / `app_v2_get_user_posted_notes` / `web_v2_fetch_home_notes` |
-| **拿封面/图片** | 用 `app_get_note_info` / `web_get_note_info_v7` 返回里的 `image_list` URL | — | `web_v2_fetch_note_image` |
-| **分享链接解析** | `xiaohongshu_web_get_note_id_and_xsec_token` | `xiaohongshu_app_extract_share_info` / `app_get_user_id_and_xsec_token` | — |
+| **关键词搜笔记** | `xiaohongshu_app_v2_search_notes` | `xiaohongshu_web_v3_fetch_search_suggest` 只用于扩词 | 目录外旧端点 |
+| **关键词搜用户** | `xiaohongshu_app_v2_search_users` | — | 目录外旧端点 |
+| **图文/视频笔记详情** | `xiaohongshu_app_v2_get_image_note_detail` / `xiaohongshu_app_v2_get_video_note_detail` | `xiaohongshu_web_v3_fetch_note_detail`（需 note_id + xsec_token） | 目录外旧端点 |
+| **笔记评论/二级评论** | `xiaohongshu_app_v2_get_note_comments` / `xiaohongshu_app_v2_get_note_sub_comments` | — | 目录外旧端点 |
+| **账号信息** | `xiaohongshu_app_v2_get_user_info` | `xiaohongshu_web_v3_fetch_user_info` | 目录外旧端点 |
+| **用户作品列表** | `xiaohongshu_app_v2_get_user_posted_notes` | — | 目录外旧端点 |
+| **拿封面/图片** | 用详情响应中的媒体 URL | — | 独立抓图旧端点 |
+| **分享文本** | App V2 详情/账号端点的 `share_text` 参数 | — | 旧解析器端点 |
 
 **铁律**：
-- ✅ search / note_info / comments / user_info 首选 App V1；用户作品列表目前只用 `web_v2_fetch_home_notes_app`
-- ⚠️ Web V2 官方说停止维护，只在 App V1 挂且没替代时用；报告里标注“备用接口，数据可能延迟或随时下线”
-- ❌ App V2 全系列实测挂，不要再试
-- ❌ 同一接口连续 3 次 HTTPStatusError → 换备选 / 让用户截图代替
+- ✅ 每次以 `tikhub list xiaohongshu` 和 `tikhub describe` 的当前目录/schema 为准
+- ❌ 端点经客户端 3 次退避重试仍失败 → 换目录内备选或让用户补截图/素材，不手工循环调用
 - ❌ 小红书不支持按话题标签搜索笔记，只支持关键词；用户问“搜 #XX 标签”时说明限制
-- 📅 实测日期写在标题里，3 个月后必须重测一次
+- 📅 OpenAPI 目录有版本变化时重新运行 `tikhub/scripts/refresh_tools.py xiaohongshu`
 
 **并发与限流（实测 2026-04-21）**：
-- **当前 tikhub RPS 上限 = 10/s**（用户提供）—— 单次诊断的搜索批量调用要节制,**建议并发不超过 3,串行更稳**
-- 触发限流时返回 `RetryError[HTTPStatusError]`（与"接口本身不稳"的报错一样,容易误判）
-- App V1 (`xiaohongshu_app_search_notes`) 限流后冷却时间长；**Web V1 (`xiaohongshu_web_search_notes`) 抗限流更强**,App V1 被限时优先切 Web V1（同样是 V1，不是 V2）
+- 官方文档标注 QPS 10；账号诊断建议并发不超过 3，429 交给 REST 客户端退避重试。
 
-### 9.2 视频号（实测 2026-04-21）
+### 9.2 视频号（REST OpenAPI V5.3.2，2026-08-14 刷新）
 
 | 任务 | ✅ 用这个 | ⚠️ 注意 |
 |---|---|---|
-| 关键词综合搜索 | `wechat_channels_fetch_search_ordinary` | 稳。结果里的 `source.title` 可能是带 `<em class="highlight">` 的高亮 HTML，处理时要剥标签 |
-| 关键词最新搜索 | `wechat_channels_fetch_search_latest` | 偶发 503，retry 1 次即可 |
-| 账号搜索 | `wechat_channels_fetch_user_search` | **实测高频 503**。fallback：用 `_search_ordinary(账号名)` 取首条 + 校验 nickname/头像 url |
-| 视频详情 | `wechat_channels_fetch_video_detail` | 稳。**优先传 `id`** 而非 `exportId`；返回的 `contact.feed_count` 是账号总作品数（冷启诊断关键字段） |
-| 评论列表 | `wechat_channels_fetch_comments` | 稳 |
-| 用户主页 | `wechat_channels_fetch_home_page` | 依赖 user_search 提供 user 上下文，user_search 挂时连带挂 |
-| 热门话题 | `wechat_channels_fetch_hot_words` | 稳 |
+| 关键词搜作品 | `wechat_channels_v2_fetch_search_channel_videos` | 从真实作品识别账号 |
+| 账号信息 | `wechat_channels_v2_fetch_user_profile` | 需要 `username` |
+| 用户作品 | `wechat_channels_v2_fetch_user_videos` | 用于账号内 top/bottom 排序 |
+| 视频详情 | `wechat_channels_v2_fetch_video_detail` | 以当前 schema 为准 |
+| 评论列表 | `wechat_channels_v2_fetch_video_comments` | — |
+| 直播回放 | `wechat_channels_v2_fetch_live_history` | — |
 
 **视频号铁律**：
 - ❌ **不要让用户提供视频号链接 / 视频 ID** — 视频号客户端只支持卡片分享，根本不输出 URL/ID
-- ❌ user_search 503 时**不要 retry 超过 1 次** — 直接 fallback 到 `_search_ordinary` + nickname 精确匹配
-- ✅ 综合搜索结果里**真号常常只有 1 条**（同名/同主题号会被高亮但来自其他号），按 `source.title` 剥 `<em>` 后 **完全等于** 目标账号名才算真号
-- ✅ `video_detail.contact.feed_count == 1` + `like/comment/forward 全 0` = **冷启失败号**，可直接出诊断结论
-- 📅 实测日期写在标题里，3 个月后重测
+- ✅ 搜索结果必须通过作品详情里的账号标识回查，不能只靠昵称相似判断同一账号
+- ✅ 冷启结论至少需要账号作品列表和多条公开互动，不能用单条作品直接判死
+- 📅 OpenAPI 目录有版本变化时重新刷新 wechat 目录
 
 ### 9.3 抖音（局部复测 2026-06 — 对标搜索优先走账号搜索）
 
-🟡 **状态**：2026-06 复测确认，抖音找对标不要只依赖视频搜索。`douyin_billboard_fetch_hot_account_search_list --keyword <词> --cursor 0` 可用于账号搜索；`douyin_app_v3_fetch_video_search_result_v2` 偶发长时间无响应，只做补充且必须加超时。
+🟡 **状态**：抖音找对标不要只依赖视频搜索。`douyin_billboard_fetch_hot_account_search_list --keyword <词> --cursor 0` 可用于账号搜索；视频搜索只做补充并设置调用超时。
 
 **实测命令**（用 tikhub CLI）：
 ```bash
@@ -683,24 +669,24 @@ tikhub --health
 tikhub list douyin search
 tikhub douyin douyin_billboard_fetch_hot_account_search_list \
   --keyword 宝宝情绪 --cursor 0
-tikhub douyin douyin_app_v3_fetch_hashtag_search_result \
-  --keyword 宝宝情绪 --offset 0 --count 10
-tikhub douyin douyin_app_v3_fetch_video_search_result_v2 \
+tikhub douyin douyin_search_fetch_challenge_search_v2 \
+  --keyword 宝宝情绪 --cursor 0 --count 10
+tikhub douyin douyin_search_fetch_video_search_v2 \
   --keyword 宝宝情绪 --offset 0 --count 10
 ```
 
 | 任务 | 实测结果 | 备注 |
 |---|---|---|
 | `douyin_billboard_fetch_hot_account_search_list` | 可用 | 找账号对标首选；`cursor` 必传 |
-| `douyin_app_v3_fetch_hashtag_search_result` | 可用 | 可先找话题，再拉话题视频反查作者 |
-| `douyin_app_v3_fetch_video_search_result_v2` | 不稳定 | 可能卡住；加超时，失败后换账号/话题搜索 |
+| `douyin_search_fetch_challenge_search_v2` | 当前目录存在 | 可先找话题，再拉话题视频反查作者 |
+| `douyin_search_fetch_video_search_v2` | 当前目录存在 | 加超时，失败后换账号/话题搜索 |
 | `douyin_web_handler_user_profile` | 可用 | 适合拿公开主页基础信息 |
 | `douyin_web_fetch_user_post_videos` | 部分受登录限制 | 普通号可能返回空，必要时结合后台截图 |
 
 **推荐调用顺序（找对标时）**：
 1. 从账号简介和近 10 条作品提取 4-6 个关键词
 2. 账号搜索首选 `douyin_billboard_fetch_hot_account_search_list --cursor 0`
-3. 账号搜索不够时，用话题搜索拿 `ch_id`，再用 `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>` 反查高互动作者
+3. 账号搜索不够时，用 `douyin_search_fetch_challenge_search_v2` 拿 `ch_id`，再用 `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>` 反查高互动作者
 4. 视频搜索只做补充；超时 1 次就换账号搜索或话题搜索，不要连续卡住
 5. 新号优先找 3-5 个 500-1W 粉的同赛道号，再补 1-2 个更高粉账号看方法论
 
@@ -727,7 +713,7 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
 | `kuaishou_app_search_video_v2` | 待测 | — |
 | `kuaishou_app_fetch_one_user_v2` | 待测 | — |
 | `kuaishou_app_fetch_one_video` | 待测 | — |
-| `kuaishou_app_fetch_one_video_comment` | 待测 | — |
+| `kuaishou_app_fetch_video_comment` | 待测 | — |
 | `kuaishou_web_fetch_one_video_by_url` | 待测 | — |
 
 ---
@@ -739,7 +725,7 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
 5. **adapt 必须命中 scoring-vocab.md 公式**，且必须标注"抄了什么 + 改了什么"。
 6. **诊断不主推**。除非用户明确说"为什么不爆"，否则不要走 L2。
 7. **multimodal 不省**：find Step 1 看我的、find Step 4 看候选 — 都要调。token 贵但不能省。
-   - 退化兜底：当 `fetch_note_image` 不可用时，可以用 `feed_notes_v2` 返回里的 `video_info_v2.media.video.bbox.ocr_v2/v3` 字段（含封面文字位置）+ desc + 标签推断封面公式，**必须明文标 ⚪ 推断 / 🟢 高可信**。
+   - 退化兜底：媒体 URL 不可用时，只能用详情返回的标题、描述、标签做文本层推断，**必须明文标注“未完成视觉验证”**，不能输出封面模板结论。
 8. **完整闭环跑完才落盘**，半成品只在对话里说。
 9. **钩子库要问过用户才追加**。crack 完成后主动问"要存吗"，用户答 yes 才写 `assets/hooks-{platform}.md`，按 4 维拆解格式存（不是单句）。**禁止自动追加**。
 10. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
@@ -767,11 +753,12 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    - **半成品不写盘**（不污染 reports/ 目录）
    - 接口连续 3 次 retry 失败 → 视同工具不可用 → 进入上面的话术
 
-11. **tikhub 调用走 CLI，不走 `claude mcp add`**：所有 tikhub 数据抓取通过 `tikhub <platform> <tool> --args` CLI 命令调用。**CLI 自包含在仓库 `tikhub/` 目录**（不依赖外部 skill）。**不要再 `claude mcp add tikhub-*`**：
+11. **TikHub 只走直接 REST API，不走 MCP**：所有数据抓取通过 `tikhub <platform> <endpoint> --args` CLI 调用；CLI 直接请求 `https://api.tikhub.io/api/v1/...`，使用 Bearer API key。**禁止请求 `mcp.tikhub.io`，禁止 `claude mcp add tikhub-*`，禁止任何 TikHub MCP 工具调用**。
 
-    - HTTP 端点是 `https://mcp.tikhub.io/{xiaohongshu|douyin|kuaishou|wechat|bilibili}/mcp`，所有平台共用一个 CLI、一个 API key
-    - 不需要重启 claude，不污染全局工具列表
-    - session id 自动缓存（5 min TTL），不用关心连接管理
+    - 非中国大陆默认基础域名：`https://api.tikhub.io`
+    - 中国大陆可设置：`TIKHUB_API_BASE_URL=https://api.tikhub.dev`
+    - REST 端点目录来自公开 `openapi.json`，用 `python3 tikhub/scripts/refresh_tools.py` 刷新
+    - 不需要 MCP session、初始化握手或 session 缓存
 
     **环境自检**：
     ```bash

@@ -81,9 +81,9 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 ```
 1. 漏斗看到 CTR < 5% 或 CES 进不了下一档 → 直接进本节
-2. 调 tikhub xiaohongshu xiaohongshu_web_v2_fetch_feed_notes_v2(note_id)
+2. 按笔记类型调 `xiaohongshu_app_v2_get_image_note_detail` 或 `xiaohongshu_app_v2_get_video_note_detail`
    → 拿封面 url + 标题 + 互动数据（赞/藏/评/转）+ 阅读完成率
-3. 下载封面到 /tmp/account_diagnostic/{note_id}/cover.jpg
+3. 下载封面到本次诊断运行的素材目录
 4. 调 scripts/analyze_image.py（拆封面 5 变量 + 模板归类）
    → 拿 big_text / big_text_ratio / human_presence / color_contrast / info_density
    → 拿 template_classification (A/B/C/D/E) + hook_detection
@@ -118,11 +118,11 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 ```
 1. 漏斗看到 搜索流量占比 < 30% → 直接进本节
-2. 调 tikhub xiaohongshu xiaohongshu_web_v2_fetch_feed_notes_v2(note_id)
+2. 按笔记类型调 App V2 图文/视频详情端点
    → 拿标题 + 正文 + 标签 + 话题
 3. 提取所有出现的关键词（分词 / 命名实体）
 4. 算"目标关键词"在标题/正文/标签三处的出现次数
-5. 调 tikhub xiaohongshu xiaohongshu_app_search_notes(keyword=目标词, sort_type=general)
+5. 调 `tikhub xiaohongshu xiaohongshu_app_v2_search_notes --keyword <目标词>`
    → 看自己的笔记排在第几位（搜不到 = 关键词埋点失败）
 6. 对照 §3.2 搜索失败的四种典型根因
 ```
@@ -154,45 +154,42 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 
 > 首选 / Fallback。首选挂时按列依次重试。
 >
-> **⚠️ 硬规则（复测 2026-04-23，与 SKILL.md §9.1 接口稳定性表对齐）**：
-> - search / note_info / comments / user_info 首选 App V1；用户作品列表目前只有 `xiaohongshu_web_v2_fetch_home_notes_app` 跑通
-> - App V2 全系列实测 RetryError；Web V2 只能作为少数场景备用，官方已停止维护，随时可能下线
-> - **官方说法 vs 实测**：tikhub 官方 2026-04 称 App V2 应可用，但实测仍 RetryError — **以实测为准**
-> - **官方已弃用接口**：`xiaohongshu_app_search_notes_v2`（注意命名：`app_search_notes_v2` ≠ `app_v2_search_notes`）—— **永远不要用**
-> - 关键词搜笔记 = `xiaohongshu_app_search_notes`（App V1，唯一稳定）
-> - 关键词搜用户 = `xiaohongshu_web_search_users`（Web V1，唯一稳定 — 注意 App V1 `search_users` 也挂）
+> **硬规则（REST OpenAPI V5.3.2，2026-08-14 刷新）**：
+> - 只调用 `tikhub list xiaohongshu` 当前目录中存在的 App V2 / Web V3 端点
+> - 关键词搜笔记 = `xiaohongshu_app_v2_search_notes`
+> - 关键词搜用户 = `xiaohongshu_app_v2_search_users`
 > - **小红书官方不开放话题标签搜索**（只支持关键词搜笔记）—— 用户问 "#XX 标签下的笔记" 时，明确告诉他"只能搜关键词"
-> - 任一工具返回 `RetryError[HTTPStatusError]` = 直接按 SKILL.md §9 表换可用版本，**禁止在同一接口刷重试**（tenacity 已重试 3 次了，再刷只会浪费时间 + 计费）
+> - REST 客户端完成 3 次退避重试后仍失败，改用目录内 fallback 或让用户补素材，禁止手工循环计费调用
 > - 返回 `code != 200` 但有 `message` → 看 `message_zh`，是参数错 / 限流 / 余额不足，按提示改参数；不要当成"接口挂了"换工具
 > - 返回 `data.items` 为空 → 关键词无结果或被风控，换近义词/降低 sort_type
 
 | 任务 | 首选 | Fallback |
 |---|---|---|
-| 账号信息（昵称/粉丝/认证） | `xiaohongshu_app_get_user_info` | 需要时让用户补主页截图 |
-| 账号笔记列表 | `xiaohongshu_web_v2_fetch_home_notes_app`（当前唯一能用） | — |
+| 账号信息（昵称/粉丝/认证） | `xiaohongshu_app_v2_get_user_info` | `xiaohongshu_web_v3_fetch_user_info` |
+| 账号笔记列表 | `xiaohongshu_app_v2_get_user_posted_notes` | — |
 | 账号粉丝/关注关系 | 当前不稳定 | 优先让用户截图 |
 | 用户收藏笔记（看口味） | 当前不稳定 | — |
-| 笔记详情 | `xiaohongshu_app_get_note_info`（需 xsec_token） | `xiaohongshu_web_get_note_info_v7` / `xiaohongshu_web_v2_fetch_feed_notes_v2`（备用） |
-| 笔记图片（封面+正文图） | 从 `app_get_note_info` / `web_get_note_info_v7` 的 `image_list` 字段取 | — |
-| 笔记评论 | `xiaohongshu_app_get_note_comments` | `xiaohongshu_web_v2_fetch_note_comments`（备用） |
-| 评论子回复 | `xiaohongshu_app_get_sub_comments` | `xiaohongshu_web_v2_fetch_sub_comments`（备用） |
-| 关键词搜笔记（找选题/对标作品） | `xiaohongshu_app_search_notes`（App V1，**唯一稳**） | `xiaohongshu_web_search_notes`（Web V1，备用） — ❌ 不要试 V2 全挂 |
-| 关键词搜用户（找对标账号） | `xiaohongshu_web_search_users`（Web V1，**唯一稳**） | — ❌ App V1/V2 全挂,Web V2 也挂,没有备用 |
-| 热榜（蓝海期选题） | `xiaohongshu_web_v2_fetch_hot_list` | — |
+| 笔记详情 | `xiaohongshu_app_v2_get_image_note_detail` / `xiaohongshu_app_v2_get_video_note_detail` | `xiaohongshu_web_v3_fetch_note_detail`（需 xsec_token） |
+| 笔记图片（封面+正文图） | 从详情响应的媒体字段取 URL | — |
+| 笔记评论 | `xiaohongshu_app_v2_get_note_comments` | — |
+| 评论子回复 | `xiaohongshu_app_v2_get_note_sub_comments` | — |
+| 关键词搜笔记（找选题/对标作品） | `xiaohongshu_app_v2_search_notes` | — |
+| 关键词搜用户（找对标账号） | `xiaohongshu_app_v2_search_users` | — |
+| 热榜（蓝海期选题） | `xiaohongshu_web_v3_fetch_hot_list` | — |
 | 话题信息 + 话题笔记 | 小红书当前不支持 hashtag 维度搜笔记 | 只能关键词搜索 |
-| 分享链接解析 | `xiaohongshu_web_get_note_id_and_xsec_token` | `xiaohongshu_app_extract_share_info` |
+| 分享文本解析 | App V2 账号/详情端点的 `share_text` 参数 | — |
 | 商品列表（看变现） | 当前不稳定 | 让用户补店铺/商品后台截图 |
 
 ### 4.1 推荐调用顺序（输入 = 账号链接时）
 
 ```
-1. dispatch_account.py <url> → 拿到 user_id (+ xsec_token)
-2. xiaohongshu_app_get_user_info(user_id) → 账号基础信息；失败时让用户补主页截图
-3. xiaohongshu_web_v2_fetch_home_notes_app(user_id, cursor="") → 最近 20 条 note_id 列表
+1. dispatch_account.py <url> → 拿到 user_id；短链可保留完整分享文本
+2. xiaohongshu_app_v2_get_user_info(user_id 或 share_text) → 账号基础信息；失败时让用户补主页截图
+3. xiaohongshu_app_v2_get_user_posted_notes(user_id, cursor="") → 最近 20 条 note_id 列表
 4. 计算每条互动数据（avg_like, avg_collect, avg_comment）→ 算 CES 均值 + 爆款率
-5. 取 top 3 + bottom 3 → 对每条调 xiaohongshu_app_get_note_info（需 xsec_token）/ xiaohongshu_web_get_note_info_v7 → 拿完整数据
+5. 取 top 3 + bottom 3 → 按类型调 App V2 图文/视频笔记详情；必要时用 Web V3 + xsec_token fallback
 6. 对 top 3 + bottom 3 → scripts/analyze_image.py 拆封面 5 变量
-7. 对 top 3 → xiaohongshu_app_get_note_comments 拿前 20 条评论（提炼痛点）
+7. 对 top 3 → xiaohongshu_app_v2_get_note_comments 拿前 20 条评论（提炼痛点）
 8. 关键词搜索 → 找对标候选（5k-50k 粉，活跃，同赛道）
 ```
 
@@ -203,7 +200,7 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 | 维度 | 小红书特化指引 |
 |---|---|
 | **账号定位** | 主页 9 宫格风格统一性 + 简介人群锁定 + 是否有"专攻 XX"的标签词 |
-| **选题角度** | **必须有搜索量背书**：调 `xiaohongshu_app_search_notes` 验证目标词是否有 ≥ 100 笔记，避免无人搜的伪需求 |
+| **选题角度** | **必须有搜索结果背书**：调 `xiaohongshu_app_v2_search_notes` 验证目标词是否有真实相关笔记，避免无人搜的伪需求 |
 | **封面公式** | 套 SKILL.md §5.1 五种封面（A 大字报 / B 对比 / C 真人出镜 / D 实物展示 / E 表格截图）。**3:4 竖版 + 大字 ≥ 1/4 + 高对比** 是基本功 |
 | **标题钩子** | 套 SKILL.md §5.2 10 公式 + **强制带核心关键词**（前 10 字内）+ 数字/emoji/【】 |
 | **正文骨架** | **首段 30 字内出钩子**（提问/承诺/反差）→ 3-5 个分点（emoji 分隔）→ 结尾互动引导 + 标签 |
@@ -223,7 +220,7 @@ CES = 点赞×1 + 收藏×1 + 转发×4 + 评论×4 + 关注×8
 ### P1（本月调 — 系统性短板）
 
 - [ ] 封面 5 变量评分对标差距 ≥ 2 → 全账号封面统一改造（用 analyze_image 跑 top 3 对标，提炼共性模板）
-- [ ] 选题维度差距 ≥ 2 → 用 `xiaohongshu_app_search_notes` 扫赛道 top 50，提炼 10 个搜索量 ≥ 1000 的选题模板
+- [ ] 选题维度差距 ≥ 2 → 用 `xiaohongshu_app_v2_search_notes` 扫赛道真实结果，提炼 10 个高互动选题模板
 - [ ] CES 分项诊断：转发 < 点赞 × 0.05 → 改句式为"避坑/拯救/我帮你做完了"
 
 ### P2（季度沉淀）

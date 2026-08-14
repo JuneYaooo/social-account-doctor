@@ -1,82 +1,66 @@
-# tikhub/ — bundled HTTP CLI
+# TikHub direct REST CLI
 
-This directory bundles the **tikhub HTTP CLI wrapper** so `social-account-doctor` is
-fully self-contained — no external skill dependency.
+This directory bundles the TikHub REST CLI used by `social-account-doctor`. It
+calls TikHub's documented `/api/v1/...` endpoints directly and uses the public
+OpenAPI document to maintain local endpoint catalogs.
 
-```
+```text
 tikhub/
-├── bin/tikhub                       # CLI entry point (chmod +x)
-├── lib/tikhub_client.py             # HTTP JSON-RPC + SSE + session cache (pure stdlib)
-├── references/tools-{platform}.json # cached /tools/list catalogs (5 platforms, ~330KB)
-└── scripts/refresh_tools.py         # rebuild references/ from live tikhub
+├── bin/tikhub                       # CLI entry point
+├── lib/tikhub_client.py             # REST client (Python standard library)
+├── references/tools-{platform}.json # cached OpenAPI endpoint catalogs
+└── scripts/refresh_tools.py         # refresh catalogs from /openapi.json
 ```
 
-## Why bundled?
+## Configuration
 
-Earlier the wrapper lived in a separate `tikhub-api` skill at `~/.claude/skills/tikhub-api/`.
-That skill is **not published** on github. To make `social-account-doctor` standalone for
-distribution, the wrapper is copied here.
+Create the repository or installed Skill `.env` from `.env.example` and set:
 
-## Quick install (after `git clone social-account-doctor`)
-
-```bash
-# 1. Put the API key in the repository/installed Skill .env
-cp -n .env.example .env
-# Edit the existing TIKHUB_API_KEY line; do not append a duplicate key.
-${EDITOR:-vi} .env
-chmod 600 .env
-
-# 2. Symlink to PATH
-ln -sf "$(pwd)/tikhub/bin/tikhub" ~/.local/bin/tikhub
-
-# 3. Verify
-tikhub --health
-tikhub list xiaohongshu search
+```text
+TIKHUB_API_KEY=your_api_key
 ```
+
+The client sends `Authorization: Bearer <key>`. The default API base URL is
+`https://api.tikhub.io`; use `TIKHUB_API_BASE_URL=https://api.tikhub.dev` when
+the mainland endpoint is preferable. `TIKHUB_ENV_FILE` can point to an explicit
+environment file.
 
 ## Usage
 
 ```bash
-tikhub <platform> <tool_name> --key1 value1 --key2 value2
-tikhub <platform> <tool_name> --json '{"k":"v"}'
-
-tikhub list <platform> [substring]      # browse cached tool catalog
-tikhub describe <platform> <tool_name>  # full input schema
-tikhub --health                         # connectivity check
-tikhub --platforms                      # list available tikhub platforms
+tikhub --health
+tikhub --platforms
+tikhub list xiaohongshu search
+tikhub describe douyin douyin_web_fetch_one_video
+tikhub douyin douyin_web_fetch_one_video --aweme_id 1234567890
+tikhub xiaohongshu xiaohongshu_app_v2_search_notes \
+  --json '{"keyword":"早餐","page":"1"}'
 ```
 
-Supported platforms (cached): `xiaohongshu` / `douyin` / `kuaishou` / `wechat` / `bilibili`.
-Add others (`tiktok`, `instagram`, `weibo`, `youtube`, `zhihu`, etc.) with:
+Numeric-looking IDs remain strings unless an explicit CLI type tag is used.
+Use `--page:int=1` only when the endpoint schema actually requires an integer.
+
+## Endpoint catalogs
+
+Catalogs are generated from `https://api.tikhub.io/openapi.json`:
 
 ```bash
-python3 tikhub/scripts/refresh_tools.py tiktok
+python3 tikhub/scripts/refresh_tools.py
+python3 tikhub/scripts/refresh_tools.py douyin xiaohongshu
+python3 tikhub/scripts/refresh_tools.py --all
 ```
 
-## Protocol notes
-
-- HTTP endpoint: `https://mcp.tikhub.io/{platform}/mcp`
-- MCP `2024-11-05` over HTTP: `initialize` returns `Mcp-Session-Id` header → `tools/list` / `tools/call`
-- Response is **SSE** (`text/event-stream`); wrapper parses `data: {...}` lines
-- Session cached at `/tmp/.tikhub-session-{platform}.json` (5 min TTL); invalid → re-init + retry once
-- Must send `User-Agent` header (Cloudflare blocks default `Python-urllib/3.x`)
+Each catalog entry records the HTTP method, REST path, query/path parameter
+locations, and request schema. Calls whose catalog path is outside `/api/v1/`
+are rejected by the client.
 
 ## Errors
 
-| Symptom | Fix |
+| Symptom | Resolution |
 |---|---|
-| `missing TIKHUB_API_KEY` | Check the installed Skill `.env`, set `TIKHUB_ENV_FILE`, or export the variable |
-| `HTTP 401` | Bad/expired key → regenerate at https://user.tikhub.io |
-| `HTTP 429` | Rate limit (10 RPS); cap concurrency ≤ 3 |
-| `RetryError[<HTTPStatusError>]` | Upstream tikhub flakiness; rotate to fallback tool (see search skill docs) |
-| `tool 'X' not found in catalog` | Cache stale → `python3 tikhub/scripts/refresh_tools.py <platform>` |
+| `missing TIKHUB_API_KEY` | Set the variable or configure the Skill `.env` |
+| `HTTP 401` | Replace an invalid or expired API key |
+| `HTTP 429` | Reduce concurrency; the client retries transient limits |
+| endpoint not found | Run `tikhub list`, then refresh the OpenAPI catalog if needed |
 
-## Debugging
-
-```bash
-TIKHUB_DEBUG=1 tikhub <platform> <tool> ...   # log requests to stderr
-```
-
-## License + provenance
-
-Vendored from `tikhub-api` skill, MIT. Original: see https://github.com/JuneYaooo/social-account-doctor.
+Use `TIKHUB_DEBUG=1` to print request method/path and retry attempts to stderr.

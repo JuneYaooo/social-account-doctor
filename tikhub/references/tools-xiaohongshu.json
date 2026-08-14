@@ -1,2684 +1,1435 @@
 [
   {
-    "name": "xiaohongshu_web_get_home_recommend",
-    "description": "获取首页推荐/Get home recommend",
+    "name": "xiaohongshu_app_v2_get_creator_hot_inspiration_feed",
+    "description": "获取创作者热点灵感列表/Get creator hot inspiration feed",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_creator_hot_inspiration_feed",
     "inputSchema": {
-      "properties": {},
-      "title": "xiaohongshu_web_get_home_recommendArguments",
-      "type": "object"
-    },
-    "outputSchema": {
+      "type": "object",
       "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_home_recommendOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_info_v2",
-    "description": "获取笔记信息 V2/Get note info V2",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_web_get_note_info_v2Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_info_v2Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_info_v4",
-    "description": "获取笔记信息 V4/Get note info V4",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_web_get_note_info_v4Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_info_v4Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_info_v5",
-    "description": "获取笔记信息 V5 (自带Cookie)/Get note info V5 (Self-provided Cookie)",
-    "inputSchema": {
-      "properties": {},
-      "title": "xiaohongshu_web_get_note_info_v5Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_info_v5Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_info_v7",
-    "description": "获取笔记信息 V7/Get note info V7",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_web_get_note_info_v7Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_info_v7Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_comments",
-    "description": "获取笔记评论 V1/Get note comments V1",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        },
-        "lastCursor": {
-          "default": null,
-          "title": "Lastcursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_get_note_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_comment_replies",
-    "description": "获取笔记评论回复 V1/Get note comment replies V1",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        },
-        "comment_id": {
-          "title": "Comment Id",
-          "type": "string"
-        },
-        "lastCursor": {
-          "default": null,
-          "title": "Lastcursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id",
-        "comment_id"
-      ],
-      "title": "xiaohongshu_web_get_note_comment_repliesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_comment_repliesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_user_info",
-    "description": "获取用户信息 V1/Get user info V1",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_get_user_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_user_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_user_info_v2",
-    "description": "获取用户信息 V2/Get user info V2",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "default": "",
-          "title": "User Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_web_get_user_info_v2Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_user_info_v2Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_search_notes",
-    "description": "搜索笔记/Search notes",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "sort": {
-          "default": "general",
-          "title": "Sort",
-          "type": "string"
-        },
-        "noteType": {
-          "default": "_0",
-          "title": "Notetype",
-          "type": "string"
-        },
-        "noteTime": {
-          "default": "",
-          "title": "Notetime",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_web_search_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_search_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_search_notes_v3",
-    "description": "搜索笔记 V3/Search notes V3",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "sort": {
-          "default": "general",
-          "title": "Sort",
-          "type": "string"
-        },
-        "noteType": {
-          "default": "_0",
-          "title": "Notetype",
-          "type": "string"
-        },
-        "noteTime": {
-          "default": "",
-          "title": "Notetime",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_web_search_notes_v3Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_search_notes_v3Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_search_users",
-    "description": "搜索用户/Search users",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_web_search_usersArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_search_usersOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_user_notes_v2",
-    "description": "获取用户的笔记 V2/Get user notes V2",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
-        "lastCursor": {
-          "default": null,
-          "title": "Lastcursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_get_user_notes_v2Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_user_notes_v2Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_visitor_cookie",
-    "description": "获取游客Cookie/Get visitor cookie",
-    "inputSchema": {
-      "properties": {
-        "proxy": {
-          "default": "",
-          "title": "Proxy",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_web_get_visitor_cookieArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_visitor_cookieOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_sign",
-    "description": "小红书Web签名/Xiaohongshu Web sign",
-    "inputSchema": {
-      "properties": {},
-      "title": "xiaohongshu_web_signArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_signOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_note_id_and_xsec_token",
-    "description": "通过分享链接获取小红书的Note ID 和 xsec_token/Get Xiaohongshu Note ID and xsec_token by share link",
-    "inputSchema": {
-      "properties": {
-        "share_text": {
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "required": [
-        "share_text"
-      ],
-      "title": "xiaohongshu_web_get_note_id_and_xsec_tokenArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_note_id_and_xsec_tokenOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_get_product_info",
-    "description": "获取小红书商品信息/Get Xiaohongshu product info",
-    "inputSchema": {
-      "properties": {
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        },
-        "item_id": {
-          "default": "",
-          "title": "Item Id",
-          "type": "string"
-        },
-        "xsec_token": {
-          "default": "",
-          "title": "Xsec Token",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_web_get_product_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_get_product_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_feed_notes",
-    "description": "获取单一笔记和推荐笔记 V1 (已弃用)/Fetch one note and feed notes V1 (deprecated)",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_feed_notes_v2",
-    "description": "获取单一笔记和推荐笔记 V2/Fetch one note and feed notes V2(v2稳定, 推荐使用此接口)",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v2Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v2Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_feed_notes_v3",
-    "description": "获取单一笔记和推荐笔记 V3/Fetch one note and feed notes V3(通过短链获取笔记详情)",
-    "inputSchema": {
-      "properties": {
-        "short_url": {
-          "title": "Short Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "short_url"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v3Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v3Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_feed_notes_v4",
-    "description": "获取单一笔记和推荐笔记 V4 (互动量有延迟)/Fetch one note and feed notes V4 (interaction volume has a delay)",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v4Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v4Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_feed_notes_v5",
-    "description": "获取单一笔记和推荐笔记 V5 (互动量有缺失)/Fetch one note and feed notes V5 (interaction volume has a missing)",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v5Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_feed_notes_v5Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_note_image",
-    "description": "获取小红书笔记图片/Fetch Xiaohongshu note image",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_note_imageArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_note_imageOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_search_notes",
-    "description": "获取搜索笔记/Fetch search notes",
-    "inputSchema": {
-      "properties": {
-        "keywords": {
-          "title": "Keywords",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "sort_type": {
-          "default": "general",
-          "title": "Sort Type",
-          "type": "string"
-        },
-        "note_type": {
-          "default": "0",
-          "title": "Note Type",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keywords"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_search_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_search_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_search_users",
-    "description": "获取搜索用户/Fetch search users",
-    "inputSchema": {
-      "properties": {
-        "keywords": {
-          "title": "Keywords",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "keywords"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_search_usersArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_search_usersOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_home_notes",
-    "description": "获取Web用户主页笔记/Fetch web user profile notes",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
         "cursor": {
+          "type": "string",
+          "description": "分页游标，首次请求留空/Pagination cursor, leave empty for first request",
           "default": "",
-          "title": "Cursor",
-          "type": "string"
+          "title": "Cursor"
         }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_home_notesArguments",
-      "type": "object"
+      }
     },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_home_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_home_notes_app",
-    "description": "获取App用户主页笔记/Fetch App user home notes",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_home_notes_appArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_home_notes_appOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_note_comments",
-    "description": "获取笔记评论/Fetch note comments",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_note_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_note_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_sub_comments",
-    "description": "获取子评论/Fetch sub comments",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        },
-        "comment_id": {
-          "title": "Comment Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id",
-        "comment_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_sub_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_sub_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_user_info",
-    "description": "获取用户信息/Fetch user info",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_user_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_user_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_user_info_app",
-    "description": "获取App用户信息/Fetch App user info",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_user_info_appArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_user_info_appOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_follower_list",
-    "description": "获取用户粉丝列表/Fetch follower list",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_follower_listArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_follower_listOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_following_list",
-    "description": "获取用户关注列表/Fetch following list",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_following_listArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_following_listOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_product_list",
-    "description": "获取小红书商品列表/Fetch Xiaohongshu product list",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
-        "page": {
-          "default": "1",
-          "title": "Page",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_product_listArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_product_listOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_web_v2_fetch_hot_list",
-    "description": "获取小红书热榜/Fetch Xiaohongshu hot list",
-    "inputSchema": {
-      "properties": {},
-      "title": "xiaohongshu_web_v2_fetch_hot_listArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_web_v2_fetch_hot_listOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_note_info",
-    "description": "获取笔记信息 V1/Get note info V1",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_get_note_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_note_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_note_info_v2",
-    "description": "获取笔记信息 V2 (蒲公英商家后台)/Get note info V2 (Pugongying Business Backend)",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_get_note_info_v2Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_note_info_v2Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_video_note_info",
-    "description": "[已弃用/Deprecated] 获取视频笔记信息 V1/ Get video note info V1",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_get_video_note_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_video_note_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_note_comments",
-    "description": "获取笔记评论/Get note comments",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        },
-        "start": {
-          "default": null,
-          "title": "Start",
-          "type": "string"
-        },
-        "sort_strategy": {
-          "default": 1,
-          "title": "Sort Strategy",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "note_id"
-      ],
-      "title": "xiaohongshu_app_get_note_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_note_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_sub_comments",
-    "description": "获取子评论/Get sub comments",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "title": "Note Id",
-          "type": "string"
-        },
-        "comment_id": {
-          "title": "Comment Id",
-          "type": "string"
-        },
-        "start": {
-          "default": null,
-          "title": "Start",
-          "type": "string"
-        }
-      },
-      "required": [
-        "note_id",
-        "comment_id"
-      ],
-      "title": "xiaohongshu_app_get_sub_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_sub_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_notes_by_topic",
-    "description": "[已弃用/Deprecated] 根据话题标签获取作品/Get notes by topic",
-    "inputSchema": {
-      "properties": {
-        "page_id": {
-          "title": "Page Id",
-          "type": "string"
-        },
-        "first_load_time": {
-          "title": "First Load Time",
-          "type": "string"
-        },
-        "sort": {
-          "default": "hot",
-          "title": "Sort",
-          "type": "string"
-        },
-        "session_id": {
-          "default": null,
-          "title": "Session Id",
-          "type": "string"
-        },
-        "last_note_ct": {
-          "default": null,
-          "title": "Last Note Ct",
-          "type": "string"
-        },
-        "last_note_id": {
-          "default": null,
-          "title": "Last Note Id",
-          "type": "string"
-        },
-        "cursor_score": {
-          "default": null,
-          "title": "Cursor Score",
-          "type": "string"
-        }
-      },
-      "required": [
-        "page_id",
-        "first_load_time"
-      ],
-      "title": "xiaohongshu_app_get_notes_by_topicArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_notes_by_topicOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_search_notes",
-    "description": "搜索笔记/Search notes",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "title": "Page",
-          "type": "integer"
-        },
-        "search_id": {
-          "default": null,
-          "title": "Search Id",
-          "type": "string"
-        },
-        "session_id": {
-          "default": null,
-          "title": "Session Id",
-          "type": "string"
-        },
-        "sort_type": {
-          "default": "general",
-          "title": "Sort Type",
-          "type": "string"
-        },
-        "filter_note_type": {
-          "default": "不限",
-          "title": "Filter Note Type",
-          "type": "string"
-        },
-        "filter_note_time": {
-          "default": "不限",
-          "title": "Filter Note Time",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword",
-        "page"
-      ],
-      "title": "xiaohongshu_app_search_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_search_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_search_notes_v2",
-    "description": "[已弃用/Deprecated] 搜索笔记 V2/Search notes V2",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "sort": {
-          "default": "general",
-          "title": "Sort",
-          "type": "string"
-        },
-        "noteType": {
-          "default": "_0",
-          "title": "Notetype",
-          "type": "string"
-        },
-        "noteTime": {
-          "default": "",
-          "title": "Notetime",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_app_search_notes_v2Arguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_search_notes_v2Output",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_search_users",
-    "description": "[已弃用/Deprecated] 搜索用户/Search users",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "title": "Page",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "keyword",
-        "page"
-      ],
-      "title": "xiaohongshu_app_search_usersArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_search_usersOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_user_info",
-    "description": "获取用户信息/Get user info",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_app_get_user_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_user_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_user_notes",
-    "description": "获取用户作品列表/Get user notes",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "title": "User Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": null,
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "user_id"
-      ],
-      "title": "xiaohongshu_app_get_user_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_user_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_extract_share_info",
-    "description": "提取分享链接信息/Extract share link info",
-    "inputSchema": {
-      "properties": {
-        "share_link": {
-          "title": "Share Link",
-          "type": "string"
-        }
-      },
-      "required": [
-        "share_link"
-      ],
-      "title": "xiaohongshu_app_extract_share_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_extract_share_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_user_id_and_xsec_token",
-    "description": "从分享链接中提取用户ID和xsec_token/Extract user ID and xsec_token from share link",
-    "inputSchema": {
-      "properties": {
-        "share_link": {
-          "title": "Share Link",
-          "type": "string"
-        }
-      },
-      "required": [
-        "share_link"
-      ],
-      "title": "xiaohongshu_app_get_user_id_and_xsec_tokenArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_user_id_and_xsec_tokenOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_get_product_detail",
-    "description": "获取商品详情/Get product detail",
-    "inputSchema": {
-      "properties": {
-        "sku_id": {
-          "title": "Sku Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "sku_id"
-      ],
-      "title": "xiaohongshu_app_get_product_detailArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_get_product_detailOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_search_products",
-    "description": "搜索商品/Search products",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "title": "Page",
-          "type": "integer"
-        },
-        "search_id": {
-          "default": null,
-          "title": "Search Id",
-          "type": "string"
-        },
-        "session_id": {
-          "default": null,
-          "title": "Session Id",
-          "type": "string"
-        },
-        "sort": {
-          "default": null,
-          "title": "Sort",
-          "type": "string"
-        },
-        "scope": {
-          "default": null,
-          "title": "Scope",
-          "type": "string"
-        },
-        "service_guarantee": {
-          "default": null,
-          "title": "Service Guarantee",
-          "type": "string"
-        },
-        "min_price": {
-          "default": null,
-          "title": "Min Price",
-          "type": "string"
-        },
-        "max_price": {
-          "default": null,
-          "title": "Max Price",
-          "type": "string"
-        },
-        "super_promotion": {
-          "default": null,
-          "title": "Super Promotion",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword",
-        "page"
-      ],
-      "title": "xiaohongshu_app_search_productsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_search_productsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_image_note_detail",
-    "description": "获取图文笔记详情/Get image note detail",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_image_note_detailArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_image_note_detailOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_video_note_detail",
-    "description": "获取视频笔记详情/Get video note detail",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_video_note_detailArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_video_note_detailOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_mixed_note_detail",
-    "description": "获取首页推荐流笔记详情/Get mixed note detail from feed",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_mixed_note_detailArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_mixed_note_detailOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_note_comments",
-    "description": "获取笔记评论列表/Get note comments",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        },
-        "index": {
-          "default": 0,
-          "title": "Index",
-          "type": "integer"
-        },
-        "sort_strategy": {
-          "default": "default",
-          "title": "Sort Strategy",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_note_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_note_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_note_sub_comments",
-    "description": "获取笔记二级评论列表/Get note sub comments",
-    "inputSchema": {
-      "properties": {
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        },
-        "comment_id": {
-          "title": "Comment Id",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        },
-        "index": {
-          "default": 1,
-          "title": "Index",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "comment_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_note_sub_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_note_sub_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_user_info",
-    "description": "获取用户信息/Get user info",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "default": "",
-          "title": "User Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_user_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_user_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_user_posted_notes",
-    "description": "获取用户笔记列表/Get user posted notes",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "default": "",
-          "title": "User Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_user_posted_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_user_posted_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_user_faved_notes",
-    "description": "获取用户收藏笔记列表/Get user faved notes",
-    "inputSchema": {
-      "properties": {
-        "user_id": {
-          "default": "",
-          "title": "User Id",
-          "type": "string"
-        },
-        "share_text": {
-          "default": "",
-          "title": "Share Text",
-          "type": "string"
-        },
-        "cursor": {
-          "default": "",
-          "title": "Cursor",
-          "type": "string"
-        }
-      },
-      "title": "xiaohongshu_app_v2_get_user_faved_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_user_faved_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_search_notes",
-    "description": "搜索笔记/Search notes",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "sort_type": {
-          "default": "general",
-          "title": "Sort Type",
-          "type": "string"
-        },
-        "note_type": {
-          "default": "不限",
-          "title": "Note Type",
-          "type": "string"
-        },
-        "time_filter": {
-          "default": "不限",
-          "title": "Time Filter",
-          "type": "string"
-        },
-        "search_id": {
-          "default": "",
-          "title": "Search Id",
-          "type": "string"
-        },
-        "search_session_id": {
-          "default": "",
-          "title": "Search Session Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "explore_feed",
-          "title": "Source",
-          "type": "string"
-        },
-        "ai_mode": {
-          "default": 0,
-          "title": "Ai Mode",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_app_v2_search_notesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_search_notesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_search_users",
-    "description": "搜索用户/Search users",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "search_id": {
-          "default": "",
-          "title": "Search Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "explore_feed",
-          "title": "Source",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_app_v2_search_usersArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_search_usersOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_search_images",
-    "description": "搜索图片/Search images",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "search_id": {
-          "default": "",
-          "title": "Search Id",
-          "type": "string"
-        },
-        "search_session_id": {
-          "default": "",
-          "title": "Search Session Id",
-          "type": "string"
-        },
-        "word_request_id": {
-          "default": "",
-          "title": "Word Request Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "explore_feed",
-          "title": "Source",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_app_v2_search_imagesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_search_imagesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_search_products",
-    "description": "搜索商品/Search products",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        },
-        "search_id": {
-          "default": "",
-          "title": "Search Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "explore_feed",
-          "title": "Source",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_app_v2_search_productsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_search_productsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_search_groups",
-    "description": "搜索群聊/Search groups",
-    "inputSchema": {
-      "properties": {
-        "keyword": {
-          "title": "Keyword",
-          "type": "string"
-        },
-        "page_no": {
-          "default": 0,
-          "title": "Page No",
-          "type": "integer"
-        },
-        "search_id": {
-          "default": "",
-          "title": "Search Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "unifiedSearchGroup",
-          "title": "Source",
-          "type": "string"
-        },
-        "is_recommend": {
-          "default": 0,
-          "title": "Is Recommend",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "keyword"
-      ],
-      "title": "xiaohongshu_app_v2_search_groupsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_search_groupsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_product_detail",
-    "description": "获取商品详情/Get product detail",
-    "inputSchema": {
-      "properties": {
-        "sku_id": {
-          "title": "Sku Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "mall_search",
-          "title": "Source",
-          "type": "string"
-        },
-        "pre_page": {
-          "default": "mall_search",
-          "title": "Pre Page",
-          "type": "string"
-        }
-      },
-      "required": [
-        "sku_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_detailArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_detailOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_product_review_overview",
-    "description": "获取商品评论总览/Get product review overview",
-    "inputSchema": {
-      "properties": {
-        "sku_id": {
-          "title": "Sku Id",
-          "type": "string"
-        },
-        "tab": {
-          "default": 2,
-          "title": "Tab",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "sku_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_review_overviewArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_review_overviewOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_product_reviews",
-    "description": "获取商品评论列表/Get product reviews",
-    "inputSchema": {
-      "properties": {
-        "sku_id": {
-          "title": "Sku Id",
-          "type": "string"
-        },
-        "page": {
-          "default": 0,
-          "title": "Page",
-          "type": "integer"
-        },
-        "sort_strategy_type": {
-          "default": 0,
-          "title": "Sort Strategy Type",
-          "type": "integer"
-        },
-        "share_pics_only": {
-          "default": 0,
-          "title": "Share Pics Only",
-          "type": "integer"
-        },
-        "from_page": {
-          "default": "score_page",
-          "title": "From Page",
-          "type": "string"
-        }
-      },
-      "required": [
-        "sku_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_reviewsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_reviewsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_product_recommendations",
-    "description": "获取商品推荐列表/Get product recommendations",
-    "inputSchema": {
-      "properties": {
-        "sku_id": {
-          "title": "Sku Id",
-          "type": "string"
-        },
-        "cursor_score": {
-          "default": "",
-          "title": "Cursor Score",
-          "type": "string"
-        },
-        "region": {
-          "default": "US",
-          "title": "Region",
-          "type": "string"
-        }
-      },
-      "required": [
-        "sku_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_recommendationsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_product_recommendationsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_topic_info",
-    "description": "获取话题详情/Get topic info",
-    "inputSchema": {
-      "properties": {
-        "page_id": {
-          "title": "Page Id",
-          "type": "string"
-        },
-        "source": {
-          "default": "normal",
-          "title": "Source",
-          "type": "string"
-        },
-        "note_id": {
-          "default": "",
-          "title": "Note Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "page_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_topic_infoArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_topic_infoOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "xiaohongshu_app_v2_get_topic_feed",
-    "description": "获取话题笔记列表/Get topic feed",
-    "inputSchema": {
-      "properties": {
-        "page_id": {
-          "title": "Page Id",
-          "type": "string"
-        },
-        "sort": {
-          "default": "trend",
-          "title": "Sort",
-          "type": "string"
-        },
-        "cursor_score": {
-          "default": "",
-          "title": "Cursor Score",
-          "type": "string"
-        },
-        "last_note_id": {
-          "default": "",
-          "title": "Last Note Id",
-          "type": "string"
-        },
-        "last_note_ct": {
-          "default": "",
-          "title": "Last Note Ct",
-          "type": "string"
-        },
-        "session_id": {
-          "default": "",
-          "title": "Session Id",
-          "type": "string"
-        },
-        "first_load_time": {
-          "default": "",
-          "title": "First Load Time",
-          "type": "string"
-        },
-        "source": {
-          "default": "normal",
-          "title": "Source",
-          "type": "string"
-        }
-      },
-      "required": [
-        "page_id"
-      ],
-      "title": "xiaohongshu_app_v2_get_topic_feedArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_topic_feedOutput",
-      "type": "object"
-    }
+    "queryParameters": [
+      "cursor"
+    ],
+    "pathParameters": []
   },
   {
     "name": "xiaohongshu_app_v2_get_creator_inspiration_feed",
     "description": "获取创作者推荐灵感列表/Get creator inspiration feed",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_creator_inspiration_feed",
     "inputSchema": {
+      "type": "object",
       "properties": {
         "cursor": {
+          "type": "string",
+          "description": "分页游标，首次请求留空/Pagination cursor, leave empty for first request",
           "default": "",
-          "title": "Cursor",
-          "type": "string"
+          "title": "Cursor"
         },
         "tab": {
+          "type": "integer",
+          "description": "标签类型/Tab type",
           "default": 0,
-          "title": "Tab",
-          "type": "integer"
+          "title": "Tab"
         },
         "source": {
+          "type": "string",
+          "description": "来源/Source",
           "default": "creator_center",
-          "title": "Source",
-          "type": "string"
+          "title": "Source"
         }
-      },
-      "title": "xiaohongshu_app_v2_get_creator_inspiration_feedArguments",
-      "type": "object"
+      }
     },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_creator_inspiration_feedOutput",
-      "type": "object"
-    }
+    "queryParameters": [
+      "cursor",
+      "tab",
+      "source"
+    ],
+    "pathParameters": []
   },
   {
-    "name": "xiaohongshu_app_v2_get_creator_hot_inspiration_feed",
-    "description": "获取创作者热点灵感列表/Get creator hot inspiration feed",
+    "name": "xiaohongshu_app_v2_get_image_note_detail",
+    "description": "获取图文笔记详情/Get image note detail",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_image_note_detail",
     "inputSchema": {
+      "type": "object",
       "properties": {
-        "cursor": {
+        "note_id": {
+          "type": "string",
+          "description": "笔记ID/Note ID",
           "default": "",
-          "title": "Cursor",
-          "type": "string"
+          "title": "Note Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
         }
-      },
-      "title": "xiaohongshu_app_v2_get_creator_hot_inspiration_feedArguments",
-      "type": "object"
+      }
     },
-    "outputSchema": {
+    "queryParameters": [
+      "note_id",
+      "share_text"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_note_comments",
+    "description": "获取笔记评论列表/Get note comments",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_note_comments",
+    "inputSchema": {
+      "type": "object",
       "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
+        "note_id": {
+          "type": "string",
+          "description": "笔记ID/Note ID",
+          "default": "",
+          "title": "Note Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "分页游标，首次请求留空/Pagination cursor, leave empty for first request",
+          "default": "",
+          "title": "Cursor"
+        },
+        "index": {
+          "type": "integer",
+          "description": "评论索引，首次请求传0/Comment index, pass 0 for first request",
+          "default": 0,
+          "title": "Index"
+        },
+        "pageArea": {
+          "type": "string",
+          "description": "折叠状态: UNFOLDED(默认-展开), FOLDED(折叠)",
+          "default": "UNFOLDED",
+          "title": "Pagearea"
+        },
+        "sort_strategy": {
+          "type": "string",
+          "description": "排序策略/Sort strategy: default, latest_v2, like_count",
+          "default": "latest_v2",
+          "title": "Sort Strategy"
+        }
+      }
+    },
+    "queryParameters": [
+      "note_id",
+      "share_text",
+      "cursor",
+      "index",
+      "pageArea",
+      "sort_strategy"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_note_sub_comments",
+    "description": "获取笔记二级评论列表/Get note sub comments",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_note_sub_comments",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "description": "笔记ID/Note ID",
+          "default": "",
+          "title": "Note Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
+        },
+        "comment_id": {
+          "type": "string",
+          "description": "父评论ID/Parent comment ID",
+          "title": "Comment Id"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "分页游标，首次留空，翻页时从$.data.data.cursor中提取cursor值/Pagination cursor, leave empty for first request, extract cursor from $.data.cursor for next page",
+          "default": "",
+          "title": "Cursor"
+        },
+        "index": {
+          "type": "integer",
+          "description": "分页索引，首次传1，翻页时从$.data.data.cursor中提取index值/Pagination index, pass 1 for first request, extract index from $.data.cursor for next page",
+          "default": 1,
+          "title": "Index"
         }
       },
       "required": [
-        "result"
-      ],
-      "title": "xiaohongshu_app_v2_get_creator_hot_inspiration_feedOutput",
-      "type": "object"
-    }
+        "comment_id"
+      ]
+    },
+    "queryParameters": [
+      "note_id",
+      "share_text",
+      "comment_id",
+      "cursor",
+      "index"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_product_detail",
+    "description": "获取商品详情/Get product detail",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_product_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "string",
+          "description": "商品SKU ID/Product SKU ID",
+          "title": "Sku Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "mall_search",
+          "title": "Source"
+        },
+        "pre_page": {
+          "type": "string",
+          "description": "前置页面/Previous page",
+          "default": "mall_search",
+          "title": "Pre Page"
+        }
+      },
+      "required": [
+        "sku_id"
+      ]
+    },
+    "queryParameters": [
+      "sku_id",
+      "source",
+      "pre_page"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_product_recommendations",
+    "description": "获取商品推荐列表/Get product recommendations",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_product_recommendations",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "string",
+          "description": "商品SKU ID/Product SKU ID",
+          "title": "Sku Id"
+        },
+        "cursor_score": {
+          "type": "string",
+          "description": "分页游标，首次请求留空/Pagination cursor, leave empty for first request",
+          "default": "",
+          "title": "Cursor Score"
+        },
+        "region": {
+          "type": "string",
+          "description": "地区/Region",
+          "default": "US",
+          "title": "Region"
+        }
+      },
+      "required": [
+        "sku_id"
+      ]
+    },
+    "queryParameters": [
+      "sku_id",
+      "cursor_score",
+      "region"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_product_review_overview",
+    "description": "获取商品评论总览/Get product review overview",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_product_review_overview",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "string",
+          "description": "商品SKU ID/Product SKU ID",
+          "title": "Sku Id"
+        },
+        "tab": {
+          "type": "integer",
+          "description": "标签类型/Tab type",
+          "default": 2,
+          "title": "Tab"
+        }
+      },
+      "required": [
+        "sku_id"
+      ]
+    },
+    "queryParameters": [
+      "sku_id",
+      "tab"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_product_reviews",
+    "description": "获取商品评论列表/Get product reviews",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_product_reviews",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "string",
+          "description": "商品SKU ID/Product SKU ID",
+          "title": "Sku Id"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，从0开始/Page number, start from 0",
+          "default": 0,
+          "title": "Page"
+        },
+        "sort_strategy_type": {
+          "type": "integer",
+          "description": "排序策略：0=综合排序, 1=最新排序/Sort strategy: 0=general, 1=latest",
+          "default": 0,
+          "title": "Sort Strategy Type"
+        },
+        "share_pics_only": {
+          "type": "integer",
+          "description": "仅看有图评论：0=否, 1=是/Show reviews with images only: 0=no, 1=yes",
+          "default": 0,
+          "title": "Share Pics Only"
+        },
+        "from_page": {
+          "type": "string",
+          "description": "来源页面/From page",
+          "default": "score_page",
+          "title": "From Page"
+        }
+      },
+      "required": [
+        "sku_id"
+      ]
+    },
+    "queryParameters": [
+      "sku_id",
+      "page",
+      "sort_strategy_type",
+      "share_pics_only",
+      "from_page"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_topic_feed",
+    "description": "获取话题笔记列表/Get topic feed",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_topic_feed",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "page_id": {
+          "type": "string",
+          "description": "话题页面ID/Topic page ID",
+          "title": "Page Id"
+        },
+        "sort": {
+          "type": "string",
+          "description": "排序方式/Sort: trend(最热), time(最新)",
+          "default": "trend",
+          "title": "Sort"
+        },
+        "cursor_score": {
+          "type": "string",
+          "description": "分页游标分数，翻页时传入/Pagination cursor score for next page",
+          "default": "",
+          "title": "Cursor Score"
+        },
+        "last_note_id": {
+          "type": "string",
+          "description": "上一页最后一条笔记ID，翻页时传入/Last note ID from previous page",
+          "default": "",
+          "title": "Last Note Id"
+        },
+        "last_note_ct": {
+          "type": "string",
+          "description": "上一页最后一条笔记创建时间，翻页时传入/Last note create time from previous page",
+          "default": "",
+          "title": "Last Note Ct"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "会话ID，翻页时保持一致/Session ID, keep consistent for pagination",
+          "default": "",
+          "title": "Session Id"
+        },
+        "first_load_time": {
+          "type": "string",
+          "description": "首次加载时间戳，翻页时保持一致/First load timestamp, keep consistent for pagination",
+          "default": "",
+          "title": "First Load Time"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "normal",
+          "title": "Source"
+        }
+      },
+      "required": [
+        "page_id"
+      ]
+    },
+    "queryParameters": [
+      "page_id",
+      "sort",
+      "cursor_score",
+      "last_note_id",
+      "last_note_ct",
+      "session_id",
+      "first_load_time",
+      "source"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_topic_info",
+    "description": "获取话题详情/Get topic info",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_topic_info",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "page_id": {
+          "type": "string",
+          "description": "话题页面ID/Topic page ID",
+          "title": "Page Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "normal",
+          "title": "Source"
+        },
+        "note_id": {
+          "type": "string",
+          "description": "来源笔记ID，从笔记跳转到话题时传入/Source note ID, pass when jumping from note to topic",
+          "default": "",
+          "title": "Note Id"
+        }
+      },
+      "required": [
+        "page_id"
+      ]
+    },
+    "queryParameters": [
+      "page_id",
+      "source",
+      "note_id"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_user_faved_notes",
+    "description": "获取用户收藏笔记列表/Get user faved notes",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_user_faved_notes",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "用户ID/User ID",
+          "default": "",
+          "title": "User Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "分页游标，首次请求留空，翻页时传入上一页最后一条笔记的note_id/Pagination cursor, leave empty for first request, pass last note_id from previous page for next page",
+          "default": "",
+          "title": "Cursor"
+        }
+      }
+    },
+    "queryParameters": [
+      "user_id",
+      "share_text",
+      "cursor"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_user_info",
+    "description": "获取用户信息/Get user info",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_user_info",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "用户ID/User ID",
+          "default": "",
+          "title": "User Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
+        }
+      }
+    },
+    "queryParameters": [
+      "user_id",
+      "share_text"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_user_posted_notes",
+    "description": "获取用户笔记列表/Get user posted notes",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_user_posted_notes",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "用户ID/User ID",
+          "default": "",
+          "title": "User Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "分页游标，首次请求留空/Pagination cursor, leave empty for first request",
+          "default": "",
+          "title": "Cursor"
+        }
+      }
+    },
+    "queryParameters": [
+      "user_id",
+      "share_text",
+      "cursor"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_get_video_note_detail",
+    "description": "获取视频笔记详情/Get video note detail",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/get_video_note_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "description": "笔记ID/Note ID",
+          "default": "",
+          "title": "Note Id"
+        },
+        "share_text": {
+          "type": "string",
+          "description": "分享链接/Share link",
+          "default": "",
+          "title": "Share Text"
+        }
+      }
+    },
+    "queryParameters": [
+      "note_id",
+      "share_text"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_search_groups",
+    "description": "搜索群聊/Search groups",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/search_groups",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词/Search keyword",
+          "title": "Keyword"
+        },
+        "page_no": {
+          "type": "integer",
+          "description": "页码，从0开始/Page number, start from 0",
+          "default": 0,
+          "title": "Page No"
+        },
+        "search_id": {
+          "type": "string",
+          "description": "搜索ID，翻页时传入首次搜索返回的值/Search ID for pagination",
+          "default": "",
+          "title": "Search Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "unifiedSearchGroup",
+          "title": "Source"
+        },
+        "is_recommend": {
+          "type": "integer",
+          "description": "是否推荐：0=否, 1=是/Is recommend: 0=no, 1=yes",
+          "default": 0,
+          "title": "Is Recommend"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [
+      "keyword",
+      "page_no",
+      "search_id",
+      "source",
+      "is_recommend"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_search_images",
+    "description": "搜索图片/Search images",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/search_images",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词/Search keyword",
+          "title": "Keyword"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，从1开始/Page number, start from 1",
+          "default": 1,
+          "title": "Page"
+        },
+        "search_id": {
+          "type": "string",
+          "description": "搜索ID，翻页时传入首次搜索返回的值/Search ID for pagination",
+          "default": "",
+          "title": "Search Id"
+        },
+        "search_session_id": {
+          "type": "string",
+          "description": "搜索会话ID，翻页时传入首次搜索返回的值/Search session ID for pagination",
+          "default": "",
+          "title": "Search Session Id"
+        },
+        "word_request_id": {
+          "type": "string",
+          "description": "词请求ID，翻页时传入首次搜索返回的值/Word request ID for pagination",
+          "default": "",
+          "title": "Word Request Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "explore_feed",
+          "title": "Source"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [
+      "keyword",
+      "page",
+      "search_id",
+      "search_session_id",
+      "word_request_id",
+      "source"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_search_notes",
+    "description": "搜索笔记/Search notes",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/search_notes",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词/Search keyword",
+          "title": "Keyword"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，从1开始/Page number, start from 1",
+          "default": 1,
+          "title": "Page"
+        },
+        "sort_type": {
+          "type": "string",
+          "description": "排序方式/Sort type",
+          "default": "general",
+          "title": "Sort Type"
+        },
+        "note_type": {
+          "type": "string",
+          "description": "笔记类型/Note type: 不限, 视频笔记, 普通笔记, 直播笔记",
+          "default": "不限",
+          "title": "Note Type"
+        },
+        "time_filter": {
+          "type": "string",
+          "description": "发布时间筛选/Time filter: 不限, 一天内, 一周内, 半年内",
+          "default": "不限",
+          "title": "Time Filter"
+        },
+        "search_id": {
+          "type": "string",
+          "description": "搜索ID，翻页时传入首次搜索返回的值/Search ID for pagination",
+          "default": "",
+          "title": "Search Id"
+        },
+        "search_session_id": {
+          "type": "string",
+          "description": "搜索会话ID，翻页时传入首次搜索返回的值/Search session ID for pagination",
+          "default": "",
+          "title": "Search Session Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "explore_feed",
+          "title": "Source"
+        },
+        "ai_mode": {
+          "type": "integer",
+          "description": "AI模式：0=关闭, 1=开启/AI mode: 0=off, 1=on",
+          "default": 0,
+          "title": "Ai Mode"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [
+      "keyword",
+      "page",
+      "sort_type",
+      "note_type",
+      "time_filter",
+      "search_id",
+      "search_session_id",
+      "source",
+      "ai_mode"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_search_products",
+    "description": "搜索商品/Search products",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/search_products",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词/Search keyword",
+          "title": "Keyword"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，从1开始/Page number, start from 1",
+          "default": 1,
+          "title": "Page"
+        },
+        "search_id": {
+          "type": "string",
+          "description": "搜索ID，翻页时传入首次搜索返回的值/Search ID for pagination",
+          "default": "",
+          "title": "Search Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "explore_feed",
+          "title": "Source"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [
+      "keyword",
+      "page",
+      "search_id",
+      "source"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_app_v2_search_users",
+    "description": "搜索用户/Search users",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/app_v2/search_users",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "搜索关键词/Search keyword",
+          "title": "Keyword"
+        },
+        "page": {
+          "type": "integer",
+          "description": "页码，从1开始/Page number, start from 1",
+          "default": 1,
+          "title": "Page"
+        },
+        "search_id": {
+          "type": "string",
+          "description": "搜索ID，翻页时传入首次搜索返回的值/Search ID for pagination",
+          "default": "",
+          "title": "Search Id"
+        },
+        "source": {
+          "type": "string",
+          "description": "来源/Source",
+          "default": "explore_feed",
+          "title": "Source"
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [
+      "keyword",
+      "page",
+      "search_id",
+      "source"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_core_data",
+    "description": "获取蒲公英博主核心数据/Get PGY blogger core data",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_core_data",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        },
+        "note_type": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "title": "Note Type",
+          "description": "笔记类型 1=图文 2=视频 3=图文+视频(默认全部)",
+          "default": 3,
+          "examples": [
+            3
+          ]
+        },
+        "date_type": {
+          "type": "integer",
+          "maximum": 12.0,
+          "minimum": 1.0,
+          "title": "Date Type",
+          "description": "统计时间范围(约 1=近7天 2=近30天 3=近90天)",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "advertise_switch": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "title": "Advertise Switch",
+          "description": "流量类型 1=全部(含合作) 0=仅自然流量",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_data_summary",
+    "description": "获取蒲公英博主数据概览/Get PGY blogger data summary",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_data_summary",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_detail",
+    "description": "获取蒲公英博主详情/Get PGY blogger detail",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_fans_history",
+    "description": "获取蒲公英博主粉丝增长历史/Get PGY blogger fans history",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_fans_history",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        },
+        "date_type": {
+          "type": "integer",
+          "maximum": 12.0,
+          "minimum": 1.0,
+          "title": "Date Type",
+          "description": "统计时间范围(约 1=近7天 2=近30天 3=近90天)",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_fans_profile",
+    "description": "获取蒲公英博主粉丝画像/Get PGY blogger fans profile",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_fans_profile",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_fans_summary",
+    "description": "获取蒲公英博主粉丝概览/Get PGY blogger fans summary",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_fans_summary",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_list",
+    "description": "获取蒲公英博主列表（选号）/Get PGY blogger list",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_list",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "brand_user_id": {
+          "type": "string",
+          "title": "Brand User Id",
+          "description": "品牌方/广告主用户ID（必填）/Brand user ID (required)",
+          "examples": [
+            "5dcfa5370000000001006030"
+          ]
+        },
+        "page_num": {
+          "type": "integer",
+          "maximum": 1000.0,
+          "minimum": 1.0,
+          "title": "Page Num",
+          "description": "页码，从 1 开始/Page number, start from 1",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "page_size": {
+          "type": "integer",
+          "maximum": 100.0,
+          "minimum": 1.0,
+          "title": "Page Size",
+          "description": "每页数量（1-100）/Page size (1-100)",
+          "default": 20,
+          "examples": [
+            20
+          ]
+        },
+        "fans_number_lower": {
+          "type": "string",
+          "maxLength": 20,
+          "pattern": "^\\d*$",
+          "title": "Fans Number Lower",
+          "description": "粉丝量下限(纯数字)；空=不限",
+          "default": "",
+          "examples": [
+            "10000"
+          ]
+        },
+        "fans_number_upper": {
+          "type": "string",
+          "maxLength": 20,
+          "pattern": "^\\d*$",
+          "title": "Fans Number Upper",
+          "description": "粉丝量上限(纯数字)；空=不限",
+          "default": "",
+          "examples": [
+            "1000000"
+          ]
+        }
+      },
+      "required": [
+        "brand_user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_notes",
+    "description": "获取蒲公英博主笔记明细/Get PGY blogger notes",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_notes",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        },
+        "page_number": {
+          "type": "integer",
+          "maximum": 1000.0,
+          "minimum": 1.0,
+          "title": "Page Number",
+          "description": "页码，从 1 开始/Page number, start from 1",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "page_size": {
+          "type": "integer",
+          "maximum": 100.0,
+          "minimum": 1.0,
+          "title": "Page Size",
+          "description": "每页数量（1-100）/Page size (1-100)",
+          "default": 20,
+          "examples": [
+            20
+          ]
+        },
+        "note_type": {
+          "type": "integer",
+          "enum": [
+            0,
+            1,
+            2,
+            4
+          ],
+          "title": "Note Type",
+          "description": "笔记类型 0=全部 1=图文 2=视频 4=图文+视频",
+          "default": 0,
+          "examples": [
+            0
+          ]
+        },
+        "order_type": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "title": "Order Type",
+          "description": "排序 1=阅读最多 2=互动最多 3=发布时间(最新)",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "advertise_switch": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "title": "Advertise Switch",
+          "description": "流量类型 1=全部(含商业合作) 0=仅自然流量",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_blogger_notes_rate",
+    "description": "获取蒲公英博主笔记转化率/Get PGY blogger notes rate",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_blogger_notes_rate",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "title": "User Id",
+          "description": "博主用户ID/Blogger user ID",
+          "examples": [
+            "5c668b3e0000000012021605"
+          ]
+        },
+        "note_type": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "title": "Note Type",
+          "description": "笔记类型 1=图文 2=视频 3=图文+视频(默认全部)",
+          "default": 3,
+          "examples": [
+            3
+          ]
+        },
+        "date_type": {
+          "type": "integer",
+          "maximum": 12.0,
+          "minimum": 1.0,
+          "title": "Date Type",
+          "description": "统计时间范围(约 1=近7天 2=近30天 3=近90天)",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        },
+        "advertise_switch": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ],
+          "title": "Advertise Switch",
+          "description": "流量类型 1=全部(含合作) 0=仅自然流量",
+          "default": 1,
+          "examples": [
+            1
+          ]
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_pgy_get_note_detail",
+    "description": "获取蒲公英笔记详情/Get PGY note detail",
+    "method": "POST",
+    "path": "/api/v1/xiaohongshu/pgy/get_note_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "title": "Note Id",
+          "description": "笔记ID/Note ID",
+          "examples": [
+            "6a20edfa0000000021020951"
+          ]
+        }
+      },
+      "required": [
+        "note_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_web_v3_fetch_homefeed",
+    "description": "获取首页推荐/Fetch homepage feed",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/web_v3/fetch_homefeed",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "num": {
+          "type": "integer",
+          "maximum": 40,
+          "description": "返回数量，最大40/Number of results, max 40",
+          "default": 20,
+          "title": "Num"
+        },
+        "cursor_score": {
+          "type": "string",
+          "description": "翻页游标/Pagination cursor",
+          "default": "",
+          "title": "Cursor Score"
+        },
+        "category": {
+          "type": "string",
+          "description": "分类频道ID/Category channel ID",
+          "default": "homefeed_recommend",
+          "title": "Category"
+        },
+        "need_filter_image": {
+          "type": "boolean",
+          "description": "仅图文/Image notes only",
+          "default": false,
+          "title": "Need Filter Image"
+        }
+      }
+    },
+    "queryParameters": [
+      "num",
+      "cursor_score",
+      "category",
+      "need_filter_image"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_web_v3_fetch_homefeed_categories",
+    "description": "获取首页分类列表/Fetch homepage categories",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/web_v3/fetch_homefeed_categories",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_web_v3_fetch_hot_list",
+    "description": "获取小红书热榜/Fetch Xiaohongshu hot list",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/web_v3/fetch_hot_list",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_web_v3_fetch_note_detail",
+    "description": "获取笔记详情/Fetch note detail",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/web_v3/fetch_note_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "description": "笔记ID/Note ID",
+          "title": "Note Id"
+        },
+        "xsec_token": {
+          "type": "string",
+          "description": "安全令牌，可以从小红书的分享链接中获取/Security token, can be obtained from the sharing link of Xiaohongshu",
+          "title": "Xsec Token"
+        }
+      },
+      "required": [
+        "note_id",
+        "xsec_token"
+      ]
+    },
+    "queryParameters": [
+      "note_id",
+      "xsec_token"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_web_v3_fetch_search_suggest",
+    "description": "获取搜索联想词/Fetch search suggestions",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/web_v3/fetch_search_suggest",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": "关键词 (可为空)/Keyword (optional)",
+          "default": "",
+          "title": "Keyword"
+        }
+      }
+    },
+    "queryParameters": [
+      "keyword"
+    ],
+    "pathParameters": []
+  },
+  {
+    "name": "xiaohongshu_web_v3_fetch_user_info",
+    "description": "获取用户信息/Fetch user info",
+    "method": "GET",
+    "path": "/api/v1/xiaohongshu/web_v3/fetch_user_info",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "用户ID/User ID",
+          "title": "User Id"
+        }
+      },
+      "required": [
+        "user_id"
+      ]
+    },
+    "queryParameters": [
+      "user_id"
+    ],
+    "pathParameters": []
   }
 ]

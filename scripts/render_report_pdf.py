@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render a Markdown diagnosis report to PDF via headless Chrome.
+"""Render a Markdown diagnosis report to a portable PDF.
 
 USAGE
     python3 scripts/render_report_pdf.py <input.md> [-o output.pdf] [--keep-html]
@@ -31,9 +31,10 @@ CARD-STYLE TOP-N OBJECTS
         </div>
 
 REQUIREMENTS
-    - python: markdown-it-py
+    - python: markdown-it-py, fpdf2
     - preferred system: Chrome/Chromium (headless mode)
-    - macOS fallback: cupsfilter (text-first A4 PDF, no extra dependency)
+    - structured fallback: fpdf2 (A4 PDF with headings, tables, lists, and CJK)
+    - last-resort macOS fallback: cupsfilter (text-first A4 PDF)
     - fonts:  Source Han Sans SC (思源黑体) installed system-wide for CJK
 """
 from __future__ import annotations
@@ -53,6 +54,13 @@ try:
     from markdown_it import MarkdownIt
 except ImportError:
     sys.exit("ERROR: markdown-it-py not installed. Run: pip install markdown-it-py")
+
+try:
+    from fpdf import FPDF
+    from fpdf.fonts import FontFace
+except ImportError:
+    FPDF = None
+    FontFace = None
 
 
 CSS = r"""
@@ -176,6 +184,268 @@ def markdown_to_plain_text(markdown: str) -> str:
     return text.strip() + "\n"
 
 
+def sanitize_markdown_for_export(markdown: str) -> str:
+    """Remove machine-specific absolute paths from portable reports."""
+    repo_root = Path(__file__).resolve().parents[1].as_posix().rstrip("/") + "/"
+    text = markdown.replace(repo_root, "")
+    text = re.sub(r"/Users/[^/\s]+/code/data/tmp/baokuan/", "本地素材/", text)
+    text = re.sub(r"output/video_distillation/[^/\s`]+/", "本次蒸馏产物/", text)
+    text = re.sub(r"/tmp/", "临时产物/", text)
+    text = re.sub(r"临时产物/[^\s`|;)]+", "临时分析文件（不随报告分发）", text)
+    text = re.sub(r"/Users/[^/\s]+/", "本地文件/", text)
+    text = re.sub(r"(?<![\w:])/(?:home|opt|private|var)/[^\s`|;)]+", "本地文件（不随报告分发）", text)
+    text = re.sub(
+        r"本地素材/(?:[^`\s|;)]+/)*([^/`\s|;)]+)",
+        r"用户上传素材（\1）",
+        text,
+    )
+    artifact_labels = {
+        r"本次蒸馏产物/00_source/media_info\.json": "媒体信息核验记录",
+        r"本次蒸馏产物/01_media/video\.mp4": "本次分析留存的视频副本",
+        r"\.\.\./02_transcript/transcript\.txt": "音频转写记录",
+        r"\.\.\./03_keyframes/keyframe_index\.json": "关键画面索引",
+        r"\.\.\./03_keyframes/frames/": "关键画面目录",
+    }
+    for pattern, label in artifact_labels.items():
+        text = re.sub(pattern, label, text)
+    text = re.sub(
+        r"原始 Whisper 草稿：`?临时分析文件（不随报告分发）`?",
+        "原始转写草稿已完成清理",
+        text,
+    )
+    text = re.sub(
+        r"\.\.\./05_copy/、\.\.\./06_video_logic/、\.\.\./07_audio_logic/、"
+        r"\.\.\./07_production_logic/、\.\.\./08_synthesis/",
+        "文案、视频结构、音频、制作与综合分析记录",
+        text,
+    )
+    text = text.replace("`multimodal_status: limited`", "分析完整度：实际视频已取得，部分模型能力受限")
+    text = text.replace("`ffprobe + 本地 ASR + 关键帧 + 逐帧视觉复核`", "媒体信息、音频转写、关键画面和逐帧视觉复核")
+    text = text.replace("`V3_keyframe_ready`", "关键画面与转写已完成")
+    return text
+
+
+def find_cjk_font() -> str | None:
+    configured = os.environ.get("PDF_FONT_PATH", "").strip()
+    candidates = [configured] if configured else []
+    candidates.extend(
+        [
+            "/System/Library/Fonts/STHeiti Medium.ttc",
+            "/System/Library/Fonts/PingFang.ttc",
+            "/System/Library/Fonts/Supplemental/Songti.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJKsc-Regular.otf",
+            "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+        ]
+    )
+    for candidate in candidates:
+        if candidate and Path(candidate).is_file():
+            return candidate
+    return None
+
+
+class ReportPDF(FPDF if FPDF is not None else object):
+    report_title = ""
+
+    def header(self):
+        if self.page_no() <= 1:
+            return
+        self.set_font("ReportCJK", size=8)
+        self.set_text_color(110, 110, 110)
+        self.cell(0, 5, self.report_title[:52], align="R")
+        self.ln(7)
+
+    def footer(self):
+        self.set_y(-12)
+        self.set_font("ReportCJK", size=8)
+        self.set_text_color(125, 125, 125)
+        self.cell(0, 5, f"{self.page_no()}/{{nb}}", align="C")
+
+
+def _inline_text(token) -> str:
+    if not getattr(token, "children", None):
+        return str(getattr(token, "content", ""))
+    parts = []
+    for child in token.children:
+        if child.type in {"text", "code_inline"}:
+            parts.append(child.content)
+        elif child.type in {"softbreak", "hardbreak"}:
+            parts.append("\n")
+        elif child.type == "image":
+            parts.append(f"[图片: {child.content or '素材'}]")
+    return "".join(parts).strip()
+
+
+def _display_weight(value: str) -> int:
+    return sum(2 if ord(char) > 127 else 1 for char in value)
+
+
+def render_with_fpdf(markdown: str, pdf_path: Path) -> Path:
+    """Render structured Markdown with embedded CJK fonts and A4 layout."""
+    if FPDF is None or FontFace is None:
+        raise RuntimeError("fpdf2 not installed")
+    font_path = find_cjk_font()
+    if not font_path:
+        raise RuntimeError("no supported CJK font found; set PDF_FONT_PATH")
+
+    tokens = MarkdownIt("commonmark", {"html": True}).enable("table").parse(markdown)
+    title = next(
+        (_inline_text(tokens[index + 1]) for index, token in enumerate(tokens[:-1])
+         if token.type == "heading_open" and token.tag == "h1"),
+        "分析报告",
+    )
+    pdf = ReportPDF(format="A4", unit="mm")
+    pdf.report_title = title
+    pdf.set_margins(14, 16, 14)
+    pdf.set_auto_page_break(auto=True, margin=16)
+    pdf.add_font("ReportCJK", fname=font_path)
+    pdf.alias_nb_pages()
+    pdf.set_title(title)
+    pdf.set_author("social-account-doctor")
+    pdf.add_page()
+    pdf.set_font("ReportCJK", size=10.5)
+    pdf.set_text_color(35, 35, 35)
+
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token.type == "heading_open" and index + 1 < len(tokens):
+            level = int(token.tag[1]) if token.tag.startswith("h") else 2
+            content = _inline_text(tokens[index + 1])
+            pdf.ln(3 if level == 1 else 2)
+            pdf.set_text_color(181, 15, 74)
+            pdf.set_font("ReportCJK", size={1: 20, 2: 15, 3: 12}.get(level, 11))
+            pdf.set_x(pdf.l_margin)
+            pdf.multi_cell(
+                0, {1: 10, 2: 8, 3: 7}.get(level, 6), content,
+                align="L", wrapmode="CHAR",
+            )
+            if level == 1:
+                pdf.set_draw_color(181, 15, 74)
+                pdf.line(pdf.l_margin, pdf.get_y() + 1, pdf.w - pdf.r_margin, pdf.get_y() + 1)
+                pdf.ln(3)
+            pdf.set_text_color(35, 35, 35)
+            pdf.set_font("ReportCJK", size=10.5)
+            index += 3
+            continue
+
+        if token.type == "blockquote_open":
+            parts = []
+            index += 1
+            while index < len(tokens) and tokens[index].type != "blockquote_close":
+                if tokens[index].type == "inline":
+                    parts.append(_inline_text(tokens[index]))
+                index += 1
+            pdf.set_fill_color(245, 245, 245)
+            pdf.set_text_color(85, 85, 85)
+            pdf.set_x(pdf.l_margin)
+            pdf.multi_cell(
+                0, 6, "\n".join(parts), align="L", fill=True,
+                padding=3, wrapmode="CHAR",
+            )
+            pdf.set_text_color(35, 35, 35)
+            pdf.ln(2)
+            index += 1
+            continue
+
+        if token.type == "table_open":
+            rows = []
+            row = []
+            index += 1
+            while index < len(tokens) and tokens[index].type != "table_close":
+                current = tokens[index]
+                if current.type == "tr_open":
+                    row = []
+                elif current.type == "inline":
+                    row.append(_inline_text(current))
+                elif current.type == "tr_close" and row:
+                    rows.append(row)
+                index += 1
+            if rows:
+                column_count = max(len(row) for row in rows)
+                normalized = [row + [""] * (column_count - len(row)) for row in rows]
+                weights = [
+                    max(8, min(36, max(_display_weight(row[col]) for row in normalized)))
+                    for col in range(column_count)
+                ]
+                pdf.set_font("ReportCJK", size=8.2 if column_count >= 5 else 9)
+                heading_style = FontFace(
+                    family="ReportCJK",
+                    size_pt=9,
+                    color=(45, 45, 45),
+                    fill_color=(254, 239, 244),
+                )
+                with pdf.table(
+                    rows=normalized,
+                    col_widths=weights,
+                    headings_style=heading_style,
+                    line_height=5.2,
+                    text_align="LEFT",
+                    width=pdf.epw,
+                ):
+                    pass
+                pdf.set_font("ReportCJK", size=10.5)
+                pdf.set_x(pdf.l_margin)
+                pdf.ln(2)
+            index += 1
+            continue
+
+        if token.type in {"bullet_list_open", "ordered_list_open"}:
+            ordered = token.type == "ordered_list_open"
+            list_index = 1
+            end_type = "ordered_list_close" if ordered else "bullet_list_close"
+            index += 1
+            while index < len(tokens) and tokens[index].type != end_type:
+                if tokens[index].type == "inline":
+                    prefix = f"{list_index}. " if ordered else "• "
+                    pdf.set_x(pdf.l_margin + 3)
+                    pdf.multi_cell(
+                        pdf.epw - 3, 6, prefix + _inline_text(tokens[index]),
+                        align="L", wrapmode="CHAR",
+                    )
+                    if ordered:
+                        list_index += 1
+                index += 1
+            pdf.ln(1)
+            index += 1
+            continue
+
+        if token.type == "paragraph_open" and index + 1 < len(tokens):
+            content = _inline_text(tokens[index + 1])
+            if content:
+                pdf.set_font("ReportCJK", size=10.5)
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(0, 6.2, content, align="L", wrapmode="CHAR")
+                pdf.ln(1.5)
+            index += 3
+            continue
+
+        if token.type in {"fence", "code_block"}:
+            pdf.set_fill_color(246, 246, 246)
+            pdf.set_font("ReportCJK", size=9)
+            pdf.set_x(pdf.l_margin)
+            pdf.multi_cell(
+                0, 5.5, token.content.rstrip(), align="L", fill=True,
+                padding=3, wrapmode="CHAR",
+            )
+            pdf.set_font("ReportCJK", size=10.5)
+            pdf.ln(2)
+            index += 1
+            continue
+
+        if token.type == "hr":
+            pdf.set_draw_color(205, 205, 205)
+            pdf.line(pdf.l_margin, pdf.get_y(), pdf.w - pdf.r_margin, pdf.get_y())
+            pdf.ln(3)
+
+        index += 1
+
+    pdf.output(str(pdf_path))
+    if not pdf_path.is_file() or pdf_path.stat().st_size == 0:
+        raise RuntimeError("fpdf2 did not produce a PDF")
+    return pdf_path
+
+
 def render_with_cupsfilter(markdown: str, pdf_path: Path) -> Path:
     """Render a portable, text-first PDF using the macOS print filter."""
     cupsfilter = shutil.which("cupsfilter")
@@ -199,7 +469,9 @@ def render_with_cupsfilter(markdown: str, pdf_path: Path) -> Path:
 
 def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
     base_dir = md_path.parent
-    md_text = md_path.read_text(encoding="utf-8")
+    md_text = sanitize_markdown_for_export(md_path.read_text(encoding="utf-8"))
+    pdf_path.parent.mkdir(parents=True, exist_ok=True)
+    pdf_path.unlink(missing_ok=True)
 
     md = (MarkdownIt("commonmark", {"html": True, "linkify": True})
           .enable("table").enable("strikethrough"))
@@ -241,7 +513,7 @@ def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
                      f"file://{html_path}"],
                     capture_output=True, text=True, timeout=timeout,
                 )
-            if pdf_path.exists() and pdf_path.stat().st_size > 0:
+            if proc.returncode == 0 and pdf_path.exists() and pdf_path.stat().st_size > 0:
                 if not keep_html:
                     html_path.unlink()
                 return pdf_path
@@ -249,11 +521,12 @@ def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
         except (OSError, subprocess.TimeoutExpired) as exc:
             chrome_error = str(exc)
 
+    fallback_errors = []
     try:
-        result = render_with_cupsfilter(md_text, pdf_path)
+        result = render_with_fpdf(md_text, pdf_path)
         print(
             "WARNING: Chrome/Chromium PDF rendering was unavailable; "
-            "used cupsfilter text fallback.",
+            "used structured fpdf2 fallback.",
             file=sys.stderr,
         )
         if chrome_error:
@@ -261,16 +534,30 @@ def render(md_path: Path, pdf_path: Path, keep_html: bool = False) -> Path:
         if not keep_html:
             html_path.unlink()
         return result
+    except Exception as fallback_error:
+        fallback_errors.append(f"fpdf2: {fallback_error}")
+
+    try:
+        result = render_with_cupsfilter(md_text, pdf_path)
+        print(
+            "WARNING: Chrome/Chromium and fpdf2 rendering were unavailable; "
+            "used cupsfilter text fallback.",
+            file=sys.stderr,
+        )
+        if not keep_html:
+            html_path.unlink()
+        return result
     except RuntimeError as fallback_error:
+        fallback_errors.append(f"cupsfilter: {fallback_error}")
         if not keep_html:
             html_path.unlink(missing_ok=True)
-        detail = chrome_error or str(fallback_error)
+        detail = chrome_error or "; ".join(fallback_errors)
         raise RuntimeError(f"PDF rendering failed: {detail}") from fallback_error
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(
-        description="Render a markdown report to PDF via headless Chrome.",
+        description="Render a Markdown report to a portable PDF.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__.split("USAGE")[1] if "USAGE" in __doc__ else "",
     )

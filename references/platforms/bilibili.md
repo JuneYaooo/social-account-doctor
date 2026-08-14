@@ -130,7 +130,7 @@ B 站官方公开的算法细节极少，本手册阈值均为**行业经验值 
 | 单视频详情（bvid） | `bilibili_web_fetch_one_video` | `bilibili_app_fetch_one_video` → `bilibili_web_fetch_one_video_v3`（URL 输入） |
 | 视频字幕（拆口播结构） | `bilibili_web_fetch_video_subtitle` | — |
 | **视频弹幕（独家）** | `bilibili_web_fetch_video_danmaku` | — |
-| 视频评论 + 二级回复 | `bilibili_web_fetch_video_comments` / `bilibili_web_fetch_comment_reply` | `bilibili_app_*` |
+| 视频评论 + 二级回复 | `bilibili_web_fetch_video_comments` / `bilibili_web_fetch_comment_reply` | `bilibili_app_fetch_video_comments` / `bilibili_app_fetch_reply_detail` |
 | UP 主信息 + 双统计 | `bilibili_web_fetch_user_profile` + `_user_up_stat` + `_user_relation_stat` | `bilibili_app_fetch_user_info` |
 | UP 主投稿列表 | `bilibili_web_fetch_user_post_videos` | `bilibili_app_fetch_user_videos` |
 | UP 主动态流 | `bilibili_web_fetch_user_dynamic` | — |

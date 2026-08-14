@@ -71,7 +71,7 @@
 1. 漏斗看到 5s完播率 < 40-50% → 直接进本节
 2. 调 tikhub douyin douyin_app_v3_fetch_one_video(aweme_id)
    → 拿 video_url + cover_url + 完播率 + 5s留存
-3. 把 video_url 下载到 /tmp/account_diagnostic/{aweme_id}/video.mp4
+3. 把 video_url 下载到本次诊断运行的素材目录
 4. 调 scripts/analyze_video.py（默认按视频配置走；本地视频片段存在且未禁用时发 video_url，如需代表帧兜底设 `VIDEO_ANALYSIS_USE_VIDEO_URL=0`）
    → 拿前 5s 的画面变化、口播文字、信息密度点分布
 5. 对照 §2.2 五种钩子失败模式定位根因
@@ -98,7 +98,7 @@ tikhub douyin douyin_app_v3_fetch_one_video(aweme_id)
   → 拿单条数据 + 媒体 URL
 
 # 下载视频前 10s
-ffmpeg -i video.mp4 -t 10 -c copy /tmp/.../prefix.mp4
+ffmpeg -i video.mp4 -t 10 -c copy ./prefix.mp4
 
 # 让 Gemini 拆前 5s
 python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.mp4
@@ -140,16 +140,16 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.m
 | 任务 | 首选 | Fallback |
 |---|---|---|
 | 账号信息（昵称/粉丝/认证） | `douyin_web_handler_user_profile` | `douyin_app_v3_handler_user_profile` → `douyin_web_handler_user_profile_v4`（带性别+直播等级） |
-| 账号粉丝/关注关系 | `douyin_web_fetch_user_relation_stat` (无此工具时) → `douyin_web_fetch_user_following_list` | `douyin_app_v3_fetch_user_following_list` |
+| 账号粉丝画像 | `douyin_billboard_fetch_hot_account_fans_portrait_list`（仅收录账号） | 普通账号缺数据时让用户补后台截图 |
 | 用户作品列表 | `douyin_web_fetch_user_post_videos` | `douyin_app_v3_fetch_user_post_videos` |
 | 用户喜欢列表（看口味） | `douyin_web_fetch_user_like_videos` | `douyin_app_v3_fetch_user_like_videos` |
 | 视频详情 | `douyin_app_v3_fetch_one_video` | `douyin_app_v3_fetch_one_video_v2` → `_v3` → `douyin_web_fetch_one_video` |
 | 视频统计（播放/点赞/转发/下载） | `douyin_app_v3_fetch_video_statistics` | `douyin_app_v3_fetch_multi_video_statistics`（批量） |
 | 视频高画质播放地址 | `douyin_app_v3_fetch_video_high_quality_play_url` | `douyin_web_fetch_video_high_quality_play_url` |
 | 视频评论 | `douyin_app_v3_fetch_video_comments` | `douyin_web_fetch_video_comments` |
-| 关键词搜索作者（找对标） | `douyin_billboard_fetch_hot_account_search_list --cursor 0` | `douyin_app_v3_fetch_user_search_result` → `douyin_web_fetch_user_search_result_v3` |
-| 关键词搜索视频（找选题/对标作品） | `douyin_app_v3_fetch_video_search_result_v2`（必须加超时） | `douyin_app_v3_fetch_general_search_result` |
-| 关键词搜话题（反查高互动作者） | `douyin_app_v3_fetch_hashtag_search_result` | `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>` |
+| 关键词搜索作者（找对标） | `douyin_billboard_fetch_hot_account_search_list --cursor 0` | `douyin_search_fetch_user_search_v2` |
+| 关键词搜索视频（找选题/对标作品） | `douyin_search_fetch_video_search_v2`（必须加超时） | `douyin_search_fetch_general_search_v2` |
+| 关键词搜话题（反查高互动作者） | `douyin_search_fetch_challenge_search_v2` | `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>` |
 | 短链解析（v.douyin.com） | `douyin_app_v3_fetch_one_video_by_share_url` | `douyin_app_v3_fetch_share_info_by_share_code` |
 | 创作者中心粉丝画像（深度诊断） | `douyin_billboard_fetch_hot_account_fans_portrait_list`（**仅星图收录账号有数据，普通账号会返回空**） | `douyin_billboard_fetch_hot_account_fans_interest_topic_list` |
 
@@ -179,12 +179,12 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.m
    注意：cursor 必传；返回后按 nickname / signature / 粉丝数 / 作品数筛掉泛领域号。
 
 3. 账号搜索不够时：
-   - 用 `douyin_app_v3_fetch_hashtag_search_result --keyword <词> --offset 0 --count 10`
+   - 用 `douyin_search_fetch_challenge_search_v2 --keyword <词> --cursor 0 --count 10`
    - 取相关 ch_id，再用 `douyin_app_v3_fetch_hashtag_video_list --ch_id <id>`
    - 按点赞 / 评论 / 收藏 / 分享排序，反查重复出现的作者
 
 4. 视频搜索只做补充：
-   `douyin_app_v3_fetch_video_search_result_v2` 可能长时间无响应，必须给 shell/脚本超时。
+   `douyin_search_fetch_video_search_v2` 必须设置 shell/脚本超时。
    超时 1 次就换账号搜索或话题搜索，不要连续卡住。
 
 5. 最终对标池：
@@ -203,7 +203,7 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py prefix.m
 | 维度 | 抖音特化指引 |
 |---|---|
 | **账号定位** | 看主页 9 宫格风格统一性 + 简介人群锁定 + 前 5 条视频是否同主题 |
-| **选题角度** | 是否命中赛道高频词（用 `douyin_app_v3_fetch_video_search_result` 验证）+ 长尾差异化 |
+| **选题角度** | 是否命中赛道高频词（用 `douyin_search_fetch_video_search_v2` 验证）+ 长尾差异化 |
 | **封面公式** | **抖音的"封面"是动态首帧，不是静态大字报**。看首帧是否高反差 / 大字 / 真人锚点 |
 | **标题钩子** | 抖音标题（描述）作用低于小红书，但仍要套 SKILL.md §5.2 10 个标题公式（数字+人群+效果） |
 | **正文骨架** | **前 3 秒口播 + 黄金 7 秒密度点**（每 7 秒一个反转/数据/画面切）。MrBeast 公式 |
@@ -240,7 +240,7 @@ AI 视频不是原罪。对标也可能用 AI 插画，关键差距通常在“�
 ### P1（本月调 — 系统性短板）
 
 - [ ] 钩子六维评分 ≤ 2 → 强制套 SKILL.md §5.4 七公式，每条视频一个
-- [ ] 选题维度差距 ≥ 2 → 用 `douyin_app_v3_fetch_video_search_result` 扫赛道 top 50，提炼 10 个共性选题模板
+- [ ] 选题维度差距 ≥ 2 → 用 `douyin_search_fetch_video_search_v2` 扫赛道真实结果，提炼 10 个共性选题模板
 - [ ] 评论互动率 < 1% → 视频结尾埋问题钩子（"你们怎么看？评论区扣 1"）
 
 ### P2（季度沉淀）

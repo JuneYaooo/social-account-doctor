@@ -1,583 +1,1106 @@
 [
   {
-    "name": "wechat_mp_web_fetch_mp_article_detail_json",
-    "description": "获取微信公众号文章详情的JSON/Get Wechat MP Article Detail JSON",
+    "name": "wechat_channels_v2_fetch_channel_id_to_username",
+    "description": "视频号ID转finder username/Convert Channel ID to Finder Username",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_channel_id_to_username",
     "inputSchema": {
+      "type": "object",
       "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_detail_jsonArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_detail_jsonOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_detail_html",
-    "description": "获取微信公众号文章详情的HTML/Get Wechat MP Article Detail HTML",
-    "inputSchema": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_detail_htmlArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_detail_htmlOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_list",
-    "description": "获取微信公众号文章列表/Get Wechat MP Article List",
-    "inputSchema": {
-      "properties": {
-        "ghid": {
-          "title": "Ghid",
-          "type": "string"
+        "channel_id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^sph[A-Za-z0-9_-]+$",
+          "title": "Channel Id",
+          "description": "视频号 ID（sph 开头的短号）/WeChat Channels ID (short ID starting with sph)",
+          "example": "sphi9BjV8GK0Zsl"
         },
-        "offset": {
-          "default": "",
-          "title": "Offset",
-          "type": "string"
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": false
         }
       },
       "required": [
-        "ghid"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_listArguments",
-      "type": "object"
+        "channel_id"
+      ]
     },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_listOutput",
-      "type": "object"
-    }
+    "queryParameters": [],
+    "pathParameters": []
   },
   {
-    "name": "wechat_mp_web_fetch_mp_article_read_count",
-    "description": "获取微信公众号文章阅读量/Get Wechat MP Article Read Count",
+    "name": "wechat_channels_v2_fetch_channel_info",
+    "description": "获取视频号账号信息/Get WeChat Channels Account Info",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_channel_info",
     "inputSchema": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        },
-        "comment_id": {
-          "title": "Comment Id",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url",
-        "comment_id"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_read_countArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_read_countOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_url",
-    "description": "获取微信公众号文章永久链接/Get Wechat MP Article URL",
-    "inputSchema": {
-      "properties": {
-        "sogou_url": {
-          "title": "Sogou Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "sogou_url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_urlArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_urlOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_comment_list",
-    "description": "获取微信公众号文章评论列表/Get Wechat MP Article Comment List",
-    "inputSchema": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        },
-        "comment_id": {
-          "default": "",
-          "title": "Comment Id",
-          "type": "string"
-        },
-        "buffer": {
-          "default": "",
-          "title": "Buffer",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_comment_listArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_comment_listOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_comment_reply_list",
-    "description": "获取微信公众号文章评论回复列表/Get Wechat MP Article Comment Reply List",
-    "inputSchema": {
-      "properties": {
-        "url": {
-          "default": "https://mp.weixin.qq.com/s/Ko5V9jw9kwL8TO6Q7J3UqQ",
-          "title": "Url",
-          "type": "string"
-        },
-        "comment_id": {
-          "title": "Comment Id",
-          "type": "string"
-        },
-        "content_id": {
-          "title": "Content Id",
-          "type": "string"
-        },
-        "offset": {
-          "default": "0",
-          "title": "Offset",
-          "type": "string"
-        }
-      },
-      "required": [
-        "comment_id",
-        "content_id"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_comment_reply_listArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_comment_reply_listOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_ad",
-    "description": "获取微信公众号广告/Get Wechat MP Article Ad",
-    "inputSchema": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_adArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_adOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_article_url_conversion",
-    "description": "获取微信公众号长链接转短链接/Get Wechat MP Long URL to Short URL",
-    "inputSchema": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_url_conversionArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_article_url_conversionOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_mp_web_fetch_mp_related_articles",
-    "description": "获取微信公众号关联文章/Get Wechat MP Related Articles",
-    "inputSchema": {
-      "properties": {
-        "url": {
-          "title": "Url",
-          "type": "string"
-        }
-      },
-      "required": [
-        "url"
-      ],
-      "title": "wechat_mp_web_fetch_mp_related_articlesArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_mp_web_fetch_mp_related_articlesOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_default_search",
-    "description": "微信视频号默认搜索/WeChat Channels Default Search",
-    "inputSchema": {
-      "properties": {},
-      "title": "wechat_channels_fetch_default_searchArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_default_searchOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_search_latest",
-    "description": "微信视频号搜索最新视频/WeChat Channels Search Latest Videos",
-    "inputSchema": {
-      "properties": {
-        "keywords": {
-          "title": "Keywords",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keywords"
-      ],
-      "title": "wechat_channels_fetch_search_latestArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_search_latestOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_search_ordinary",
-    "description": "微信视频号综合搜索/WeChat Channels Comprehensive Search",
-    "inputSchema": {
-      "properties": {
-        "keywords": {
-          "title": "Keywords",
-          "type": "string"
-        }
-      },
-      "required": [
-        "keywords"
-      ],
-      "title": "wechat_channels_fetch_search_ordinaryArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_search_ordinaryOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_user_search",
-    "description": "微信视频号用户搜索/WeChat Channels User Search",
-    "inputSchema": {
-      "properties": {
-        "keywords": {
-          "title": "Keywords",
-          "type": "string"
-        },
-        "page": {
-          "default": 1,
-          "title": "Page",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "keywords"
-      ],
-      "title": "wechat_channels_fetch_user_searchArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_user_searchOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_video_detail",
-    "description": "微信视频号视频详情/WeChat Channels Video Detail",
-    "inputSchema": {
-      "properties": {
-        "id": {
-          "default": "",
-          "title": "Id",
-          "type": "string"
-        },
-        "exportId": {
-          "default": "",
-          "title": "Exportid",
-          "type": "string"
-        }
-      },
-      "title": "wechat_channels_fetch_video_detailArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_video_detailOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_home_page",
-    "description": "微信视频号主页/WeChat Channels Home Page",
-    "inputSchema": {
-      "properties": {},
-      "title": "wechat_channels_fetch_home_pageArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_home_pageOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_comments",
-    "description": "微信视频号评论/WeChat Channels Comments",
-    "inputSchema": {
-      "properties": {},
-      "title": "wechat_channels_fetch_commentsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_commentsOutput",
-      "type": "object"
-    }
-  },
-  {
-    "name": "wechat_channels_fetch_live_history",
-    "description": "微信视频号直播回放/WeChat Channels Live History",
-    "inputSchema": {
+      "type": "object",
       "properties": {
         "username": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 10,
+          "pattern": "^v2_[0-9a-fA-F]+@finder$",
           "title": "Username",
-          "type": "string"
+          "description": "视频号 finder username（v2_…@finder 格式）/WeChat Channels finder username (v2_…@finder format)",
+          "example": "v2_060000231003b20faec8c6e4811dc1d4c602ee30b0771bbcf220c67926bb76ab7702ac335a53@finder"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
         }
       },
       "required": [
         "username"
-      ],
-      "title": "wechat_channels_fetch_live_historyArguments",
-      "type": "object"
+      ]
     },
-    "outputSchema": {
-      "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
-        }
-      },
-      "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_live_historyOutput",
-      "type": "object"
-    }
+    "queryParameters": [],
+    "pathParameters": []
   },
   {
-    "name": "wechat_channels_fetch_hot_words",
-    "description": "微信视频号热门话题/WeChat Channels Hot Topics",
+    "name": "wechat_channels_v2_fetch_collection_videos",
+    "description": "获取视频号合集内视频/Get WeChat Channels Collection Videos",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_collection_videos",
     "inputSchema": {
-      "properties": {},
-      "title": "wechat_channels_fetch_hot_wordsArguments",
-      "type": "object"
-    },
-    "outputSchema": {
+      "type": "object",
       "properties": {
-        "result": {
-          "title": "Result",
-          "type": "string"
+        "topic_id": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[0-9]+$",
+          "title": "Topic Id",
+          "description": "合集 ID（纯数字，来自 fetch_user_collections 的 topic_id）/Collection ID (numeric, from topic_id of fetch_user_collections)",
+          "example": "14616794565351966924"
+        },
+        "topic": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Topic",
+          "description": "合集名（可选，提高命中）/Collection name (optional, improves hit rate)",
+          "default": "",
+          "example": "早安中国"
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^(v2_[0-9a-fA-F]+@finder)?$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Username",
+          "description": "创作者 finder username（可选，提高命中）/Creator finder username (optional, improves hit rate)",
+          "default": "",
+          "example": "v2_060000231003b20faec8c6e4811dc1d4c602ee30b0771bbcf220c67926bb76ab7702ac335a53@finder"
+        },
+        "last_buffer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9+/=_-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Buffer",
+          "description": "翻页游标（base64），首页留空/Pagination cursor (base64), leave empty for first page",
+          "default": ""
+        },
+        "topic_type": {
+          "type": "integer",
+          "maximum": 1000.0,
+          "minimum": 0.0,
+          "title": "Topic Type",
+          "description": "合集类型，默认 16（与 fetch_user_collections 返回的 topic_type 对齐）/Collection type, default 16 (align with topic_type from fetch_user_collections)",
+          "default": 16
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构（推荐做媒体下载）/True=raw response; False=simplified parsed structure (recommended for media download)",
+          "default": true
         }
       },
       "required": [
-        "result"
-      ],
-      "title": "wechat_channels_fetch_hot_wordsOutput",
-      "type": "object"
-    }
+        "topic_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_live_detail",
+    "description": "获取视频号直播间详情/Get WeChat Channels Live Detail",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_live_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "live_id": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[0-9]+$",
+          "title": "Live Id",
+          "description": "直播 ID（纯数字）/Live ID (numeric)",
+          "example": "2078950291205875194"
+        },
+        "scene": {
+          "type": "integer",
+          "maximum": 1000.0,
+          "minimum": 0.0,
+          "title": "Scene",
+          "description": "进入场景，默认 5/Entry scene, default 5",
+          "default": 5
+        },
+        "finder_username": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^(v2_[0-9a-fA-F]+@finder)?$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finder Username",
+          "description": "主播 finder username（可选，提高命中）/Anchor finder username (optional, improves hit rate)",
+          "default": "",
+          "example": "v2_060000231003b20faec8cae1811ac4d5c702ea32b0771737aa785454f7f8177114cc4d248d66@finder"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "live_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_live_history",
+    "description": "获取视频号直播回放列表/Get WeChat Channels Live History",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_live_history",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 10,
+          "pattern": "^v2_[0-9a-fA-F]+@finder$",
+          "title": "Username",
+          "description": "视频号 finder username（v2_…@finder 格式）/WeChat Channels finder username (v2_…@finder format)",
+          "example": "v2_060000231003b20faec8cae1811ac4d5c702ea32b0771737aa785454f7f8177114cc4d248d66@finder"
+        },
+        "last_buffer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9+/=_-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Buffer",
+          "description": "翻页游标（base64），首页留空/Pagination cursor (base64), leave empty for first page",
+          "default": ""
+        },
+        "flag": {
+          "type": "integer",
+          "maximum": 1000.0,
+          "minimum": 0.0,
+          "title": "Flag",
+          "description": "拉取标志，默认 12/Fetch flag, default 12",
+          "default": 12
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构（推荐做媒体下载）/True=raw response; False=simplified parsed structure (recommended for media download)",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_search_channel_videos",
+    "description": "视频号号内搜索/Search Videos Within a WeChat Channel",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_search_channel_videos",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 10,
+          "pattern": "^v2_[0-9a-fA-F]+@finder$",
+          "title": "Username",
+          "description": "创作者 finder username（v2_…@finder 格式）/Creator finder username (v2_…@finder format)",
+          "example": "v2_060000231003b20faec8c6e4811dc1d4c602ee30b0771bbcf220c67926bb76ab7702ac335a53@finder"
+        },
+        "keyword": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Keyword",
+          "description": "在该号内搜索的关键词（1-100 字）/Keyword to search within this channel (1-100 chars)",
+          "example": "新闻"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "username",
+        "keyword"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_user_collections",
+    "description": "获取视频号合集列表/Get WeChat Channels User Collections",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_user_collections",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 10,
+          "pattern": "^v2_[0-9a-fA-F]+@finder$",
+          "title": "Username",
+          "description": "视频号 finder username（v2_…@finder 格式）/WeChat Channels finder username (v2_…@finder format)",
+          "example": "v2_060000231003b20faec8c6e4811dc1d4c602ee30b0771bbcf220c67926bb76ab7702ac335a53@finder"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_user_profile",
+    "description": "获取视频号账号主页资料+统计/Get WeChat Channels User Profile & Stats",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_user_profile",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 10,
+          "pattern": "^v2_[0-9a-fA-F]+@finder$",
+          "title": "Username",
+          "description": "视频号 finder username（v2_…@finder 格式）/WeChat Channels finder username (v2_…@finder format)",
+          "example": "v2_060000231003b20faec8c6e4811dc1d4c602ee30b0771bbcf220c67926bb76ab7702ac335a53@finder"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_user_videos",
+    "description": "获取视频号用户作品列表/Get WeChat Channels User Videos",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_user_videos",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 256,
+          "minLength": 10,
+          "pattern": "^v2_[0-9a-fA-F]+@finder$",
+          "title": "Username",
+          "description": "视频号 finder username（v2_…@finder 格式）/WeChat Channels finder username (v2_…@finder format)",
+          "example": "v2_060000231003b20faec8c6e4811dc1d4c602ee30b0771bbcf220c67926bb76ab7702ac335a53@finder"
+        },
+        "last_buffer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9+/=_-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Buffer",
+          "description": "翻页游标（base64），首页留空/Pagination cursor (base64), leave empty for first page",
+          "default": ""
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构（推荐做媒体下载）/True=raw response; False=simplified parsed structure (recommended for media download)",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_video_comments",
+    "description": "获取视频号作品评论/Get WeChat Channels Video Comments",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_video_comments",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "object_id": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[0-9]+$",
+          "title": "Object Id",
+          "description": "作品 objectId（纯数字）/Video objectId (numeric)",
+          "example": "14941130915890399732"
+        },
+        "last_buffer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9+/=_-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Buffer",
+          "description": "翻页游标（base64），首页留空/Pagination cursor (base64), leave empty for first page",
+          "default": ""
+        },
+        "comment_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32,
+              "pattern": "^[0-9]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Comment Id",
+          "description": "展开某条评论的二级回复时传其 commentId（纯数字），首页留空/Pass a commentId (numeric) to expand its replies, leave empty for first-level comments",
+          "default": ""
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "object_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_video_detail",
+    "description": "获取视频号作品详情/Get WeChat Channels Video Detail",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_video_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "object_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32,
+              "pattern": "^[0-9]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Object Id",
+          "description": "作品 objectId（纯数字，最优先）/Video objectId (numeric, highest priority)",
+          "default": "",
+          "example": "14941130915890399732"
+        },
+        "export_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 2048,
+              "pattern": "^(export/.+)?$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Export Id",
+          "description": "搜索结果中的 exportId（export/ 开头，会过期，需尽快使用）/exportId from search results (starts with export/, expires soon)",
+          "default": ""
+        },
+        "object_nonce_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32,
+              "pattern": "^[0-9]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Object Nonce Id",
+          "description": "配套 objectNonceId（纯数字，可选，提升命中率）/Optional objectNonceId (numeric, improves hit rate)",
+          "default": ""
+        },
+        "share_url": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 256,
+              "pattern": "^(https?://weixin\\.qq\\.com/sph/[A-Za-z0-9]+/?)?$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Share Url",
+          "description": "视频号分享短链（https://weixin.qq.com/sph/…），仅在 object_id 与 export_id 都为空时使用/Share URL (https://weixin.qq.com/sph/…), used only when object_id and export_id are empty",
+          "default": ""
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构（推荐做媒体下载）/True=raw response; False=simplified parsed structure (recommended for media download)",
+          "default": true
+        }
+      }
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_channels_v2_fetch_video_share_url",
+    "description": "生成视频号作品分享链接/Generate WeChat Channels Video Share URL",
+    "method": "POST",
+    "path": "/api/v1/wechat_channels/v2/fetch_video_share_url",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "object_id": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[0-9]+$",
+          "title": "Object Id",
+          "description": "作品 objectId（纯数字）/Video objectId (numeric)",
+          "example": "14941130915890399732"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "object_id"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_account_articles",
+    "description": "获取公众号文章列表/Get WeChat MP Account Articles",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_account_articles",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^gh_[A-Za-z0-9_]+$",
+          "title": "Username",
+          "description": "公众号 gh_username（gh_…）/Official account gh_username (gh_…)",
+          "example": "gh_363b924965e9"
+        },
+        "page_size": {
+          "type": "integer",
+          "maximum": 20.0,
+          "minimum": 10.0,
+          "title": "Page Size",
+          "description": "每页文章数，范围 10-20，默认 20/Articles per page, range 10-20, default 20",
+          "default": 20
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 8192,
+              "pattern": "^[A-Za-z0-9+/=_-]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Offset",
+          "description": "翻页游标（base64），首页留空；翻页传上一页响应的 next_offset/Pagination cursor (base64), leave empty for first page; for the next page pass next_offset from the previous response",
+          "default": ""
+        },
+        "item_show_type": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Item Show Type",
+          "description": "内容栏目：留空/0=文章（默认）、5=视频、7=音频、8=贴图/Content tab: empty/0=articles (default), 5=videos, 7=audios, 8=image-text posts"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_account_profile",
+    "description": "获取公众号资料页/Get WeChat MP Account Profile",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_account_profile",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^gh_[A-Za-z0-9_]+$",
+          "title": "Username",
+          "description": "公众号 gh_username（gh_…）/Official account gh_username (gh_…)",
+          "example": "gh_363b924965e9"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_account_services",
+    "description": "获取公众号服务/自定义菜单/Get WeChat MP Account Services & Custom Menu",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_account_services",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^gh_[A-Za-z0-9_]+$",
+          "title": "Username",
+          "description": "公众号 gh_username（gh_…）/Official account gh_username (gh_…)",
+          "example": "gh_363b924965e9"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "username"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_article_ad",
+    "description": "获取公众号文章广告/Get WeChat MP Article Ads",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_article_ad",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https?://mp\\.weixin\\.qq\\.com/s([/?].+)?$",
+          "title": "Url",
+          "description": "公众号文章链接（https://mp.weixin.qq.com/s/… 或带 __biz 的长链）/WeChat MP article URL (https://mp.weixin.qq.com/s/… or long URL with __biz)",
+          "example": "https://mp.weixin.qq.com/s/TSNQKkRpN1qbKsT7BvzqIw"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_article_comments",
+    "description": "获取公众号文章评论/Get WeChat MP Article Comments",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_article_comments",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https?://mp\\.weixin\\.qq\\.com/s([/?].+)?$",
+          "title": "Url",
+          "description": "公众号文章链接（https://mp.weixin.qq.com/s/…）/WeChat MP article URL (https://mp.weixin.qq.com/s/…)",
+          "example": "https://mp.weixin.qq.com/s/TSNQKkRpN1qbKsT7BvzqIw"
+        },
+        "buffer": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 8192
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Buffer",
+          "description": "翻页游标，首页留空；翻页传上一页响应的 buffer/Pagination cursor, leave empty for first page; pass buffer from the previous response",
+          "default": ""
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_article_detail",
+    "description": "获取公众号文章详情/Get WeChat MP Article Detail",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_article_detail",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https?://mp\\.weixin\\.qq\\.com/s([/?].+)?$",
+          "title": "Url",
+          "description": "公众号文章链接（https://mp.weixin.qq.com/s/… 或带 __biz 的长链）/WeChat MP article URL (https://mp.weixin.qq.com/s/… or long URL with __biz)",
+          "example": "https://mp.weixin.qq.com/s/TSNQKkRpN1qbKsT7BvzqIw"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_article_stats",
+    "description": "获取公众号文章互动数据/Get WeChat MP Article Stats",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_article_stats",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https?://mp\\.weixin\\.qq\\.com/s([/?].+)?$",
+          "title": "Url",
+          "description": "公众号文章链接（https://mp.weixin.qq.com/s/… 或带 __biz 的长链）/WeChat MP article URL (https://mp.weixin.qq.com/s/… or long URL with __biz)",
+          "example": "https://mp.weixin.qq.com/s/TSNQKkRpN1qbKsT7BvzqIw"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_comment_replies",
+    "description": "获取公众号评论的二级回复/Get WeChat MP Comment Replies",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_comment_replies",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https?://mp\\.weixin\\.qq\\.com/s([/?].+)?$",
+          "title": "Url",
+          "description": "公众号文章链接（https://mp.weixin.qq.com/s/…）/WeChat MP article URL (https://mp.weixin.qq.com/s/…)",
+          "example": "http://mp.weixin.qq.com/s?__biz=Mzk3NTA0MzM5NA==&mid=2247483745&idx=1&sn=3f34e768cf457a501038991ed30be1f4#rd"
+        },
+        "content_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 32,
+              "pattern": "^[0-9]*$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Content Id",
+          "description": "目标一级评论的 content_id（纯数字），不传则自动取第一条有回复的评论/content_id (numeric) of the target first-level comment; defaults to the first comment that has replies",
+          "default": "",
+          "example": "12109128638545265979"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0.0,
+          "title": "Offset",
+          "description": "回复翻页偏移，首页 0；has_more=true 时传上次返回的 next_offset/Reply pagination offset, 0 for first page; pass next_offset from the previous response when has_more=true",
+          "default": 0
+        },
+        "all_pages": {
+          "type": "boolean",
+          "title": "All Pages",
+          "description": "为 true 时忽略 offset，一次取全部回复/When true, ignore offset and fetch all replies at once",
+          "default": false
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_mp_v2_fetch_related_articles",
+    "description": "获取公众号关联文章/Get WeChat MP Related Articles",
+    "method": "POST",
+    "path": "/api/v1/wechat_mp/v2/fetch_related_articles",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "maxLength": 2048,
+          "pattern": "^https?://mp\\.weixin\\.qq\\.com/s([/?].+)?$",
+          "title": "Url",
+          "description": "公众号文章链接（https://mp.weixin.qq.com/s/… 或带 __biz 的长链）/WeChat MP article URL (https://mp.weixin.qq.com/s/… or long URL with __biz)",
+          "example": "https://mp.weixin.qq.com/s/TSNQKkRpN1qbKsT7BvzqIw"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始响应；False=精简解析结构/True=raw response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_search_v2_fetch_search",
+    "description": "微信综合搜索（搜一搜）/WeChat Universal Search",
+    "method": "POST",
+    "path": "/api/v1/wechat_search/v2/fetch_search",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Keyword",
+          "description": "搜索关键词（1-100 字）/Search keyword (1-100 chars)",
+          "example": "人民日报"
+        },
+        "business_type": {
+          "type": "string",
+          "enum": [
+            "all",
+            "account",
+            "article",
+            "video",
+            "live_stream",
+            "moments",
+            "news",
+            "book",
+            "listen",
+            "image",
+            "encyclopedia",
+            "weixin_index"
+          ],
+          "title": "Business Type",
+          "description": "垂类字符串键：综合 all / 公众号 account / 文章 article / 视频 video / 直播 live_stream / 朋友圈 moments / 新闻 news / 读书 book / 听书 listen / 图片 image / 百科 encyclopedia / 微信指数 weixin_index，传其他值将直接报错/Vertical key: all / account / article / video / live_stream / moments / news / book / listen / image / encyclopedia / weixin_index, other values are rejected",
+          "default": "all",
+          "example": "account"
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Sort",
+          "description": "排序（结果页「排序」下拉，综合与各垂类通用）：不限(相关性) default/0 / 最新(发布时间降序) latest/1 / 最热(点赞降序) hot/2，字符串键或整数均可/Sort (result page 'sort' dropdown, common to all verticals): default/0 (relevance) / latest/1 (newest) / hot/2 (most liked); string key or integer",
+          "default": "default",
+          "example": "hot"
+        },
+        "publish_time": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Publish Time",
+          "description": "发布时间（结果页「时间」下拉，通用）：不限 all/0 / 最近一天 day/1 / 最近七天 week/2 / 最近半年 half_year/3，字符串键或整数均可/Publish time (result page 'time' dropdown, common): all/0 / day/1 / week/2 / half_year/3; string key or integer",
+          "default": "all",
+          "example": "week"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0.0,
+          "title": "Offset",
+          "description": "首页传 0；翻页请用 cursor（只传 offset 无效，每页都回到第一页）/Pass 0 for the first page; use cursor to paginate (offset alone does not work — it returns the first page every time)",
+          "default": 0
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cursor",
+          "description": "翻页游标：首页留空；翻页时把上一页响应返回的 cursor 原样传回/Pagination cursor: leave empty for the first page; for the next page pass back the cursor returned in the previous response"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始搜索响应；False=精简解析结构/True=raw search response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
+  },
+  {
+    "name": "wechat_search_v2_fetch_search_videos",
+    "description": "搜视频号视频（时长/排序/时间筛选）/WeChat Channels Video Search",
+    "method": "POST",
+    "path": "/api/v1/wechat_search/v2/fetch_search_videos",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Keyword",
+          "description": "搜索关键词（1-100 字）/Search keyword (1-100 chars)",
+          "example": "美食"
+        },
+        "duration": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Duration",
+          "description": "时长档（video 垂类专属）：不限 all/0 / 短(<5min) short/1 / 中(5-10min) medium/2 / 长(20min+) long/3，字符串键或整数均可/Duration tier (Channels video only): all/0 / short/1 (<5min) / medium/2 (5-10min) / long/3 (20min+); string key or integer",
+          "default": "all",
+          "example": "short"
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Sort",
+          "description": "排序：不限(相关性) default/0 / 最新(发布时间降序) latest/1 / 最热(点赞降序) hot/2，字符串键或整数均可/Sort: default/0 (relevance) / latest/1 (newest) / hot/2 (most liked); string key or integer",
+          "default": "default",
+          "example": "hot"
+        },
+        "publish_time": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Publish Time",
+          "description": "发布时间：不限 all/0 / 最近一天 day/1 / 最近七天 week/2 / 最近半年 half_year/3，字符串键或整数均可/Publish time: all/0 / day/1 / week/2 / half_year/3; string key or integer",
+          "default": "all",
+          "example": "week"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0.0,
+          "title": "Offset",
+          "description": "首页传 0；翻页请用 cursor（只传 offset 无效）/Pass 0 for the first page; use cursor to paginate (offset alone does not work)",
+          "default": 0
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cursor",
+          "description": "翻页游标，用法同综合搜索：首页留空；翻页时把上一页响应返回的 cursor 原样传回/Pagination cursor, same as universal search: leave empty for the first page; pass back the cursor from the previous response"
+        },
+        "raw": {
+          "type": "boolean",
+          "title": "Raw",
+          "description": "True=原始搜索响应；False=精简解析结构/True=raw search response; False=simplified parsed structure",
+          "default": true
+        }
+      },
+      "required": [
+        "keyword"
+      ]
+    },
+    "queryParameters": [],
+    "pathParameters": []
   }
 ]

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""tikhub — CLI wrapper for tikhub MCP HTTP endpoints.
+"""tikhub — CLI wrapper for TikHub's direct REST API endpoints.
 
 Usage:
-    tikhub --health                                    # GET /health
-    tikhub --platforms                                 # GET /platforms
+    tikhub --health                                    # GET /api/v1/health/check
+    tikhub --platforms                                 # list cached platform groups
 
     tikhub list <platform>                             # all tools (from cache)
     tikhub list <platform> <substring>                 # filter by substring
@@ -204,7 +204,7 @@ def cmd_call(platform: str, tool_name: str, args: argparse.Namespace, extras: li
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="tikhub",
-        description="CLI wrapper for tikhub MCP HTTP endpoints.",
+        description="CLI wrapper for TikHub direct REST API endpoints.",
         add_help=True,
         allow_abbrev=False,
     )

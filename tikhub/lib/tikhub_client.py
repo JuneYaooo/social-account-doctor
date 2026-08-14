@@ -1,56 +1,77 @@
-"""tikhub_client — minimal stdlib JSON-RPC client for https://mcp.tikhub.io.
+"""TikHub REST API client used by the bundled ``tikhub`` CLI.
 
-Speaks MCP-over-HTTP: initialize → cache session id → tools/list / tools/call.
-Response transport is SSE (text/event-stream); we parse `data: {...}` lines.
-
-Public API:
-    client = TikhubClient(platform="douyin")
-    client.call(tool_name, arguments_dict) -> parsed result (dict/list/str)
-    client.list_tools() -> [{"name", "description", "inputSchema", ...}, ...]
-    client.health() -> dict
+This module deliberately does not use MCP. Calls go directly to TikHub's
+documented REST endpoints under ``/api/v1`` with Bearer authentication.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-ENDPOINT = "https://mcp.tikhub.io/{platform}/mcp"
-HEALTH_URL = "https://mcp.tikhub.io/health"
-PLATFORMS_URL = "https://mcp.tikhub.io/platforms"
 
-SESSION_DIR = Path("/tmp")
-SESSION_TTL_SECONDS = 300  # 5 min — server-side TTL is unknown; refresh proactively
-
+DEFAULT_API_BASE_URL = "https://api.tikhub.io"
+HEALTH_PATH = "/api/v1/health/check"
+OPENAPI_PATH = "/openapi.json"
+ENV_VAR = "TIKHUB_API_KEY"
+BASE_URL_ENV_VAR = "TIKHUB_API_BASE_URL"
 SKILL_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 LEGACY_ENV_FILE = Path.home() / ".claude" / ".env"
-ENV_VAR = "TIKHUB_API_KEY"
-
-PROTOCOL_VERSION = "2024-11-05"
-CLIENT_NAME = "tikhub-cli"
-CLIENT_VERSION = "0.1.0"
-USER_AGENT = f"{CLIENT_NAME}/{CLIENT_VERSION} (+https://mcp.tikhub.io)"
-
+REFERENCES_DIR = Path(__file__).resolve().parents[1] / "references"
+CLIENT_NAME = "tikhub-rest-cli"
+CLIENT_VERSION = "0.2.0"
+USER_AGENT = f"{CLIENT_NAME}/{CLIENT_VERSION} (+https://api.tikhub.io)"
+DEFAULT_PLATFORMS = (
+    "douyin",
+    "xiaohongshu",
+    "kuaishou",
+    "wechat",
+    "bilibili",
+    "tiktok",
+    "instagram",
+    "weibo",
+    "youtube",
+    "zhihu",
+    "linkedin",
+    "reddit",
+    "twitter",
+    "threads",
+)
 DEBUG = os.environ.get("TIKHUB_DEBUG") == "1"
 
 
 class TikhubError(Exception):
-    """Raised on transport / protocol / upstream errors."""
+    """Raised on REST transport, authentication, or upstream errors."""
 
 
-def _debug(msg: str) -> None:
+def _debug(message: str) -> None:
     if DEBUG:
-        print(f"[tikhub] {msg}", file=sys.stderr)
+        print(f"[tikhub-rest] {message}", file=sys.stderr)
+
+
+def _read_env_value(env_file: Path, key: str) -> str | None:
+    if not env_file.is_file():
+        return None
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        name, value = line.split("=", 1)
+        if name.strip() == key:
+            return value.strip().strip('"').strip("'")
+    return None
 
 
 def load_api_key() -> str:
-    """Load the key from the process, installed Skill, then legacy Claude config."""
+    """Load the key from process env, explicit file, Skill file, or legacy file."""
     key = os.environ.get(ENV_VAR)
     if key:
         return key.strip()
@@ -58,239 +79,161 @@ def load_api_key() -> str:
     candidates = [Path(configured_file).expanduser()] if configured_file else []
     candidates.extend((SKILL_ENV_FILE, LEGACY_ENV_FILE))
     for env_file in candidates:
-        if not env_file.is_file():
-            continue
-        for line in env_file.read_text().splitlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if "=" not in line:
-                continue
-            k, v = line.split("=", 1)
-            if k.strip() == ENV_VAR:
-                return v.strip().strip('"').strip("'")
-    raise TikhubError(
-        f"missing {ENV_VAR}. Set the env var or add it to {SKILL_ENV_FILE}"
-    )
+        value = _read_env_value(env_file, ENV_VAR)
+        if value:
+            return value
+    raise TikhubError(f"missing {ENV_VAR}. Set the env var or add it to {SKILL_ENV_FILE}")
 
 
-def _parse_sse(body: bytes) -> dict:
-    """Pull the first `data: {...}` JSON object out of an SSE stream.
+def api_base_url() -> str:
+    return os.environ.get(BASE_URL_ENV_VAR, DEFAULT_API_BASE_URL).strip().rstrip("/")
 
-    tikhub returns one event per response, so first match is the answer.
-    """
+
+def _json_query_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return "null"
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    return str(value)
+
+
+def _decode_json(body: bytes, label: str) -> Any:
     text = body.decode("utf-8", errors="replace")
-    for line in text.splitlines():
-        if line.startswith("data:"):
-            payload = line[len("data:"):].strip()
-            if not payload:
-                continue
-            try:
-                return json.loads(payload)
-            except json.JSONDecodeError as e:
-                raise TikhubError(f"bad SSE JSON: {e}\nraw: {payload[:500]}")
-    # Maybe upstream returned plain JSON despite Accept header
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
-        raise TikhubError(f"no SSE data in response. raw: {text[:500]}")
+    except json.JSONDecodeError as exc:
+        raise TikhubError(f"{label} returned non-JSON: {text[:500]}") from exc
 
 
-def _maybe_unwrap_text(value: Any) -> Any:
-    """If value is a JSON-stringified scalar/object, parse it once."""
-    if isinstance(value, str):
-        s = value.strip()
-        if s and s[0] in "{[":
-            try:
-                return json.loads(s)
-            except json.JSONDecodeError:
-                return value
-    return value
+def _load_catalog(platform: str) -> list[dict]:
+    path = REFERENCES_DIR / f"tools-{platform}.json"
+    if not path.is_file():
+        raise TikhubError(
+            f"no REST catalog for {platform!r}; run "
+            f"python3 {REFERENCES_DIR.parent}/scripts/refresh_tools.py {platform}"
+        )
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise TikhubError(f"invalid REST catalog {path}: {exc}") from exc
+    if not isinstance(data, list):
+        raise TikhubError(f"invalid REST catalog shape: {path}")
+    return data
 
 
 class TikhubClient:
     def __init__(self, platform: str, api_key: str | None = None, timeout: int = 60):
         self.platform = platform
-        self.endpoint = ENDPOINT.format(platform=platform)
         self.api_key = api_key or load_api_key()
-        self.timeout = timeout
-        self._req_id = 0
-
-    # ---------- session ----------
-
-    @property
-    def _session_file(self) -> Path:
-        return SESSION_DIR / f".tikhub-session-{self.platform}.json"
-
-    def _load_session(self) -> str | None:
-        f = self._session_file
-        if not f.is_file():
-            return None
-        try:
-            data = json.loads(f.read_text())
-        except (OSError, json.JSONDecodeError):
-            return None
-        if time.time() - data.get("created_at", 0) > SESSION_TTL_SECONDS:
-            _debug(f"session for {self.platform} expired (age > {SESSION_TTL_SECONDS}s)")
-            return None
-        return data.get("session_id")
-
-    def _save_session(self, session_id: str) -> None:
-        try:
-            self._session_file.write_text(
-                json.dumps({"session_id": session_id, "created_at": time.time()})
-            )
-        except OSError as e:
-            _debug(f"could not cache session: {e}")
-
-    def _drop_session(self) -> None:
-        try:
-            self._session_file.unlink(missing_ok=True)
-        except OSError:
-            pass
-
-    # ---------- HTTP ----------
-
-    def _next_id(self) -> int:
-        self._req_id += 1
-        return self._req_id
-
-    def _post(self, payload: dict, session_id: str | None) -> tuple[dict, dict]:
-        """POST and return (parsed_body, response_headers_lowercased)."""
-        body = json.dumps(payload).encode("utf-8")
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
-            "Accept": "application/json, text/event-stream",
-            "User-Agent": USER_AGENT,
-        }
-        if session_id:
-            headers["Mcp-Session-Id"] = session_id
-        _debug(f"POST {self.endpoint} method={payload.get('method')} session={session_id}")
-        req = urllib.request.Request(self.endpoint, data=body, headers=headers, method="POST")
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                resp_body = resp.read()
-                resp_headers = {k.lower(): v for k, v in resp.headers.items()}
-        except urllib.error.HTTPError as e:
-            err_body = e.read().decode("utf-8", errors="replace") if e.fp else ""
-            raise TikhubError(f"HTTP {e.code}: {err_body[:500]}")
-        except urllib.error.URLError as e:
-            raise TikhubError(f"network error: {e.reason}")
-        parsed = _parse_sse(resp_body)
-        return parsed, resp_headers
-
-    # ---------- protocol ----------
-
-    def initialize(self) -> str:
-        payload = {
-            "jsonrpc": "2.0",
-            "id": self._next_id(),
-            "method": "initialize",
-            "params": {
-                "protocolVersion": PROTOCOL_VERSION,
-                "capabilities": {},
-                "clientInfo": {"name": CLIENT_NAME, "version": CLIENT_VERSION},
-            },
-        }
-        data, headers = self._post(payload, session_id=None)
-        if "error" in data:
-            raise TikhubError(f"initialize failed: {data['error']}")
-        session_id = headers.get("mcp-session-id")
-        if not session_id:
-            raise TikhubError("initialize: server did not return mcp-session-id header")
-        self._save_session(session_id)
-        _debug(f"initialized {self.platform} session={session_id}")
-        return session_id
-
-    def _ensure_session(self) -> str:
-        return self._load_session() or self.initialize()
-
-    def _call_jsonrpc(self, method: str, params: dict) -> Any:
-        """One retry on session-related failure: drop cache, re-init, retry."""
-        for attempt in (1, 2):
-            session_id = self._ensure_session()
-            payload = {
-                "jsonrpc": "2.0",
-                "id": self._next_id(),
-                "method": method,
-                "params": params,
-            }
-            try:
-                data, _headers = self._post(payload, session_id=session_id)
-            except TikhubError as e:
-                msg = str(e).lower()
-                if attempt == 1 and ("session" in msg or "401" in msg or "440" in msg):
-                    _debug("session looks invalid; refreshing and retrying")
-                    self._drop_session()
-                    continue
-                raise
-            if "error" in data:
-                err = data["error"]
-                # JSON-RPC -32001/-32600 etc. could indicate bad session — retry once
-                if attempt == 1 and isinstance(err, dict):
-                    msg = (err.get("message") or "").lower()
-                    if "session" in msg:
-                        self._drop_session()
-                        continue
-                raise TikhubError(f"{method} failed: {err}")
-            return data.get("result")
-
-    # ---------- public ----------
+        self.timeout = max(10, min(int(timeout), 60))
+        self.base_url = api_base_url()
 
     def list_tools(self) -> list[dict]:
-        """Return the full tools catalog (handles cursor pagination if present)."""
-        all_tools: list[dict] = []
-        cursor = None
-        while True:
-            params: dict = {}
-            if cursor:
-                params["cursor"] = cursor
-            result = self._call_jsonrpc("tools/list", params)
-            if not isinstance(result, dict):
-                raise TikhubError(f"tools/list bad shape: {result!r}")
-            all_tools.extend(result.get("tools", []))
-            cursor = result.get("nextCursor")
-            if not cursor:
-                break
-        return all_tools
+        """Return the cached REST endpoint catalog for this platform."""
+        return _load_catalog(self.platform)
+
+    def _tool(self, tool_name: str) -> dict:
+        for tool in self.list_tools():
+            if tool.get("name") == tool_name:
+                return tool
+        raise TikhubError(
+            f"REST endpoint {tool_name!r} not found in {self.platform} catalog; "
+            f"use `tikhub list {self.platform}` and update the command"
+        )
+
+    def _request(
+        self,
+        method: str,
+        path: str,
+        arguments: dict,
+        query_names: set[str],
+        path_names: set[str],
+    ) -> Any:
+        method = method.upper()
+        query = {}
+        body_args = {}
+        for key, value in arguments.items():
+            if key in path_names:
+                path = path.replace(f"{{{key}}}", urllib.parse.quote(str(value), safe=""))
+            elif method == "GET" or key in query_names:
+                query[key] = _json_query_value(value)
+            else:
+                body_args[key] = value
+        unresolved = re.findall(r"{([^}]+)}", path)
+        if unresolved:
+            raise TikhubError(f"missing REST path parameter(s): {', '.join(unresolved)}")
+
+        url = f"{self.base_url}{path}"
+        if query:
+            url += "?" + urllib.parse.urlencode(query)
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Accept": "application/json",
+            "User-Agent": USER_AGENT,
+        }
+        data = None
+        if method != "GET":
+            headers["Content-Type"] = "application/json"
+            data = json.dumps(body_args, ensure_ascii=False).encode("utf-8")
+
+        for attempt in range(1, 4):
+            _debug(f"{method} {path} attempt={attempt}")
+            request = urllib.request.Request(url, data=data, headers=headers, method=method)
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                    return _decode_json(response.read(), f"{method} {path}")
+            except urllib.error.HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+                if attempt < 3 and (exc.code == 429 or exc.code >= 500):
+                    time.sleep(0.5 * attempt)
+                    continue
+                raise TikhubError(f"HTTP {exc.code} from {path}: {body[:500]}") from exc
+            except urllib.error.URLError as exc:
+                if attempt < 3:
+                    time.sleep(0.5 * attempt)
+                    continue
+                raise TikhubError(f"network error calling {path}: {exc.reason}") from exc
+        raise TikhubError(f"REST call failed after retries: {path}")
 
     def call(self, tool_name: str, arguments: dict | None = None) -> Any:
-        """Call a tool. Returns the parsed result payload (auto-unwrapped)."""
-        result = self._call_jsonrpc(
-            "tools/call",
-            {"name": tool_name, "arguments": arguments or {}},
-        )
-        if not isinstance(result, dict):
-            return result
-        # Prefer structuredContent (already-typed); fall back to content[0].text
-        if "structuredContent" in result and result["structuredContent"] is not None:
-            sc = result["structuredContent"]
-            if isinstance(sc, dict) and "result" in sc and len(sc) == 1:
-                return _maybe_unwrap_text(sc["result"])
-            return sc
-        content = result.get("content")
-        if isinstance(content, list) and content:
-            first = content[0]
-            if isinstance(first, dict) and first.get("type") == "text":
-                return _maybe_unwrap_text(first.get("text", ""))
-        return result
+        """Call one cached REST endpoint using query/body metadata from OpenAPI."""
+        tool = self._tool(tool_name)
+        path = str(tool.get("path") or "")
+        method = str(tool.get("method") or "GET")
+        if not path.startswith("/api/v1/"):
+            raise TikhubError(f"refusing non-REST endpoint path: {path!r}")
+        query_names = {str(name) for name in tool.get("queryParameters", [])}
+        path_names = {str(name) for name in tool.get("pathParameters", [])}
+        return self._request(method, path, arguments or {}, query_names, path_names)
 
 
-def _get_json(url: str, label: str) -> Any:
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+def _get_public_json(path: str, label: str) -> Any:
+    url = f"{api_base_url()}{path}"
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            return json.loads(resp.read())
-    except (urllib.error.URLError, json.JSONDecodeError) as e:
-        raise TikhubError(f"{label} failed: {e}")
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return _decode_json(response.read(), label)
+    except (urllib.error.URLError, urllib.error.HTTPError) as exc:
+        raise TikhubError(f"{label} failed: {exc}") from exc
 
 
 def health() -> dict:
-    """Hit /health (no auth required)."""
-    return _get_json(HEALTH_URL, "health check")
+    """Call TikHub's documented REST health endpoint."""
+    result = _get_public_json(HEALTH_PATH, "REST health check")
+    if not isinstance(result, dict):
+        raise TikhubError(f"REST health check returned unexpected data: {result!r}")
+    return result
 
 
-def platforms() -> Any:
-    """Hit /platforms (no auth required)."""
-    return _get_json(PLATFORMS_URL, "platforms check")
+def openapi() -> dict:
+    result = _get_public_json(OPENAPI_PATH, "REST OpenAPI discovery")
+    if not isinstance(result, dict) or "paths" not in result:
+        raise TikhubError("REST OpenAPI discovery returned invalid schema")
+    return result
+
+
+def platforms() -> list[str]:
+    """Return CLI-supported REST catalog groups without a network request."""
+    return list(DEFAULT_PLATFORMS)

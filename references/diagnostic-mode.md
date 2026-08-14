@@ -50,7 +50,7 @@
 
 > 截图 / 链接进，**「卡在哪一层 + 怎么调」**的可执行诊断报告出。
 > 不是 "AI 看了下你的账号觉得还行"，是 **平台专属阈值 × 对标差距 × 可抄模板** 的三段式判决书。
-> **本 skill 完全自包含**：tikhub MCP 调数据 + Gemini 多模态做拆解 + 本文档自带评分术语。
+> **本 skill 完全自包含**：TikHub REST API 调数据 + Gemini 多模态做拆解 + 本文档自带评分术语。
 
 ---
 
@@ -62,7 +62,7 @@
 |---|---|---|---|
 | **A. 永不过时** | §1 三层诊断框架、§5 评分术语（5 封面/10 标题/3 骨架/7 钩子）、§3 视频分析三 mode、平台调性定性结论 | 基于人性 + 方法论，多年稳定 | 不动 |
 | **B. 季度级波动** | platforms/*.md 里所有具体数字（完播率、CTR、CES 系数、互动率、搜索占比等） | 平台算法迭代会改，半年内可能偏移 ±20% | **采集日期：2026-04**；建议每 6 个月用 §0 数据来源重新校准一次 |
-| **C. 可能随时失效** | tikhub MCP 工具名（§8 速查表）、抖音星图 API "仅星图收录账号"限制、平台后台截图 OCR 字段名 | API 升级或平台改版即失效 | **最后核对：2026-04**；调用前先用 1 个测试账号验证工具能跑通 |
+| **C. 可能随时失效** | TikHub REST API 工具名（§8 速查表）、抖音星图 API "仅星图收录账号"限制、平台后台截图 OCR 字段名 | API 升级或平台改版即失效 | **最后核对：2026-04**；调用前先用 1 个测试账号验证工具能跑通 |
 | **D. 高风险主张（默认怀疑）** | 任何"X 月起停推""新规死刑线""算法刚刚改了"等说法 | 99% 是博主推测，不是平台官方 | **看到先疑，要求官方公告链接**。本 skill 已删除"抖音 2026 新规<40%停推"这种主张，未来不要再加 |
 
 **铁律**：方法论可以照搬，数字必须复核。如果你（Claude）下次诊断时发现某个阈值已经明显跟当前实战不符，告诉用户"该校准 B 档数字了"，而不是硬套旧阈值。
@@ -95,11 +95,11 @@
 
 **第一步：找候选（先攒 10-15 个，候选池要够厚）**
 
-| 方法 | 怎么用（直接调 tikhub MCP） |
+| 方法 | 怎么用（直接调 TikHub REST API） |
 |---|---|
-| 同领域博主搜索 | `xiaohongshu_web_search_users` / `douyin_billboard_fetch_hot_account_search_list --cursor 0` / `kuaishou_app_search_user_v2` |
-| 行业关键词搜作品反查作者 | `xiaohongshu_app_search_notes` / 抖音 `hashtag_search_result` → `hashtag_video_list` / `kuaishou_app_search_video_v2` 按互动量倒序；抖音视频搜索只做超时受控补充 |
-| 平台热榜锁定头部 | `xiaohongshu_web_v2_fetch_hot_list` / `douyin_app_v3_fetch_hot_search_list` / `kuaishou_web_fetch_kuaishou_hot_list_v2` |
+| 同领域博主搜索 | `xiaohongshu_app_v2_search_users` / `douyin_billboard_fetch_hot_account_search_list --cursor 0` / `kuaishou_app_search_user_v2` |
+| 行业关键词搜作品反查作者 | `xiaohongshu_app_v2_search_notes` / 抖音 `douyin_search_fetch_challenge_search_v2` → `douyin_app_v3_fetch_hashtag_video_list` / `kuaishou_app_search_video_v2` 按互动量倒序；抖音视频搜索只做超时受控补充 |
+| 平台热榜锁定头部 | `xiaohongshu_web_v3_fetch_hot_list` / `douyin_app_v3_fetch_hot_search_list` / `kuaishou_web_fetch_kuaishou_hot_list_v2` |
 | 关注页 + 推荐小三角 | 看自己/已知对标账号的"相似推荐",抖音用 `douyin_xingtu_v2_get_recommend_for_star_authors` |
 | 第三方数据工具 | 蝉小红 / 新红 / 灰豚数据,查赛道 top 100（人工） |
 | 爆款作品反查 | 抖音可用 `hashtag_video_list` 反查；小红书只用关键词搜笔记，不能按 hashtag 维度搜 → 按互动量倒序找重复出现的作者 |
@@ -212,7 +212,7 @@
      "metrics": {"impressions": ..., "ctr": ..., "completion": ..., ...},
      "raw_text": "OCR 全文"
    }
-3. 如果用户也给了笔记链接 → 调对应平台 tikhub MCP "笔记/视频详情" 工具
+3. 如果用户也给了笔记链接 → 调对应平台 TikHub REST API "笔记/视频详情" 工具
    拿封面 + 标题 + 评论
 4. 跳到 §4 平台专属诊断
 ```
@@ -221,7 +221,7 @@
 
 ```
 1. 调 scripts/dispatch_account.py <account_url>  → 拿到 platform + user_id + tikhub 工具表
-2. 用对应 tikhub MCP 工具，分别拿:
+2. 用对应 TikHub REST API 工具，分别拿:
    - 我方：账号信息 + 最近 30 条笔记互动数据
    - 对标：账号信息 + 最近 30 条笔记互动数据
 3. 计算各自的爆款率 / 扑街率 / 互动均值（Layer 2）
@@ -236,7 +236,7 @@
 
 ```
 1. 拿到账号信息 → 提取人群 / 赛道关键词
-2. 调对应 tikhub MCP 的"关键词搜笔记"+"按互动量排序"
+2. 调对应 TikHub REST API 的"关键词搜笔记"+"按互动量排序"
 3. 从结果里挑 3-5 个 5k-50k 粉账号，过滤掉:
    - 蓝 V / 官方号
    - 单笔记 100w+ 异常爆（不可复制）
@@ -326,10 +326,10 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py <视频�
 ### 3.4 评论拉取 + 痛点聚类（文本分析，不走 Gemini，但走 LLM 推理）
 
 ```
-1. 用 tikhub MCP 拉评论：
+1. 用 TikHub REST API 拉评论：
    - 抖音：tikhub douyin douyin_app_v3_fetch_video_comments
-   - 小红书：tikhub xiaohongshu xiaohongshu_app_get_note_comments
-   - 快手：tikhub kuaishou kuaishou_app_fetch_one_video_comment
+   - 小红书：tikhub xiaohongshu xiaohongshu_app_v2_get_note_comments
+   - 快手：tikhub kuaishou kuaishou_app_fetch_video_comment
 2. 取前 50-100 条评论，让 Claude 做痛点聚类 + 情绪分布
 3. 输出：top 5 高频痛点 + 评论情绪分布（正/负/求资源/吐槽）
 ```
@@ -341,12 +341,11 @@ python3 ~/.claude/skills/social-account-doctor/scripts/analyze_video.py <视频�
 ```
 # 抖音视频高画质播放地址
 tikhub douyin douyin_app_v3_fetch_video_high_quality_play_url(aweme_id=...)
-→ 拿到 URL 后用 curl/wget 下载到 /tmp/account_diag/{aweme_id}/video.mp4
+→ 拿到 URL 后下载到本次运行的 `01_media/video.mp4`
 
 # 小红书笔记图片
-# 没有独立的 image 接口可用 (web_v2_fetch_note_image 实测挂)
-# 改用 app_get_note_info 返回里的 image_list URL
-tikhub xiaohongshu xiaohongshu_app_get_note_info(note_id=..., xsec_token=...)
+# 用图文或视频笔记详情返回的媒体 URL
+tikhub xiaohongshu xiaohongshu_app_v2_get_image_note_detail --note_id ...
 → 从 image_list 字段拿 URL 列表
 
 # 快手视频
@@ -565,9 +564,9 @@ tikhub kuaishou kuaishou_app_fetch_one_video(photo_id=...)
 
 ---
 
-## 8. tikhub MCP 工具速查（按平台 × 任务）
+## 8. TikHub REST API 工具速查（按平台 × 任务）
 
-> 三大平台都有完整 tikhub MCP，本 skill 全部直接调用，不依赖任何其他 search skill。
+> 三大平台都有完整 TikHub REST API，本 skill 全部直接调用，不依赖任何其他 search skill。
 
 ### 抖音（tikhub douyin ）
 | 任务 | 工具 | 关键参数 |
@@ -579,28 +578,28 @@ tikhub kuaishou kuaishou_app_fetch_one_video(photo_id=...)
 | 视频高画质播放 URL | `douyin_app_v3_fetch_video_high_quality_play_url` | `aweme_id` 或 `share_url` |
 | 视频评论 | `douyin_app_v3_fetch_video_comments` | `aweme_id` |
 | 关键词搜作者（找对标） | `douyin_billboard_fetch_hot_account_search_list` | `keyword` + `cursor=0` |
-| 关键词搜作者 fallback | `douyin_app_v3_fetch_user_search_result` | `keyword` |
-| 关键词搜话题（反查高互动作者） | `douyin_app_v3_fetch_hashtag_search_result` → `douyin_app_v3_fetch_hashtag_video_list` | `keyword` / `ch_id` |
-| 关键词搜视频（找选题，补充） | `douyin_app_v3_fetch_video_search_result_v2` | `keyword`，必须加调用超时 |
+| 关键词搜作者 fallback | `douyin_search_fetch_user_search_v2` | `keyword` |
+| 关键词搜话题（反查高互动作者） | `douyin_search_fetch_challenge_search_v2` → `douyin_app_v3_fetch_hashtag_video_list` | `keyword` / `ch_id` |
+| 关键词搜视频（找选题，补充） | `douyin_search_fetch_video_search_v2` | `keyword`，必须加调用超时 |
 | 短链解析（v.douyin.com） | `douyin_app_v3_fetch_one_video_by_share_url` | `share_url` |
 | 粉丝画像（深度诊断） | `douyin_billboard_fetch_hot_account_fans_portrait_list`（仅星图收录账号有数据，普通账号会空） | `sec_uid` |
 | 热搜榜 | `douyin_app_v3_fetch_hot_search_list` | — |
 
-### 小红书（tikhub xiaohongshu ） — 接口选择见 SKILL.md §9.1（实测 2026-04-23）
+### 小红书（tikhub xiaohongshu）— 当前 REST OpenAPI 目录
 | 任务 | 工具 | 关键参数 |
 |---|---|---|
-| 账号信息 | `xiaohongshu_app_get_user_info` (App V1, **首选**) | `user_id` |
-| 用户笔记列表 | `xiaohongshu_web_v2_fetch_home_notes_app`（当前唯一能用） | `user_id` + `cursor` |
-| 笔记详情 | `xiaohongshu_app_get_note_info` (App V1, 需 `xsec_token`) | `note_id` + `xsec_token` |
-| 笔记图片 | 用 `app_get_note_info` 返回的 `image_list` URL (`web_v2_fetch_note_image` 实测挂) | — |
-| 笔记评论 | `xiaohongshu_app_get_note_comments` (App V1) | `note_id` |
-| 评论子回复 | `xiaohongshu_app_get_sub_comments` (App V1) | `note_id` + `comment_id` |
-| 关键词搜笔记 | `xiaohongshu_app_search_notes` (App V1) | `keyword` + `sort_type` |
-| 关键词搜用户 | `xiaohongshu_web_search_users` (Web V1, **唯一可用**) | `keyword` + `page` |
-| 热榜 | `xiaohongshu_web_v2_fetch_hot_list` (⚠️ 官方说 Web V2 已停维护，暂时能用) | — |
-| 分享链接解析 | `xiaohongshu_web_get_note_id_and_xsec_token` (短链 → note_id+xsec_token) | `share_link` |
+| 账号信息 | `xiaohongshu_app_v2_get_user_info` | `user_id` 或 `share_text` |
+| 用户笔记列表 | `xiaohongshu_app_v2_get_user_posted_notes` | `user_id` / `share_text` + `cursor` |
+| 图文/视频笔记详情 | `xiaohongshu_app_v2_get_image_note_detail` / `xiaohongshu_app_v2_get_video_note_detail` | `note_id` 或 `share_text` |
+| 笔记图片 | 用详情响应返回的媒体 URL | — |
+| 笔记评论 | `xiaohongshu_app_v2_get_note_comments` | `note_id` |
+| 评论子回复 | `xiaohongshu_app_v2_get_note_sub_comments` | `note_id` + `comment_id` |
+| 关键词搜笔记 | `xiaohongshu_app_v2_search_notes` | `keyword` |
+| 关键词搜用户 | `xiaohongshu_app_v2_search_users` | `keyword` + `page` |
+| 热榜 | `xiaohongshu_web_v3_fetch_hot_list` | — |
+| Web 详情 fallback | `xiaohongshu_web_v3_fetch_note_detail` | `note_id` + `xsec_token` |
 
-**⚠️ 不要用** (官方弃用 / 实测全挂): `app_v2_*` 全系列实测 RetryError; `app_search_notes_v2` / `app_search_users` / `app_get_video_note_info` / `app_get_notes_by_topic` 官方明确弃用; `web_v2_fetch_user_info/feed_notes_v2/note_comments/sub_comments/home_notes` 官方说停止维护, 暂能用但别长期依赖。
+目录之外的 App V1、Web V1、Web V2 旧端点不再调用；以 `tikhub list xiaohongshu` 为准。
 
 ### 快手（tikhub kuaishou ）
 | 任务 | 工具 | 关键参数 |
@@ -609,7 +608,7 @@ tikhub kuaishou kuaishou_app_fetch_one_video(photo_id=...)
 | 用户作品列表 | `kuaishou_app_fetch_user_post_v2` | `user_id` + `pcursor` |
 | 用户热门作品 | `kuaishou_app_fetch_user_hot_post` | `user_id` |
 | 视频详情 | `kuaishou_app_fetch_one_video` | `photo_id` |
-| 视频评论 | `kuaishou_app_fetch_one_video_comment` | `photo_id` |
+| 视频评论 | `kuaishou_app_fetch_video_comment` | `photo_id` |
 | 用户直播信息 | `kuaishou_app_fetch_user_live_info` | `user_id` |
 | 关键词搜视频 | `kuaishou_app_search_video_v2` | `keyword` + `page` |
 | 关键词搜用户 | `kuaishou_app_search_user_v2` | `keyword` + `page` |

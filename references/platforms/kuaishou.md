@@ -134,14 +134,14 @@
 
 ---
 
-## 4. tikhub MCP 工具映射（快手账号诊断专用）
+## 4. TikHub REST API 工具映射（快手账号诊断专用）
 
-> tikhub MCP 工具完整速查见 SKILL.md §8。本节只列**诊断必用 5 件套** + **快手专属 3 条铁律**。
+> TikHub REST API 工具完整速查见 SKILL.md §8。本节只列**诊断必用 5 件套** + **快手专属 3 条铁律**。
 
 ### 4.0 快手专属 3 条铁律（先看这个，否则 90% 浪费时间）
 
 1. **user_id 二义性**：快手账号有**两种 ID**：`url 末段的 string ID`（如分享链接里的 `3xem9tstguwzc4u`）和 **`numeric ID`**（如 `4253294011`，response 里 `userProfile.profile.user_id`）。
-   - `kuaishou_app_fetch_one_user_v2` / `kuaishou_app_fetch_one_user` ✅ 两种 ID 都吃
+   - `kuaishou_app_fetch_one_user_v2` 用于解析并校验账号 ID
    - `kuaishou_app_fetch_user_post_v2` / `kuaishou_app_fetch_user_hot_post` ❌ **只认 numeric ID**，给 string ID 会连续 RetryError 像接口挂了
    - 标准做法：先用 `_fetch_one_user_v2(string_id)` 拿 response 里的 numeric `user_id`，再喂给 `_fetch_user_post_v2(numeric_id)`
 
@@ -156,7 +156,7 @@
 | 账号最近笔记 | `kuaishou_app_fetch_user_post_v2` | `user_id` + `pcursor` 翻页 |
 | 用户热门作品 | `kuaishou_app_fetch_user_hot_post` | 看历史爆款 |
 | 单条视频详情 | `kuaishou_app_fetch_one_video` | `photo_id` |
-| 单条评论（看亲密度） | `kuaishou_app_fetch_one_video_comment` | `photo_id` |
+| 单条评论（看亲密度） | `kuaishou_app_fetch_video_comment` | `photo_id` |
 | 用户直播信息 | `kuaishou_app_fetch_user_live_info` | 看是否做直播变现 |
 | 关键词搜对标 | `kuaishou_app_search_video_v2` + `kuaishou_app_search_user_v2` | `keyword` |
 | 热榜（找赛道天花板） | `kuaishou_web_fetch_kuaishou_hot_list_v2` | `board_type=1` |
