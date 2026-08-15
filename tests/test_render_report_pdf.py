@@ -87,6 +87,20 @@ def test_sanitize_preserves_image_source_while_hiding_visible_paths():
     assert "/Users/" not in sanitized
 
 
+def test_sanitize_preserves_more_than_ten_distinct_images():
+    module = load_script()
+    image_tags = [
+        f'<div><img src="../frames/account_{index}.jpg" alt="画面 {index}"></div>'
+        for index in range(12)
+    ]
+
+    sanitized = module.sanitize_markdown_for_export("\n".join(image_tags))
+
+    for index, tag in enumerate(image_tags):
+        assert tag in sanitized, f"image {index} was replaced by another placeholder"
+        assert sanitized.count(f'../frames/account_{index}.jpg') == 1
+
+
 def test_sanitize_removes_client_preface_but_preserves_conclusion_quote():
     module = load_script()
     markdown = """# 蜂巢小蛋糕爆款视频拆解

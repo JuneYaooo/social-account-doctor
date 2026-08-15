@@ -295,7 +295,7 @@ def sanitize_markdown_for_export(markdown: str) -> str:
 
     def protect_image(match: re.Match[str]) -> str:
         image_markup.append(match.group(0))
-        return f"REPORTIMAGEPLACEHOLDER{len(image_markup) - 1}"
+        return f"REPORTIMAGEPLACEHOLDER_{len(image_markup) - 1}_END"
 
     repo_root = Path(__file__).resolve().parents[1].as_posix().rstrip("/") + "/"
     text = strip_client_preface(strip_internal_sections(markdown))
@@ -337,7 +337,7 @@ def sanitize_markdown_for_export(markdown: str) -> str:
     text = text.replace("`ffprobe + 本地 ASR + 关键帧 + 逐帧视觉复核`", "媒体信息、音频转写、关键画面和逐帧视觉复核")
     text = text.replace("`V3_keyframe_ready`", "关键画面与转写已完成")
     for index, markup in enumerate(image_markup):
-        text = text.replace(f"REPORTIMAGEPLACEHOLDER{index}", markup)
+        text = text.replace(f"REPORTIMAGEPLACEHOLDER_{index}_END", markup)
     return text
 
 
