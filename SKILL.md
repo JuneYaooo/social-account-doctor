@@ -574,7 +574,7 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 
 ### mc CLI — 登录自己账号的数据源（免 TikHub key，MediaCrawler 适配层）
 
-> 位置 `mediacrawler/bin/mc`，文档 `mediacrawler/README.md`。原理：本机 Playwright 真实浏览器 + 用户自己平台的登录态，**不需要 TIKHUB_API_KEY**。首次用 `mc --setup` 安装（克隆 MediaCrawler 到 `vendor/` + 独立 venv + chromium，需 Python ≥ 3.10 + git）。
+> 位置 `mediacrawler/bin/mc`，文档 `mediacrawler/README.md`。原理：本机 Playwright 真实浏览器 + 用户自己平台的登录态，**不需要 TIKHUB_API_KEY**。首次用 `mc --setup` 安装（克隆 MediaCrawler 到 `vendor/` + 独立 venv + chromium，需 Python ≥ 3.10 + git）。何时走这条路径见 §10「数据源确认」。
 
 | 任务 | 命令 | 说明 |
 |---|---|---|
@@ -776,6 +776,18 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    - `crack` 依赖：数据源（tikhub CLI 作品详情，或 `mc detail`）+ multimodal 脚本
    - `adapt` 依赖：纯 LLM（无外部依赖）
    - L2 完整诊断依赖：数据源（搜对标 + 账号作品）+ multimodal
+
+   **数据源确认（首次使用 / 实时搜索场景必须先问）**：
+   - 用户**刚装好 skill 后第一次**需要平台数据，或本次需要**实时搜索/实时抓取**（find、crack 链接解析、账号作品列表）时，**先用一句话和用户确认走哪条路径**，不要自己默默选：
+     ```
+     平台数据有两种取法：
+     ① TikHub API —— 五平台全支持（含视频号），快、稳，按调用计费
+     ② mc 扫码登录 —— 免费，用你自己的小红书/抖音/快手/B站账号，弹浏览器扫码一次，之后免扫码；不支持视频号
+     用哪种？（也可以直接说"以后都用 ①/②"，我记住不再问）
+     ```
+   - 用户已表达过明确偏好（说过"没有 key"“别用我账号”“以后都用 X”）→ 不再重复问，直接走对应路径
+   - 只有一条路可用（如 TikHub key 没配且用户不想装 mc；或目标是视频号只有 TikHub 能走）→ 不问，直接用可用的并告知
+   - 用户给了本地视频 / 截图 / 自己上传的材料时不需要任何数据源 → 不问
 
    **缺哪个明说哪个**（在第一句话就说，不要默默缩范围）：
 

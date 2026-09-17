@@ -92,7 +92,7 @@ https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/inst
 
 > 🔒 脚本优先读当前进程环境变量，再读安装后的 Skill `.env`；仅为兼容旧安装回退读取 `~/.claude/.env`。
 
-系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
+> 💡 **两种数据源怎么选？装好后第一次用时 Claude 会先问你**（TikHub 计费快稳全平台 vs 扫码登录免费但无视频号），你答一次它就记住偏好，之后不再重复问；随时可以直接说「用 TikHub」或「用我自己账号」切换。系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
 
 安装器支持 `--target claude|codex|cursor|openclaw`；完整命令见 `docs/install.md`。带货视频链接复用通用内容分析链路；链接解析或媒体下载失败时会要求上传本地文件，不会假装已看过视频。商品事实仍只来自用户上传材料。
 
@@ -101,7 +101,7 @@ https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/inst
 
 ## 🛠 在 Claude Code 里怎么用
 
-装完直接跟 Claude 说人话就行,见上面 [怎么用 —— 直接跟 Claude 说](#怎么用--直接跟-claude-说) 表格。Claude 会自己路由到 find / crack / adapt / compose 命令,跑完把报告路径告诉你。
+装完直接跟 Claude 说人话就行,见上面 [怎么用 —— 直接跟 Claude 说](#怎么用--直接跟-claude-说) 表格。Claude 会自己路由到 find / crack / adapt / compose 命令,跑完把报告路径告诉你。第一次涉及平台数据抓取时，Claude 会先和你确认用 TikHub 还是扫码登录（免费），之后记住你的偏好。
 
 **🧑‍💻 想自己写脚本调 CLI 而不走 agent?** 看 [SKILL.md](./SKILL.md) —— 命令闭环、输入路由、每个脚本的参数和文件布局都在那;`scripts/` 下的 `analyze_image.py` / `analyze_video.py` / `analyze_document.py` / `render_report_pdf.py` 也可以独立调。
 
