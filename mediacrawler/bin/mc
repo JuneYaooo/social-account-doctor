@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""mc — 用自己账号登录抓平台数据的 CLI（MediaCrawler 适配层，免 TikHub key）。
+
+Usage:
+    mc --status                                  # 安装 / 登录态检查（JSON）
+    mc --setup [--force]                         # 克隆 MediaCrawler + venv + chromium
+
+    mc search  --platform xiaohongshu --keywords "词1,词2" [--max-notes 20]
+    mc detail  --platform douyin --ids "url1,url2"
+    mc creator --platform xhs --ids "profile_url"
+
+Common options:
+    --comments / --no-comments      抓一级评论（默认抓）
+    --max-comments N                每条作品最多抓 N 条一级评论（默认 20）
+    --login qrcode|phone|cookie     登录方式（默认 qrcode，弹浏览器扫码）
+    --cookies STRING                cookie 登录时的 cookie 串
+    --headless                      无头模式（扫码登录时不要用）
+    --timeout SECONDS               爬取超时（默认 900）
+    --out DIR                       数据落盘目录（默认 <skill>/vendor/mc-data）
+    --force                         跳过同平台 5 分钟冷却（默认两次抓取要间隔）
+
+Output:
+    - success: unified JSON to stdout（items 含 id/url/标题/互动数/媒体/评论）
+    - failure: {"error": "..."} JSON to stdout, non-zero exit
+    - 人类可读进度（含扫码提示）走 stderr
+
+Env:
+    MC_DEBUG=1      透传更多调试日志
+    MC_PYTHON       指定建 venv 用的 Python (>=3.10)
+    MC_VENDOR_DIR   覆盖 vendor 目录（默认 <skill>/vendor）
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent / "lib"))
+
+import mc_client  # noqa: E402
+
+
+def _emit(obj: dict, code: int = 0) -> None:
+    print(json.dumps(obj, ensure_ascii=False, indent=2))
+    sys.exit(code)
+
+
+def _fail(msg: str, code: int = 2, **extra) -> None:
+    _emit({"ok": False, "error": msg, **extra}, code)
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        prog="mc",
+        description="MediaCrawler adapter CLI — login with your own account, no TikHub key.",
+        add_help=True,
+        allow_abbrev=False,
+    )
+    parser.add_argument("--status", action="store_true", help="check install & login state, print JSON")
+    parser.add_argument("--setup", action="store_true", help="clone MediaCrawler, build venv, install chromium")
+    parser.add_argument("--force", action="store_true", help="--setup: re-install; crawl: skip same-platform cooldown")
+    parser.add_argument("mode", nargs="?", choices=("search", "detail", "creator"), help="crawl mode")
+    parser.add_argument("--platform", help="xiaohongshu | douyin | kuaishou | bilibili")
+    parser.add_argument("--keywords", default="", help="search keywords, comma-separated")
+    parser.add_argument("--ids", default="", help="note/video/creator URLs or IDs, comma-separated")
+    parser.add_argument("--max-notes", type=int, default=20, help="max notes per keyword (default 20)")
+    parser.add_argument("--max-comments", type=int, default=20, help="max first-level comments per note")
+    parser.add_argument("--comments", dest="comments", action="store_true", default=True)
+    parser.add_argument("--no-comments", dest="comments", action="store_false")
+    parser.add_argument("--login", default="qrcode", choices=mc_client.LOGIN_TYPES)
+    parser.add_argument("--cookies", default="", help="cookie string for --login cookie")
+    parser.add_argument("--headless", action="store_true", help="run browser headless (not for first login)")
+    parser.add_argument("--timeout", type=int, default=900, help="crawl timeout seconds (default 900)")
+    parser.add_argument("--out", default=None, help="data output directory")
+    args = parser.parse_args(argv)
+
+    if args.status:
+        _emit(mc_client.status())
+    if args.setup:
+        try:
+            _emit(mc_client.setup(force=args.force))
+        except mc_client.McError as e:
+            _fail(str(e))
+        return
+
+    if not args.mode:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+    if not args.platform:
+        _fail("missing --platform (xiaohongshu | douyin | kuaishou | bilibili)")
+
+    ids = [i.strip() for i in args.ids.split(",") if i.strip()] if args.ids else []
+    try:
+        result = mc_client.crawl(
+            mode=args.mode,
+            platform=args.platform,
+            keywords=args.keywords,
+            ids=ids,
+            max_notes=args.max_notes,
+            comments=args.comments,
+            login=args.login,
+            cookies=args.cookies,
+            headless=args.headless,
+            timeout=args.timeout,
+            out_dir=args.out,
+            force=args.force,
+        )
+    except mc_client.McError as e:
+        _fail(str(e))
+
+    # 未登录 / 风控等失败也要让 agent 拿到结构化结果而不是报错堆栈
+    code = 0 if result.get("ok") else 2
+    _emit(result, code)
+
+
+if __name__ == "__main__":
+    main()

@@ -113,6 +113,7 @@ main() {
         --exclude='.git' \
         --exclude='reports' \
         --exclude='assets' \
+        --exclude='vendor' \
         --exclude='venv' \
         --exclude='.venv' \
         --exclude='__pycache__' \
@@ -157,6 +158,10 @@ main() {
     ln -sf "$SKILL_DIR/tikhub/bin/tikhub" "$HOME/.local/bin/tikhub"
     print_success "已软链 tikhub -> ~/.local/bin/tikhub"
 
+    chmod +x "$SKILL_DIR/mediacrawler/bin/mc" 2>/dev/null || true
+    ln -sf "$SKILL_DIR/mediacrawler/bin/mc" "$HOME/.local/bin/mc"
+    print_success "已软链 mc -> ~/.local/bin/mc（可选的登录式数据源，免 TikHub key）"
+
     if ! echo ":$PATH:" | grep -q ":$HOME/.local/bin:"; then
         print_warning "~/.local/bin 不在 PATH 中，请把下面一行加进 shell rc："
         print_info "  export PATH=\"\$HOME/.local/bin:\$PATH\""
@@ -174,8 +179,9 @@ main() {
 
     if ! grep -q "^TIKHUB_API_KEY=" "$SKILL_DIR/.env" 2>/dev/null || \
        grep -q "^TIKHUB_API_KEY=your-tikhub-key$" "$SKILL_DIR/.env" 2>/dev/null; then
-        print_warning "请在 $SKILL_DIR/.env 填入有效的 TIKHUB_API_KEY"
-        print_info "  申请 key: https://tikhub.io/"
+        print_warning "未配置 TIKHUB_API_KEY（申请: https://tikhub.io/ ）"
+        print_info "  没有 key 也可以用登录自己账号的 mc 路径（小红书/抖音/快手/B站，免 key）："
+        print_info "    mc --setup   # 首次使用时安装（需要 Python>=3.10 和 git，支持视频号以外的平台）"
     fi
 
     print_header "安装完成"
@@ -184,13 +190,16 @@ main() {
     echo ""
     print_info "下一步："
     print_info "  1. 编辑 .env 填多模态 API key:  nano $SKILL_DIR/.env"
-    print_info "  2. 在同一 .env 填入 TIKHUB_API_KEY"
+    print_info "  2. 平台数据源二选一（或都配）："
+    print_info "     a. .env 填 TIKHUB_API_KEY（五平台全支持）"
+    print_info "     b. 不想用 key: 跑 'mc --setup'，之后抓数据时弹浏览器扫码登录自己账号"
     print_info "  3. 重启当前 agent 宿主让 skill 生效"
     print_info '  4. 直接对当前 agent 说："找对标 / 拆这条爆款 / 对着这条仿写"'
     echo ""
     print_info "冒烟测试（可选）："
     print_info "  tikhub --health"
     print_info "  tikhub list xiaohongshu search"
+    print_info "  mc --status      # 登录式数据源（需先 mc --setup）"
     echo ""
 }
 

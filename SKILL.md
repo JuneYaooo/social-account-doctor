@@ -15,7 +15,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 这些规则适用于 find / crack / adapt / diagnostic。违反时不要硬写报告；在对话里明说缺哪一步、为什么缺、用户可以怎么补。
 
 **H1 — find 必须有真对标搜索**
-- `find` 模式至少跑过 1 次平台搜索，并拿到真实账号或作品候选：小红书 `xiaohongshu_app_v2_search_notes` / 抖音账号搜索或视频搜索 / 快手 `kuaishou_app_search_video_v2` / 视频号 `wechat_channels_v2_fetch_search_channel_videos` / B 站 `bilibili_web_fetch_general_search`。
+- `find` 模式至少跑过 1 次平台搜索，并拿到真实账号或作品候选：小红书 `xiaohongshu_app_v2_search_notes` / 抖音账号搜索或视频搜索 / 快手 `kuaishou_app_search_video_v2` / 视频号 `wechat_channels_v2_fetch_search_channel_videos` / B 站 `bilibili_web_fetch_general_search`；或 TikHub key 不可用时改跑 `mc search`（登录自己账号的 MediaCrawler 路径，见 §7.5）。
 - 只拿了我的账号信息或作品列表就写“对标结论” = 违规。没有对标搜索，就只能标成“仅基于我方数据的初步判断”。
 
 **H2 — 视觉判断必须先跑多模态**
@@ -572,6 +572,34 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 | **B 站独家：弹幕** | — | — | — | `bilibili_web_fetch_video_danmaku`（4 类信号见 platforms/bilibili.md §3） |
 | **解析分享链接** | `xiaohongshu_web_v3_fetch_note_detail`（支持分享文本时直接传） | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` | `bilibili_web_bv_to_aid`（bv ↔ aid 转换） |
 
+### mc CLI — 登录自己账号的数据源（免 TikHub key，MediaCrawler 适配层）
+
+> 位置 `mediacrawler/bin/mc`，文档 `mediacrawler/README.md`。原理：本机 Playwright 真实浏览器 + 用户自己平台的登录态，**不需要 TIKHUB_API_KEY**。首次用 `mc --setup` 安装（克隆 MediaCrawler 到 `vendor/` + 独立 venv + chromium，需 Python ≥ 3.10 + git）。
+
+| 任务 | 命令 | 说明 |
+|---|---|---|
+| **find Step 3 关键词搜** | `mc search --platform xiaohongshu --keywords "词1,词2"` | 多词逗号分隔一次跑完；`--max-notes` 是每词上限（小红书强制 ≥20） |
+| **crack 作品详情** | `mc detail --platform douyin --ids "作品URL"` | 支持分享短链 / 纯 ID；`--ids` 逗号分隔批量 |
+| **账号诊断作品列表** | `mc creator --platform xhs --ids "主页URL"` | 抓该创作者全部作品 + 评论 |
+| **评论** | search/detail 自带 `--comments`（默认开） | 每条上限 `--max-comments 20` |
+| **状态检查** | `mc --status` | 已装？已 patch？哪些平台已登录 |
+
+平台：`xiaohongshu/xhs`、`douyin/dy`、`kuaishou/ks`、`bilibili/bili`。**视频号不支持**（继续走 TikHub wechat_* 或本地视频）。**抖音需要本机 Node.js ≥ 16**（`mc --status` 会报 node_found）。
+
+**频率控制铁律（保护用户账号，必须遵守）**——用户登录的是自己的账号，抓太密会触发平台风控甚至封号：
+- **能合并就合并**：多个搜索词合成一次 `--keywords "词1,词2"`；多条作品合成一次 `--ids "url1,url2"`（≤5 条）。禁止一个词一次调用连环跑
+- **单次上限**：search ≤ 3 个关键词；detail ≤ 5 条；creator ≤ 2 个账号；并发固定 1，**禁止并行跑多个 mc 进程**
+- **同平台冷却**：mc 内置同平台 5 分钟冷却（连续抓取直接拒绝，报错会提示）；agent 侧遵守同平台两次抓取间隔 ≥ 5 分钟，`--force` 只在用户明确要求时用
+- **先复用再抓**：`vendor/mc-data/{平台}/json/` 里 24 小时内已抓过的同关键词/同账号数据先复用（直接读 `*_contents_*.json`，或 `python3 mediacrawler/lib/mc_client.py` 里的 `parse_results` 重新归一化），不重复抓
+- **风控信号立即停手**：出现验证码、登录失效、连续空结果 → 停止重试，告知用户过段时间再试或改走 TikHub 路径
+- 任务结束提醒用户：数据来自本人账号登录抓取，请控制频率
+
+**输出归一化**：stdout JSON 的 `items[]` 带 `id/url/title/desc/publish_time/liked_count/collected_count/comment_count/share_count/image_urls/video_url/cover_url/tags/comments`，封面/视频 URL 直接喂 `analyze_image.py` / `analyze_video.py`，字段语义对齐 TikHub 路径，下游 find/crack/adapt 不用改。
+
+**已知边界**（上游防骚扰设计，勿当 bug 报）：输出无真实用户 ID / 主页链接 / 粉丝数 / 简介（`nickname` 已脱敏）；除快手外无播放量。find Step 5 体量过滤改用互动量 + 更新频率近似；需要精确粉丝数时换 TikHub。
+
+**合规**：上游 NON-COMMERCIAL LEARNING LICENSE，仅供学习研究；单次几十条的量级，不要加大并发批量采集。
+
 ### 视频号（独立路径 — 没分享链接）
 
 视频号客户端**不输出可复制的链接 / 视频 ID**（分享出去是卡片，不是 URL）。所以任何视频号任务的入口都是**账号名/关键词搜索**，跟其他三平台流程不一样：
@@ -744,20 +772,22 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
 10. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
 
    **开干前必做**：列出本次任务依赖的工具，逐个 ping。
-   - `find` 依赖：tikhub CLI（`tikhub --health`）+ analyze_image.py + analyze_video.py
-   - `crack` 依赖：tikhub CLI（笔记/视频/评论详情）+ multimodal 脚本
+   - `find` 依赖：数据源（`tikhub --health`，或免 key 的 `mc --status`）+ analyze_image.py + analyze_video.py
+   - `crack` 依赖：数据源（tikhub CLI 作品详情，或 `mc detail`）+ multimodal 脚本
    - `adapt` 依赖：纯 LLM（无外部依赖）
-   - L2 完整诊断依赖：tikhub CLI（搜对标 + 账号信息）+ multimodal
+   - L2 完整诊断依赖：数据源（搜对标 + 账号作品）+ multimodal
 
    **缺哪个明说哪个**（在第一句话就说，不要默默缩范围）：
 
    ```
-   ⚠️ 本次需要 tikhub CLI（小红书）调数据，环境检查发现：
+   ⚠️ 本次需要平台数据，环境检查发现：
       - tikhub --health 不通 / TIKHUB_API_KEY 没配 / 连续 retry 失败
 
-   两个选择：
+   三个选择：
    ① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或 PATH（详见仓库 `tikhub/README.md`），再来一次
-   ② 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
+   ② 没有 TikHub key？改用登录自己账号的 mc 路径（首次 `mc --setup`，之后弹浏览器扫码；
+      支持小红书/抖音/快手/B站，不支持视频号，详见 `mediacrawler/README.md`）
+   ③ 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
    ```
 
    **禁止偷工**：

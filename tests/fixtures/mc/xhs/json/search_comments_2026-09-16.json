@@ -1,0 +1,28 @@
+[
+    {
+        "comment_id": "a_comment_1",
+        "create_time": 1758002500000,
+        "note_id": "661f2b44000000001e021234",
+        "content": "跟着做了一周，真的瘦了",
+        "creator_hash": "c1d2e3f4a5b60718",
+        "nickname": "路***人",
+        "sub_comment_count": 2,
+        "pictures": "",
+        "parent_comment_id": "",
+        "last_modify_ts": 1758002500001,
+        "like_count": 23
+    },
+    {
+        "comment_id": "a_comment_2",
+        "create_time": 1758002600000,
+        "note_id": "661f2b44000000001e021234",
+        "content": "求饭盒链接",
+        "creator_hash": "d2e3f4a5b6c71829",
+        "nickname": "阿***宝",
+        "sub_comment_count": 0,
+        "pictures": "",
+        "parent_comment_id": "",
+        "last_modify_ts": 1758002600001,
+        "like_count": 5
+    }
+]
