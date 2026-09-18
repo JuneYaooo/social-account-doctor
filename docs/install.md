@@ -33,12 +33,12 @@
    | key | 必选? | 用途 | 去哪搞 |
    |---|---|---|---|
    | `VIDEO_ANALYSIS_API_KEY` + `VIDEO_ANALYSIS_BASE_URL` | ✅ 必选 | 看图 / 看视频的多模态大模型（OpenAI 兼容协议） | 用户自己的 key 或代理站 |
-   | `TIKHUB_API_KEY` | ⚪ 与 mc 二选一 | 抓小红书/抖音/快手/视频号/B 站 数据（五平台全支持） | https://tikhub.io/ |
+   | `TIKHUB_API_KEY` | ⚪ 可选（付费） | 量大 / 需要视频号时的平台数据抓取（五平台全支持） | https://tikhub.io/ |
    | `AUDIO_TRANSCRIPTION_API_KEY` | ⚪ 可选 | 拆"真人口播"视频时做语音转写 | SiliconFlow / OpenAI 兼容服务 |
 
    key 写到安装后的 `social-account-doctor/.env`（脚本从 `.env.example` 自动创建）。
 
-   **用户没有 TikHub key？** 告诉他可以登录自己账号抓数据（免 key）：让 agent 在首次需要平台数据时跑 `mc --setup`（安装 MediaCrawler 登录式数据源，需 Python ≥ 3.10 + git），抓取时会弹浏览器扫码。仅支持小红书 / 抖音 / 快手 / B 站，不支持视频号；详见 `mediacrawler/README.md`。
+   **平台数据源推荐顺序**：先走免费的自有账号路径——首次需要平台数据时让 agent 跑 `mc --setup`（安装 MediaCrawler 登录式数据源，需 Python ≥ 3.10 + git），抓取时弹浏览器扫码，用用户自己的小红书 / 抖音 / 快手 / B 站账号；小量使用（同账号同平台每天几次）完全够用，mc 内置频率保护。需要**视频号**或**大批量**抓取时再配 `TIKHUB_API_KEY`（按调用计费），详见 `mediacrawler/README.md`。
 
 4. **确认系统依赖**:
    - Python 3.10+

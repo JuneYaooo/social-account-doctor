@@ -784,8 +784,9 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    - 用户**刚装好 skill 后第一次**需要平台数据，或本次需要**实时搜索/实时抓取**（find、crack 链接解析、账号作品列表）时，**先用一句话和用户确认走哪条路径**，不要自己默默选：
      ```
      平台数据有两种取法：
-     ① TikHub API —— 五平台全支持（含视频号），快、稳，按调用计费
-     ② mc 扫码登录 —— 免费，用你自己的小红书/抖音/快手/B站账号，弹浏览器扫码一次，之后免扫码；不支持视频号
+     ① mc 扫码登录（推荐）—— 免费，用你自己的小红书/抖音/快手/B站账号，弹浏览器
+        扫码一次，之后免扫码；小量使用（每天几次）完全够用；不支持视频号
+     ② TikHub API —— 按调用计费，快、稳，五平台全支持（含视频号），适合量大场景
      用哪种？（也可以直接说"以后都用 ①/②"，我记住不再问）
      ```
    - 用户已表达过明确偏好（说过"没有 key"“别用我账号”“以后都用 X”）→ 不再重复问，直接走对应路径
@@ -796,12 +797,14 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
 
    ```
    ⚠️ 本次需要平台数据，环境检查发现：
-      - tikhub --health 不通 / TIKHUB_API_KEY 没配 / 连续 retry 失败
+      - 已配的数据源不可用（tikhub --health 不通 / TIKHUB_API_KEY 没配；
+        或 mc 未安装 / 登录失效，mc --status 可查）
 
    三个选择：
-   ① 修复 ~/.claude/.env 的 TIKHUB_API_KEY 或 PATH（详见仓库 `tikhub/README.md`），再来一次
-   ② 没有 TikHub key？改用登录自己账号的 mc 路径（首次 `mc --setup`，之后弹浏览器扫码；
+   ① 免费路径（推荐）：登录自己账号的 mc（首次 `mc --setup`，之后弹浏览器扫码一次即可；
       支持小红书/抖音/快手/B站，不支持视频号，详见 `mediacrawler/README.md`）
+   ② 修复 TikHub（量大 / 需要视频号时）：配 TIKHUB_API_KEY 或 PATH
+      （详见仓库 `tikhub/README.md`），再来一次
    ③ 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
    ```
 

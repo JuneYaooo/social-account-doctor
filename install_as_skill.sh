@@ -237,9 +237,9 @@ main() {
 
     if ! grep -q "^TIKHUB_API_KEY=" "$SKILL_DIR/.env" 2>/dev/null || \
        grep -q "^TIKHUB_API_KEY=your-tikhub-key$" "$SKILL_DIR/.env" 2>/dev/null; then
-        print_warning "未配置 TIKHUB_API_KEY（申请: https://tikhub.io/ ）"
-        print_info "  没有 key 也可以用登录自己账号的 mc 路径（小红书/抖音/快手/B站，免 key）："
-        print_info "    mc --setup   # 首次使用时安装（需要 Python>=3.10 和 git，支持视频号以外的平台）"
+        print_info "未配置 TIKHUB_API_KEY（可选的付费路径，需要视频号或大批量抓取时再申请: https://tikhub.io/ ）"
+        print_info "  推荐先用免费的自己账号路径（小红书/抖音/快手/B站）："
+        print_info "    mc --setup   # 首次使用时安装（需要 Python>=3.10 和 git），抓数据时扫码登录"
     fi
 
     print_header "安装完成"
@@ -248,9 +248,9 @@ main() {
     echo ""
     print_info "下一步："
     print_info "  1. 编辑 .env 填多模态 API key:  nano $SKILL_DIR/.env"
-    print_info "  2. 平台数据源二选一（或都配）："
-    print_info "     a. .env 填 TIKHUB_API_KEY（五平台全支持）"
-    print_info "     b. 不想用 key: 跑 'mc --setup'，之后抓数据时弹浏览器扫码登录自己账号"
+    print_info "  2. 平台数据源（推荐先用免费的自己账号路径）："
+    print_info "     a. 跑 'mc --setup'，之后抓数据时弹浏览器扫码登录自己的小红书/抖音/快手/B站账号（免费，小量够用）"
+    print_info "     b. 量大或需要视频号: .env 填 TIKHUB_API_KEY（付费，五平台全支持）"
     print_info "  3. 重启当前 agent 宿主让 skill 生效"
     print_info '  4. 直接对当前 agent 说："找对标 / 拆这条爆款 / 对着这条仿写"'
     echo ""

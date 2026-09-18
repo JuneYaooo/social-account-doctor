@@ -88,13 +88,13 @@ https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/inst
 
 1. **一个会看图 / 看视频的大模型 key + 端点** —— 推荐 Gemini 3.1 Pro,OpenAI 协议兼容的服务都行（OpenAI / SiliconFlow / Gemini 官方兼容端点 / 可信代理站）。`VIDEO_ANALYSIS_BASE_URL` **必填**：脚本不内置任何默认端点，没填会直接报错——这是防止 key 和素材发到意外域名的保护
 2. **平台数据源，二选一（或都配）**：
-   - **[tikhub.io](https://tikhub.io/) 的 API key** —— 一个 key 通吃五平台（含视频号），按调用计费
-   - **不想买 key？** 用登录自己账号的路径：`mc --setup` 一次安装，之后抓数据时弹浏览器扫码登录自己的小红书 / 抖音 / 快手 / B 站账号（免 key，免费；不支持视频号）。详见 [mediacrawler/README.md](./mediacrawler/README.md)
+   - **推荐先用自己账号（免费）**：`mc --setup` 一次安装，之后抓数据时弹浏览器扫码登录自己的小红书 / 抖音 / 快手 / B 站账号。小量使用（每天几次）完全够用，内置频率保护；不支持视频号。详见 [mediacrawler/README.md](./mediacrawler/README.md)
+   - **量大或需要视频号？** [tikhub.io](https://tikhub.io/) 的 API key —— 一个 key 通吃五平台（含视频号），按调用计费
 3. **一个语音转写 key**(可选) —— 只有当你要拆"真人口播"类视频时才需要(SenseVoice / Whisper 均可)
 
 > 🔒 脚本优先读当前进程环境变量，再读安装后的 Skill `.env`；仅为兼容旧安装回退读取 `~/.claude/.env`。
 
-> 💡 **两种数据源怎么选？装好后第一次用时 Claude 会先问你**（TikHub 计费快稳全平台 vs 扫码登录免费但无视频号），你答一次它就记住偏好，之后不再重复问；随时可以直接说「用 TikHub」或「用我自己账号」切换。系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
+> 💡 **两种数据源怎么选？装好后第一次用时 Claude 会先问你**（扫码登录免费、小量够用但无视频号 vs TikHub 计费快稳全平台），你答一次它就记住偏好，之后不再重复问；随时可以直接说「用 TikHub」或「用我自己账号」切换。系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
 
 安装器支持 `--target claude|codex|cursor|openclaw`；完整命令见 `docs/install.md`。带货视频链接复用通用内容分析链路；链接解析或媒体下载失败时会要求上传本地文件，不会假装已看过视频。商品事实仍只来自用户上传材料。
 
