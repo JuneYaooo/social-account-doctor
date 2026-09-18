@@ -145,7 +145,8 @@ def analysis_timeout_seconds(override: Optional[int] = None) -> int:
 
 def chat_completions_url(base_url: str) -> str:
     base = base_url.rstrip("/")
-    if base.endswith("/v1"):
+    # /openai 是 Gemini 官方 OpenAI 兼容端点的后缀（.../v1beta/openai）
+    if base.endswith(("/v1", "/openai")):
         return f"{base}/chat/completions"
     return f"{base}/v1/chat/completions"
 
@@ -217,12 +218,18 @@ def _parse_json(content: str) -> dict:
 
 def analyze(image_path: str, timeout_seconds: Optional[int] = None) -> dict:
     api_key = os.environ.get("VIDEO_ANALYSIS_API_KEY")
-    base_url = os.environ.get("VIDEO_ANALYSIS_BASE_URL", "https://daydream88.fun/v1")
+    # 不内置默认端点：BASE_URL 没显式配置就直接报错，避免 key 和素材发到任何第三方域名
+    base_url = os.environ.get("VIDEO_ANALYSIS_BASE_URL")
     model = os.environ.get("VIDEO_ANALYSIS_MODEL_NAME", "gemini-3.1-pro-preview")
     timeout_seconds = analysis_timeout_seconds(timeout_seconds)
 
     if not api_key:
         return {"error": "VIDEO_ANALYSIS_API_KEY not set in env"}
+    if not base_url:
+        return {"error": "VIDEO_ANALYSIS_BASE_URL not set（不内置默认端点，防止 key 发到第三方域名）。"
+                         "在 shell 环境或 Skill 的 .env 里填你的 OpenAI 兼容端点，例如 "
+                         "https://api.openai.com/v1、https://api.siliconflow.cn/v1，或 Gemini 官方兼容端点 "
+                         "https://generativelanguage.googleapis.com/v1beta/openai"}
 
     if not Path(image_path).exists():
         return {"error": f"image not found: {image_path}"}

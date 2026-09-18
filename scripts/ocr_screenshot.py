@@ -29,7 +29,7 @@ social-account-doctor: ocr_screenshot.py
 
 环境变量:
 - VIDEO_ANALYSIS_API_KEY
-- VIDEO_ANALYSIS_BASE_URL  (默认 https://generativelanguage.googleapis.com)
+- VIDEO_ANALYSIS_BASE_URL  (必填，不内置默认端点——防止 key 发到意外域名)
 - VIDEO_ANALYSIS_MODEL_NAME  (默认 gemini-3-pro-preview)
 - VIDEO_ANALYSIS_TIMEOUT_SECONDS  (默认 600 秒)
 - VIDEO_ANALYSIS_NORMALIZE_IMAGES  (默认 1，非 JPEG 图片转 JPEG 后发送)
@@ -106,7 +106,8 @@ def analysis_timeout_seconds() -> int:
 
 def chat_completions_url(base_url: str) -> str:
     base = base_url.rstrip("/")
-    if base.endswith("/v1"):
+    # /openai 是 Gemini 官方 OpenAI 兼容端点的后缀（.../v1beta/openai）
+    if base.endswith(("/v1", "/openai")):
         return f"{base}/chat/completions"
     return f"{base}/v1/chat/completions"
 
@@ -209,7 +210,14 @@ def main():
         print(json.dumps({"error": "VIDEO_ANALYSIS_API_KEY not set"}, ensure_ascii=False))
         sys.exit(3)
 
-    base_url = os.environ.get("VIDEO_ANALYSIS_BASE_URL", "https://generativelanguage.googleapis.com")
+    base_url = os.environ.get("VIDEO_ANALYSIS_BASE_URL")
+    if not base_url:
+        print(json.dumps({
+            "error": "VIDEO_ANALYSIS_BASE_URL not set（不内置默认端点，防止 key 发到第三方域名）。"
+                     "填你的 OpenAI 兼容端点，例如 https://api.openai.com/v1 或 "
+                     "Gemini 官方兼容端点 https://generativelanguage.googleapis.com/v1beta/openai",
+        }, ensure_ascii=False))
+        sys.exit(3)
     model = os.environ.get("VIDEO_ANALYSIS_MODEL_NAME", "gemini-3-pro-preview")
 
     image_b64, mime = encode_image_to_base64(path)

@@ -86,7 +86,7 @@ https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/inst
 
 安装脚本会引导你填这些，也可以编辑安装后的 `social-account-doctor/.env`：
 
-1. **一个会看图 / 看视频的大模型 key** —— 推荐 Gemini 3.1 Pro,OpenAI 协议兼容的代理站都行
+1. **一个会看图 / 看视频的大模型 key + 端点** —— 推荐 Gemini 3.1 Pro,OpenAI 协议兼容的服务都行（OpenAI / SiliconFlow / Gemini 官方兼容端点 / 可信代理站）。`VIDEO_ANALYSIS_BASE_URL` **必填**：脚本不内置任何默认端点，没填会直接报错——这是防止 key 和素材发到意外域名的保护
 2. **平台数据源，二选一（或都配）**：
    - **[tikhub.io](https://tikhub.io/) 的 API key** —— 一个 key 通吃五平台（含视频号），按调用计费
    - **不想买 key？** 用登录自己账号的路径：`mc --setup` 一次安装，之后抓数据时弹浏览器扫码登录自己的小红书 / 抖音 / 快手 / B 站账号（免 key，免费；不支持视频号）。详见 [mediacrawler/README.md](./mediacrawler/README.md)

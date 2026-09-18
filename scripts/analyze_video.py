@@ -101,7 +101,8 @@ def use_video_url_payload(video_path: str) -> bool:
 
 def chat_completions_url(base_url: str) -> str:
     base = base_url.rstrip("/")
-    if base.endswith("/v1"):
+    # /openai 是 Gemini 官方 OpenAI 兼容端点的后缀（.../v1beta/openai）
+    if base.endswith(("/v1", "/openai")):
         return f"{base}/chat/completions"
     return f"{base}/v1/chat/completions"
 
@@ -306,9 +307,17 @@ def extract_even_frames(
 
 def gemini_chat(messages: list, max_tokens: int = 2500, temperature: float = 0.2) -> dict:
     """统一的 Gemini 调用 — OpenAI 兼容协议。返回解析后的 JSON dict（或带 error 的 dict）。"""
-    api_key = os.environ["VIDEO_ANALYSIS_API_KEY"]
-    base_url = os.environ.get("VIDEO_ANALYSIS_BASE_URL", "https://daydream88.fun/v1")
+    api_key = os.environ.get("VIDEO_ANALYSIS_API_KEY")
+    # 不内置默认端点：BASE_URL 没显式配置就直接报错，避免 key 和素材发到任何第三方域名
+    base_url = os.environ.get("VIDEO_ANALYSIS_BASE_URL")
     model = os.environ.get("VIDEO_ANALYSIS_MODEL_NAME", "gemini-3.1-pro-preview")
+    if not api_key:
+        return {"error": "VIDEO_ANALYSIS_API_KEY not set in env"}
+    if not base_url:
+        return {"error": "VIDEO_ANALYSIS_BASE_URL not set（不内置默认端点，防止 key 发到第三方域名）。"
+                         "在 shell 环境或 Skill 的 .env 里填你的 OpenAI 兼容端点，例如 "
+                         "https://api.openai.com/v1、https://api.siliconflow.cn/v1，或 Gemini 官方兼容端点 "
+                         "https://generativelanguage.googleapis.com/v1beta/openai"}
 
     payload = {
         "model": model,
@@ -630,7 +639,14 @@ def call_sensevoice(audio_chunks: list, required: bool = False) -> dict:
                 "talking 模式必须设 AUDIO_TRANSCRIPTION_API_KEY（口播主导视频没 ASR=没法分析）"
             )
         return {"skipped": True, "reason": "AUDIO_TRANSCRIPTION_API_KEY not set"}
-    base_url = os.environ.get("AUDIO_TRANSCRIPTION_BASE_URL", "https://api.siliconflow.cn/v1")
+    base_url = os.environ.get("AUDIO_TRANSCRIPTION_BASE_URL")
+    if not base_url:
+        if required:
+            raise RuntimeError(
+                "talking 模式必须设 AUDIO_TRANSCRIPTION_BASE_URL"
+                "（如用 SiliconFlow：https://api.siliconflow.cn/v1）"
+            )
+        return {"skipped": True, "reason": "AUDIO_TRANSCRIPTION_BASE_URL not set（不默认第三方域名）"}
     model = os.environ.get("AUDIO_TRANSCRIPTION_MODEL", "FunAudioLLM/SenseVoiceSmall")
 
     full_text_parts = []

@@ -46,6 +46,7 @@ def test_analyze_image_retries_with_larger_token_budget(tmp_path, monkeypatch):
     img_path = tmp_path / "cover.png"
     make_png(img_path)
     monkeypatch.setenv("VIDEO_ANALYSIS_API_KEY", "test-key")
+    monkeypatch.setenv("VIDEO_ANALYSIS_BASE_URL", "https://proxy.example.com/v1")
     calls = []
 
     def fake_call_once(api_key, base_url, model, b64, mime, max_tokens, timeout_seconds):
@@ -245,3 +246,64 @@ def test_ocr_screenshot_normalizes_images_and_builds_urls(tmp_path):
         module.gemini_generate_content_url("https://generativelanguage.googleapis.com/v1beta", "gemini", "key")
         == "https://generativelanguage.googleapis.com/v1beta/models/gemini:generateContent?key=key"
     )
+
+
+# ---------------------------------------------------------------------------
+# no hidden default endpoints: BASE_URL must be explicit (key-exfiltration guard)
+# ---------------------------------------------------------------------------
+
+def test_analyze_image_requires_explicit_base_url(tmp_path, monkeypatch):
+    module = load_script("analyze_image")
+    img_path = tmp_path / "cover.png"
+    make_png(img_path)
+    monkeypatch.setenv("VIDEO_ANALYSIS_API_KEY", "sk-test")
+    monkeypatch.delenv("VIDEO_ANALYSIS_BASE_URL", raising=False)
+    result = module.analyze(str(img_path))
+    assert "error" in result
+    assert "VIDEO_ANALYSIS_BASE_URL" in result["error"]
+    assert "daydream" not in result["error"].lower()
+
+
+def test_gemini_chat_requires_explicit_base_url(monkeypatch):
+    module = load_script("analyze_video")
+    monkeypatch.setenv("VIDEO_ANALYSIS_API_KEY", "sk-test")
+    monkeypatch.delenv("VIDEO_ANALYSIS_BASE_URL", raising=False)
+    result = module.gemini_chat([{"role": "user", "content": "hi"}])
+    assert "error" in result
+    assert "VIDEO_ANALYSIS_BASE_URL" in result["error"]
+
+
+def test_gemini_chat_reports_missing_key_as_error(monkeypatch):
+    module = load_script("analyze_video")
+    monkeypatch.delenv("VIDEO_ANALYSIS_API_KEY", raising=False)
+    result = module.gemini_chat([{"role": "user", "content": "hi"}])
+    assert "error" in result
+    assert "VIDEO_ANALYSIS_API_KEY" in result["error"]
+
+
+def test_sensevoice_requires_explicit_base_url(monkeypatch):
+    module = load_script("analyze_video")
+    monkeypatch.setenv("AUDIO_TRANSCRIPTION_API_KEY", "sk-test")
+    monkeypatch.delenv("AUDIO_TRANSCRIPTION_BASE_URL", raising=False)
+    result = module.call_sensevoice([], required=False)
+    assert result.get("skipped") is True
+    assert "AUDIO_TRANSCRIPTION_BASE_URL" in result["reason"]
+    import pytest
+    with pytest.raises(RuntimeError, match="AUDIO_TRANSCRIPTION_BASE_URL"):
+        module.call_sensevoice([], required=True)
+
+
+def test_chat_completions_url_accepts_google_official_compat():
+    expected = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    for name in ("analyze_image", "analyze_video", "ocr_screenshot"):
+        module = load_script(name)
+        assert module.chat_completions_url(
+            "https://generativelanguage.googleapis.com/v1beta/openai") == expected
+        assert module.chat_completions_url(
+            "https://proxy.example.com/v1") == "https://proxy.example.com/v1/chat/completions"
+
+
+def test_no_hardcoded_third_party_endpoints_in_scripts():
+    for name in ("analyze_image", "analyze_video", "ocr_screenshot", "analyze_document"):
+        src = (REPO_ROOT / "scripts" / f"{name}.py").read_text(encoding="utf-8")
+        assert "daydream" not in src.lower(), f"{name}.py still references the removed proxy domain"
