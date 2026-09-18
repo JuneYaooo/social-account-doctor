@@ -56,6 +56,11 @@ PINNED_COMMIT = "60e66f2a925816960bbd44af5d6c9b8385d79335"
 # 覆盖。合并关键词（--keywords "词1,词2"）和批量 ID（--ids "url1,url2"）一次
 # 跑完，不要拆成多次调用绕冷却。用户明确要求时可用 --force 覆盖。
 COOLDOWN_SECONDS = int(os.environ.get("MC_COOLDOWN_SECONDS", "1800"))
+# 抓取失败的退避间隔（秒）。失败往往发生在风控敏感期（验证码 / 登录失效 /
+# 被限流），立即重试只会继续加压，所以失败也写冷却标记，只是短一截。
+FAILURE_COOLDOWN_SECONDS = int(os.environ.get("MC_FAILURE_COOLDOWN_SECONDS", "600"))
+# 抓取锁超过此时长（秒）视为崩溃残留，可被新进程抢占
+CRAWL_LOCK_STALE_SECONDS = 7200
 
 # skill 平台名 → MediaCrawler --platform 值
 PLATFORM_MAP = {
@@ -580,6 +585,25 @@ def build_crawler_args(
     return args
 
 
+def _redact_cmd(cmd: list[str]) -> str:
+    """日志用的命令行还原，cookie 值打码（进程列表里 --cookies 依然可见，
+    共享机器慎用 cookie 登录，见 README）。"""
+    parts: list[str] = []
+    skip_value = False
+    for item in cmd:
+        if skip_value:
+            parts.append("***")
+            skip_value = False
+        elif item == "--cookies":
+            parts.append(item)
+            skip_value = True
+        elif item.startswith("--cookies="):
+            parts.append("--cookies=***")
+        else:
+            parts.append(item)
+    return " ".join(parts)
+
+
 def run_crawl(
     crawler_args: list[str],
     timeout: int = 900,
@@ -594,7 +618,7 @@ def run_crawl(
     if not venv_python().is_file():
         raise McError("MediaCrawler 未安装；先运行: mc --setup")
     cmd = [str(venv_python()), "main.py", *crawler_args]
-    _debug(f"run: {' '.join(cmd)}")
+    _debug(f"run: {_redact_cmd(cmd)}")
     log("[mc] 启动 MediaCrawler（首次运行会弹出浏览器，请在窗口里扫码登录；登录态会保存，之后免扫码）")
     started = time.time()
     proc = subprocess.Popen(
@@ -817,12 +841,37 @@ def _latest_files(directory: Path, pattern: str, keep: int = 1) -> list[Path]:
     return files[:keep]
 
 
-def parse_results(mode: str, platform_mc: str, out_dir: Path | str | None = None) -> dict:
-    """Read MediaCrawler JSON output and normalize it for the analysis pipeline."""
+def parse_results(mode: str, platform_mc: str, out_dir: Path | str | None = None,
+                  since: float | None = None) -> dict:
+    """Read MediaCrawler JSON output and normalize it for the analysis pipeline.
+
+    ``since``（epoch 秒）只接受该时刻之后写入的结果文件——crawl 用它防止
+    「本次抓取失败没写出新文件、却把历史文件当本次结果返回」的静默错误；
+    单独复用历史数据（SKILL.md 的「先复用再抓」路径）不传 since，行为不变。
+    """
     if mode not in CRAWL_MODES:
         raise McError(f"未知模式 {mode!r}")
     base = (Path(out_dir) if out_dir else DATA_DIR) / platform_mc / "json"
     content_files = _latest_files(base, f"{mode}_contents_*.json")
+    if since is not None and content_files:
+        fresh = [p for p in content_files if p.stat().st_mtime >= since]
+        if not fresh:
+            return {
+                "ok": False,
+                "error": "stale_data",
+                "platform": platform_mc,
+                "mode": mode,
+                "items": [],
+                "count": 0,
+                "stale_files": [
+                    {"path": str(p), "age_minutes": int((time.time() - p.stat().st_mtime) // 60)}
+                    for p in content_files
+                ],
+                "hint": "本次抓取没有产出新数据（常见：未扫码登录 / 触发风控 / 超时中断）。"
+                        "stale_files 是历史数据，除非明确要复用，不要当本次结果使用；"
+                        "先 mc --status 检查登录态再重试。",
+            }
+        content_files = fresh
     comment_files = _latest_files(base, f"{mode}_comments_*.json", keep=3)
     if not content_files:
         return {
@@ -882,33 +931,73 @@ def _cooldown_file(platform_mc: str) -> Path:
     return DATA_DIR / f".last-run-{platform_mc}"
 
 
-def _check_cooldown(platform_mc: str) -> None:
-    """Reject a new crawl on the same platform inside the cooldown window."""
+def _cooldown_expiry(platform_mc: str) -> float | None:
+    """读冷却标记里存的「到期时间戳」（epoch 秒）；无标记 / 损坏返回 None。"""
     marker = _cooldown_file(platform_mc)
     if not marker.is_file():
-        return
+        return None
     try:
-        last = float(marker.read_text(encoding="utf-8").strip())
+        return float(marker.read_text(encoding="utf-8").strip())
     except (OSError, ValueError):
+        return None
+
+
+def _check_cooldown(platform_mc: str) -> None:
+    """Reject a new crawl on the same platform inside the cooldown window."""
+    expiry = _cooldown_expiry(platform_mc)
+    if expiry is None:
         return
-    elapsed = time.time() - last
-    if elapsed < COOLDOWN_SECONDS:
+    remaining = expiry - time.time()
+    if remaining > 0:
         raise McError(
-            f"同平台（{platform_mc}）两次抓取需间隔 {COOLDOWN_SECONDS // 60} 分钟"
-            f"（上次结束于 {int(elapsed // 60)} 分钟前）——保护你的登录账号不触发风控。"
+            f"同平台（{platform_mc}）抓取冷却中，还需等 {int(remaining // 60) + 1} 分钟"
+            "——保护登录账号不触发风控。注意：抓取失败也会进入退避，连续失败通常"
+            "是登录失效或风控信号（先 mc --status 检查登录态），不要拿 --force 硬闯。"
             "多个关键词合并进一次 --keywords、多条链接合并进一次 --ids；"
             "确有必要立即重抓时加 --force。"
         )
 
 
-def _mark_cooldown(platform_mc: str) -> None:
-    """Stamp after a data-producing crawl so the next one waits its turn."""
+def _mark_cooldown(platform_mc: str, seconds: int | None = None) -> None:
+    """Stamp the cooldown expiry; 成功抓取用完整间隔，失败退避用短间隔。"""
+    duration = COOLDOWN_SECONDS if seconds is None else seconds
     marker = _cooldown_file(platform_mc)
     try:
         marker.parent.mkdir(parents=True, exist_ok=True)
-        marker.write_text(str(time.time()), encoding="utf-8")
+        marker.write_text(str(time.time() + duration), encoding="utf-8")
     except OSError:
         pass
+
+
+def _lock_file(platform_mc: str) -> Path:
+    return DATA_DIR / f".crawl-lock-{platform_mc}"
+
+
+def _acquire_crawl_lock(platform_mc: str) -> Path | None:
+    """同平台互斥锁：并行抓取会抢同一个 browser_data profile（chromium profile
+    锁冲突可能损坏登录态）。O_CREAT|O_EXCL 原子创建；崩溃残留超时的锁可抢占。
+    返回锁文件路径（调用方负责 finally 释放），拿不到返回 None。"""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    lock = _lock_file(platform_mc)
+    for _attempt in range(2):
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        except FileExistsError:
+            try:
+                age = time.time() - lock.stat().st_mtime
+            except OSError:
+                return None
+            if age <= CRAWL_LOCK_STALE_SECONDS or _attempt:
+                return None
+            try:  # 崩溃残留的陈旧锁，清掉重试一次
+                lock.unlink()
+            except OSError:
+                return None
+            continue
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(f"{os.getpid()} {time.time()}")
+        return lock
+    return None
 
 
 def crawl(
@@ -927,7 +1016,7 @@ def crawl(
     force: bool = False,
     log: Callable[[str], None] = _log,
 ) -> dict:
-    """End-to-end: validate install → cooldown check → run crawler → parse output."""
+    """End-to-end: lock → cooldown check → run crawler → parse output."""
     platform_mc = normalize_platform(platform)
     # 评论默认按模式定：detail/creator（crack 拆解、账号诊断）真用评论内容；
     # search（find 找对标）只用互动计数——comment_count 笔记详情自带，逐条翻
@@ -935,27 +1024,47 @@ def crawl(
     # --comments/--no-comments 永远优先。
     if comments is None:
         comments = mode != "search"
-    if not force:
-        _check_cooldown(platform_mc)
-    run = run_crawl(
-        build_crawler_args(mode, platform_mc, keywords, ids, max_notes,
-                           comments=comments, login=login, cookies=cookies,
-                           headless=headless, out_dir=out_dir,
-                           max_comments_per_note=max_comments),
-        timeout=timeout, log=log,
-    )
-    result = parse_results(mode, platform_mc, out_dir)
-    if result["ok"] and result["count"] > 0:
-        _mark_cooldown(platform_mc)
-    result["run"] = {
-        "returncode": run["returncode"],
-        "timed_out": run["timed_out"],
-        "elapsed_seconds": run["elapsed_seconds"],
-    }
-    if not result["ok"] and run["timed_out"]:
-        result["error"] = "timeout_no_output"
-        result["hint"] = (
-            "爬取超时且无输出。最常见原因：浏览器弹出后没有完成扫码登录。"
-            "重新运行一次，在浏览器窗口里完成登录；登录态保存后不再需要扫码。"
+    # 同平台文件锁（--force 也不绕过锁：锁保护的是浏览器 profile，不是频率）
+    lock = _acquire_crawl_lock(platform_mc)
+    if lock is None:
+        raise McError(
+            f"同平台（{platform_mc}）已有另一个 mc 抓取进程在跑——并行会抢同一个"
+            "浏览器登录 profile，可能损坏登录态。等它跑完再试；确认是残留锁时删除 "
+            f"{_lock_file(platform_mc)} 后重试。"
         )
-    return result
+    run_started = time.time()
+    try:
+        if not force:
+            _check_cooldown(platform_mc)
+        run = run_crawl(
+            build_crawler_args(mode, platform_mc, keywords, ids, max_notes,
+                               comments=comments, login=login, cookies=cookies,
+                               headless=headless, out_dir=out_dir,
+                               max_comments_per_note=max_comments),
+            timeout=timeout, log=log,
+        )
+        # since=run_started：只认本次 run 写出的文件，防止失败时静默返回历史数据
+        result = parse_results(mode, platform_mc, out_dir, since=run_started)
+        if result["ok"] and result["count"] > 0:
+            _mark_cooldown(platform_mc)
+        else:
+            # 失败退避：浏览器已拉起、请求已发出，即使没抓到数据也要冷却一截，
+            # 防止 agent 在风控敏感期零间隔循环重试
+            _mark_cooldown(platform_mc, seconds=FAILURE_COOLDOWN_SECONDS)
+        result["run"] = {
+            "returncode": run["returncode"],
+            "timed_out": run["timed_out"],
+            "elapsed_seconds": run["elapsed_seconds"],
+        }
+        if not result["ok"] and run["timed_out"]:
+            result["error"] = "timeout_no_output"
+            result["hint"] = (
+                "爬取超时且无输出。最常见原因：浏览器弹出后没有完成扫码登录。"
+                "重新运行一次，在浏览器窗口里完成登录；登录态保存后不再需要扫码。"
+            )
+        return result
+    finally:
+        try:
+            lock.unlink()
+        except OSError:
+            pass

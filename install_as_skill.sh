@@ -165,10 +165,12 @@ main() {
         --exclude='.git' \
         --exclude='reports' \
         --exclude='assets' \
+        --exclude='output' \
         --exclude='vendor' \
         --exclude='venv' \
         --exclude='.venv' \
         --exclude='__pycache__' \
+        --exclude='.pytest_cache' \
         --exclude='.env' \
         "$SCRIPT_DIR/" "$SKILL_DIR/"
     print_success "文件复制完成"

@@ -31,6 +31,10 @@ Env:
     MC_VENDOR_DIR   覆盖 vendor 目录（默认 <skill>/vendor）
     MC_NO_MIRROR=1  --setup 禁用镜像加速（pip/Chromium/GitHub 全部直连官方源）
     MC_GIT_URL      --setup 用指定的 URL 克隆 MediaCrawler（gh 代理/企业镜像等）
+
+频率保护（内置，无需配置）：同平台 30 分钟冷却、失败后退避 10 分钟、
+同平台文件锁拒绝并行（防浏览器 profile 损坏）；MC_COOLDOWN_SECONDS /
+MC_FAILURE_COOLDOWN_SECONDS 可调时长。
 """
 
 from __future__ import annotations

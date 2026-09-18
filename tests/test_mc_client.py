@@ -1,6 +1,8 @@
 import importlib.util
 import json
+import os
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -444,9 +446,12 @@ def _capture_crawl_args(monkeypatch, tmp_path):
         captured["args"] = args
         return {"returncode": 0, "timed_out": False, "elapsed_seconds": 0.1}
 
+    def fake_parse(mode, p, out_dir=None, since=None):
+        captured.setdefault("since", since)
+        return {"ok": True, "count": 1, "items": [{"id": "x"}]}
+
     monkeypatch.setattr(mc, "run_crawl", fake_run)
-    monkeypatch.setattr(mc, "parse_results",
-                        lambda mode, p, out_dir=None: {"ok": True, "count": 1, "items": [{"id": "x"}]})
+    monkeypatch.setattr(mc, "parse_results", fake_parse)
     monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
     return captured
 
@@ -489,6 +494,127 @@ def test_cooldown_default_is_thirty_minutes(monkeypatch):
     monkeypatch.delenv("MC_COOLDOWN_SECONDS", raising=False)
     fresh = load_mc_client()
     assert fresh.COOLDOWN_SECONDS == 1800
+
+
+# ---------------------------------------------------------------------------
+# failure backoff: a run that launched the browser must cool down even on failure
+# ---------------------------------------------------------------------------
+
+def test_crawl_marks_failure_backoff_when_no_data(monkeypatch, tmp_path):
+    """失败（未产出数据）也要退避——防止 agent 在风控敏感期零间隔循环重试。"""
+    monkeypatch.setattr(mc, "run_crawl",
+                        lambda args, timeout=900, log=None:
+                        {"returncode": 2, "timed_out": False, "elapsed_seconds": 5.0})
+    monkeypatch.setattr(mc, "parse_results",
+                        lambda mode, p, out_dir=None, since=None:
+                        {"ok": False, "error": "no_output", "count": 0, "items": []})
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    result = mc.crawl("search", "xhs", keywords="t", log=lambda m: None)
+    assert result["ok"] is False
+    assert result["error"] == "no_output"
+    expiry = mc._cooldown_expiry("xhs")
+    assert expiry is not None
+    assert 500 < expiry - time.time() < 700  # ~10 分钟失败退避
+    with pytest.raises(mc.McError, match="冷却"):
+        mc._check_cooldown("xhs")
+
+
+def test_crawl_reports_stale_when_run_wrote_nothing(monkeypatch, tmp_path):
+    """本次没产出新文件时不能把历史文件当本次结果静默返回。"""
+    base = tmp_path / "dy" / "json"
+    base.mkdir(parents=True)
+    old_file = base / "detail_contents_2026-09-01.json"
+    old_file.write_text(json.dumps([{"aweme_id": "old1", "title": "t"}]), encoding="utf-8")
+    day_ago = time.time() - 86400
+    os.utime(old_file, (day_ago, day_ago))
+    monkeypatch.setattr(mc, "run_crawl",
+                        lambda args, timeout=900, log=None:
+                        {"returncode": 0, "timed_out": False, "elapsed_seconds": 5.0})
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+
+    result = mc.crawl("detail", "douyin", ids=["http://x/1"], log=lambda m: None)
+
+    assert result["ok"] is False
+    assert result["error"] == "stale_data"
+    assert result["count"] == 0
+    assert result["stale_files"][0]["age_minutes"] > 1000
+    assert mc._cooldown_expiry("dy") is not None  # 失败退避生效
+    assert not (tmp_path / ".crawl-lock-dy").exists()  # 锁已释放
+
+
+def test_parse_results_since_filters_stale_files(tmp_path):
+    base = tmp_path / "xhs" / "json"
+    base.mkdir(parents=True)
+    old_file = base / "search_contents_2026-09-18.json"
+    old_file.write_text(json.dumps([{"note_id": "s1", "title": "t", "liked_count": "1"}]),
+                        encoding="utf-8")
+    hour_ago = time.time() - 3600
+    os.utime(old_file, (hour_ago, hour_ago))
+
+    result = mc.parse_results("search", "xhs", out_dir=tmp_path, since=time.time())
+    assert result["ok"] is False
+    assert result["error"] == "stale_data"
+
+    # 复用历史数据的路径（不传 since）不受影响
+    assert mc.parse_results("search", "xhs", out_dir=tmp_path)["ok"] is True
+
+
+def test_parse_results_accepts_files_written_after_since(tmp_path):
+    base = tmp_path / "xhs" / "json"
+    base.mkdir(parents=True)
+    fresh_file = base / "search_contents_2026-09-18.json"
+    fresh_file.write_text(json.dumps([{"note_id": "s1", "title": "t", "liked_count": "1"}]),
+                          encoding="utf-8")
+    result = mc.parse_results("search", "xhs", out_dir=tmp_path, since=time.time() - 60)
+    assert result["ok"] is True
+    assert result["count"] == 1
+
+
+# ---------------------------------------------------------------------------
+# per-platform crawl lock (parallel runs would fight over the browser profile)
+# ---------------------------------------------------------------------------
+
+def test_crawl_rejects_concurrent_same_platform(monkeypatch, tmp_path):
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    lock = tmp_path / ".crawl-lock-xhs"
+    lock.write_text("999999 123", encoding="utf-8")
+    with pytest.raises(mc.McError, match="另一个|并行"):
+        mc.crawl("search", "xhs", keywords="t", log=lambda m: None)
+
+
+def test_crawl_steals_stale_lock(tmp_path, monkeypatch):
+    """崩溃残留的陈旧锁可被抢占，不会把用户永久卡死。"""
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    lock = tmp_path / ".crawl-lock-ks"
+    lock.write_text("999999 123", encoding="utf-8")
+    stale = time.time() - mc.CRAWL_LOCK_STALE_SECONDS - 60
+    os.utime(lock, (stale, stale))
+    assert mc._acquire_crawl_lock("ks") is not None
+
+
+def test_crawl_lock_released_after_run(monkeypatch, tmp_path):
+    _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("search", "dy", keywords="t", log=lambda m: None)
+    assert not (tmp_path / ".crawl-lock-dy").exists()
+
+
+def test_crawl_passes_since_to_parse(monkeypatch, tmp_path):
+    captured = _capture_crawl_args(monkeypatch, tmp_path)
+    before = time.time()
+    mc.crawl("search", "xhs", keywords="t", log=lambda m: None)
+    assert captured["since"] is not None
+    assert captured["since"] >= before - 1
+
+
+# ---------------------------------------------------------------------------
+# cookie redaction in debug logs
+# ---------------------------------------------------------------------------
+
+def test_redact_cmd_masks_cookie_values():
+    cmd = ["python", "main.py", "--cookies", "web_session=secret;", "--lt", "cookie"]
+    assert "secret" not in mc._redact_cmd(cmd)
+    assert "--cookies ***" in mc._redact_cmd(cmd)
+    assert mc._redact_cmd(["--cookies=abc", "x"]) == "--cookies=*** x"
 
 
 # ---------------------------------------------------------------------------
