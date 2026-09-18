@@ -539,7 +539,7 @@ def test_crawl_reports_stale_when_run_wrote_nothing(monkeypatch, tmp_path):
     assert result["count"] == 0
     assert result["stale_files"][0]["age_minutes"] > 1000
     assert mc._cooldown_expiry("dy") is not None  # 失败退避生效
-    assert not (tmp_path / ".crawl-lock-dy").exists()  # 锁已释放
+    assert not (tmp_path / "crawl.lock").exists()  # 锁已释放
 
 
 def test_parse_results_since_filters_stale_files(tmp_path):
@@ -571,31 +571,124 @@ def test_parse_results_accepts_files_written_after_since(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# per-platform crawl lock (parallel runs would fight over the browser profile)
+# global single-instance crawl lock (no concurrent crawls, ever)
 # ---------------------------------------------------------------------------
 
-def test_crawl_rejects_concurrent_same_platform(monkeypatch, tmp_path):
+def test_crawl_rejects_concurrent_run(monkeypatch, tmp_path):
     monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    lock = tmp_path / ".crawl-lock-xhs"
+    lock = tmp_path / "crawl.lock"
     lock.write_text("999999 123", encoding="utf-8")
     with pytest.raises(mc.McError, match="另一个|并行"):
         mc.crawl("search", "xhs", keywords="t", log=lambda m: None)
 
 
-def test_crawl_steals_stale_lock(tmp_path, monkeypatch):
-    """崩溃残留的陈旧锁可被抢占，不会把用户永久卡死。"""
+def test_global_lock_blocks_other_platforms_too(monkeypatch, tmp_path):
+    """跨平台并行同样拒绝——全机同一时间只允许一个抓取进程。"""
     monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    lock = tmp_path / ".crawl-lock-ks"
+    lock = tmp_path / "crawl.lock"
     lock.write_text("999999 123", encoding="utf-8")
-    stale = time.time() - mc.CRAWL_LOCK_STALE_SECONDS - 60
-    os.utime(lock, (stale, stale))
-    assert mc._acquire_crawl_lock("ks") is not None
+    with pytest.raises(mc.McError, match="单实例|并行"):
+        mc.crawl("detail", "bilibili", ids=["http://x/1"], log=lambda m: None)
 
 
 def test_crawl_lock_released_after_run(monkeypatch, tmp_path):
     _capture_crawl_args(monkeypatch, tmp_path)
     mc.crawl("search", "dy", keywords="t", log=lambda m: None)
-    assert not (tmp_path / ".crawl-lock-dy").exists()
+    assert not (tmp_path / "crawl.lock").exists()
+
+
+def test_crawl_steals_stale_lock(tmp_path, monkeypatch):
+    """崩溃残留的陈旧锁可被抢占，不会把用户永久卡死。"""
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    lock = tmp_path / "crawl.lock"
+    lock.write_text("999999 123", encoding="utf-8")
+    stale = time.time() - mc.CRAWL_LOCK_STALE_SECONDS - 60
+    os.utime(lock, (stale, stale))
+    assert mc._acquire_crawl_lock() is not None
+
+
+# ---------------------------------------------------------------------------
+# per-run volume caps (enforced, not just guidance)
+# ---------------------------------------------------------------------------
+
+def test_volume_cap_rejects_too_many_keywords(monkeypatch, tmp_path):
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    with pytest.raises(mc.McError, match="关键词"):
+        mc.crawl("search", "xhs", keywords="a,b,c,d", log=lambda m: None)
+
+
+def test_volume_cap_rejects_too_many_detail_ids(monkeypatch, tmp_path):
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    ids = [f"http://x/{i}" for i in range(6)]
+    with pytest.raises(mc.McError, match="detail"):
+        mc.crawl("detail", "xhs", ids=ids, log=lambda m: None)
+
+
+def test_volume_cap_rejects_too_many_creators(monkeypatch, tmp_path):
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    ids = [f"http://x/u/{i}" for i in range(3)]
+    with pytest.raises(mc.McError, match="creator"):
+        mc.crawl("creator", "xhs", ids=ids, log=lambda m: None)
+
+
+def test_volume_caps_within_limits_pass(monkeypatch, tmp_path):
+    _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("search", "xhs", keywords="a,b,c", log=lambda m: None)  # 3 词 = 上限，放行
+    mc.crawl("detail", "dy", ids=[f"http://x/{i}" for i in range(5)], log=lambda m: None)
+
+
+# ---------------------------------------------------------------------------
+# pacing jitter patch (fixed intervals are a classic bot fingerprint)
+# ---------------------------------------------------------------------------
+
+def _fake_mc_dir(tmp_path):
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "base_config.py").write_text(
+        "CRAWLER_MAX_SLEEP_SEC = 2\n", encoding="utf-8")
+    core = tmp_path / "media_platform" / "xhs" / "core.py"
+    core.parent.mkdir(parents=True)
+    return core
+
+
+def test_patch_pacing_applies_jitter_and_bumps_base_sleep(tmp_path):
+    core = _fake_mc_dir(tmp_path)
+    core.write_text(
+        "import asyncio\nimport os\n\n"
+        "await asyncio.sleep(config.CRAWLER_MAX_SLEEP_SEC)\n"
+        "crawl_interval = config.CRAWLER_MAX_SLEEP_SEC\n",
+        encoding="utf-8")
+
+    result = mc.patch_pacing(tmp_path)
+
+    assert result["base_sleep_3s"] is True
+    text = core.read_text(encoding="utf-8")
+    # bilibili core 原本没有 import random，补丁要补上
+    assert "\nimport random\n" in text
+    assert "asyncio.sleep(config.CRAWLER_MAX_SLEEP_SEC + random.uniform(0, config.CRAWLER_MAX_SLEEP_SEC))" in text
+    assert "crawl_interval = config.CRAWLER_MAX_SLEEP_SEC + random.uniform" in text
+    assert mc.pacing_patched(tmp_path) is True
+
+
+def test_patch_pacing_is_idempotent(tmp_path):
+    core = _fake_mc_dir(tmp_path)
+    core.write_text(
+        "import asyncio\nimport random\n\n"
+        "await asyncio.sleep(config.CRAWLER_MAX_SLEEP_SEC)\n",
+        encoding="utf-8")
+    mc.patch_pacing(tmp_path)
+    first = core.read_text(encoding="utf-8")
+    mc.patch_pacing(tmp_path)
+    second = core.read_text(encoding="utf-8")
+    assert first == second  # 第二次不重复包一层
+    assert first.count("import random") == 1
+
+
+def test_patch_pacing_leaves_clean_files_alone(tmp_path):
+    core = _fake_mc_dir(tmp_path)
+    original = "import asyncio\nimport random\n\nprint('hi')\n"
+    core.write_text(original, encoding="utf-8")
+    mc.patch_pacing(tmp_path)
+    assert core.read_text(encoding="utf-8") == original
 
 
 def test_crawl_passes_since_to_parse(monkeypatch, tmp_path):

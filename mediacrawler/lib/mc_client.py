@@ -61,6 +61,11 @@ COOLDOWN_SECONDS = int(os.environ.get("MC_COOLDOWN_SECONDS", "1800"))
 FAILURE_COOLDOWN_SECONDS = int(os.environ.get("MC_FAILURE_COOLDOWN_SECONDS", "600"))
 # 抓取锁超过此时长（秒）视为崩溃残留，可被新进程抢占
 CRAWL_LOCK_STALE_SECONDS = 7200
+# 单次 run 体量硬上限（超了直接拒绝，拆多次跑会被冷却拦住）。风控看的是
+# 长期总量，不是单次频率；要更多数据就分天抓或改走 TikHub。
+MAX_KEYWORDS_PER_RUN = int(os.environ.get("MC_MAX_KEYWORDS", "3"))
+MAX_DETAIL_IDS_PER_RUN = int(os.environ.get("MC_MAX_DETAIL_IDS", "5"))
+MAX_CREATOR_IDS_PER_RUN = int(os.environ.get("MC_MAX_CREATOR_IDS", "2"))
 
 # skill 平台名 → MediaCrawler --platform 值
 PLATFORM_MAP = {
@@ -353,6 +358,63 @@ def patch_config(mc_dir: Path | None = None) -> bool:
     return changed
 
 
+# 上游固定 2s 间隔是典型机器特征；快手 core 自带抖动，其余平台靠这个补丁
+PACING_CORE_FILES = (
+    "media_platform/xhs/core.py",
+    "media_platform/douyin/core.py",
+    "media_platform/kuaishou/core.py",
+    "media_platform/bilibili/core.py",
+)
+_JITTER = "config.CRAWLER_MAX_SLEEP_SEC + random.uniform(0, config.CRAWLER_MAX_SLEEP_SEC)"
+
+
+def _patch_jitter(text: str) -> str:
+    # 确保有 import random（bilibili core 没有）；幂等
+    if not re.search(r"^import random$", text, re.M):
+        text = text.replace("import asyncio\n", "import asyncio\nimport random\n", 1)
+    # 两种节奏形态都打上抖动：直接 sleep 和先赋值再 sleep
+    text = text.replace(f"asyncio.sleep(config.CRAWLER_MAX_SLEEP_SEC)",
+                        f"asyncio.sleep({_JITTER})")
+    text = text.replace("crawl_interval = config.CRAWLER_MAX_SLEEP_SEC",
+                        f"crawl_interval = {_JITTER}")
+    return text
+
+
+def patch_pacing(mc_dir: Path | None = None) -> dict[str, bool]:
+    """请求间隔随机化 + 基础间隔 2s→3s（抖动后 3-6s 随机停顿）。
+
+    固定间隔是平台异常检测最经典的机器特征。幂等、非致命：某个文件找不到
+    匹配模式就保持原样（跑起来仍是安全的固定间隔，只是少了随机性）。
+    """
+    mc_dir = mc_dir or MC_DIR
+    result: dict[str, bool] = {}
+    cfg = mc_dir / "config" / "base_config.py"
+    if cfg.is_file():
+        text = cfg.read_text(encoding="utf-8")
+        patched = text.replace("CRAWLER_MAX_SLEEP_SEC = 2", "CRAWLER_MAX_SLEEP_SEC = 3")
+        if patched != text:
+            cfg.write_text(patched, encoding="utf-8")
+        result["base_sleep_3s"] = "CRAWLER_MAX_SLEEP_SEC = 3" in cfg.read_text(encoding="utf-8")
+    for rel in PACING_CORE_FILES:
+        path = mc_dir / rel
+        if not path.is_file():
+            continue
+        patched = _patch_jitter(path.read_text(encoding="utf-8"))
+        if patched != path.read_text(encoding="utf-8"):
+            path.write_text(patched, encoding="utf-8")
+        result[rel.split("/")[1]] = _JITTER in path.read_text(encoding="utf-8")
+    return result
+
+
+def pacing_patched(mc_dir: Path | None = None) -> bool:
+    """抖动补丁是否已应用（任一平台 core 带抖动即视为已打）。"""
+    mc_dir = mc_dir or MC_DIR
+    return any(
+        _JITTER in (mc_dir / rel).read_text(encoding="utf-8")
+        for rel in PACING_CORE_FILES if (mc_dir / rel).is_file()
+    )
+
+
 def login_state_platforms() -> list[str]:
     """Platforms that already have a saved login (browser_data profile dir)."""
     browser_data = MC_DIR / "browser_data"
@@ -398,6 +460,7 @@ def status() -> dict:
         cfg = MC_DIR / "config" / "base_config.py"
         if cfg.is_file():
             info["config_patched"] = "ENABLE_CDP_MODE = False" in cfg.read_text(encoding="utf-8")
+        info["pacing_patched"] = pacing_patched()
         info["ok"] = info["config_patched"]
     info["version"] = _read_version_file()
     return info
@@ -502,8 +565,9 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
         raise McError(f"playwright install 失败: {' | '.join(tail[-3:])}")
     steps["playwright"] = "chromium installed"
 
-    # 5. patch config + 版本记录
+    # 5. patch config + 节奏抖动 + 版本记录
     steps["config_patch"] = "applied" if patch_config() else "already patched"
+    steps["pacing_patch"] = patch_pacing()
     VERSION_FILE.write_text(json.dumps({
         "pinned_commit": PINNED_COMMIT,
         "actual_commit": actual_sha,
@@ -969,16 +1033,18 @@ def _mark_cooldown(platform_mc: str, seconds: int | None = None) -> None:
         pass
 
 
-def _lock_file(platform_mc: str) -> Path:
-    return DATA_DIR / f".crawl-lock-{platform_mc}"
+def _lock_file() -> Path:
+    """全局单实例锁：同一时间全机只允许一个抓取进程。跨平台并行同样拒绝——
+    虽然各平台风控相互独立，但单实例最简单也最稳：不会出现两个 chromium、
+    agent 也不会同时盯多个扫码窗口。"""
+    return DATA_DIR / "crawl.lock"
 
 
-def _acquire_crawl_lock(platform_mc: str) -> Path | None:
-    """同平台互斥锁：并行抓取会抢同一个 browser_data profile（chromium profile
-    锁冲突可能损坏登录态）。O_CREAT|O_EXCL 原子创建；崩溃残留超时的锁可抢占。
+def _acquire_crawl_lock() -> Path | None:
+    """O_CREAT|O_EXCL 原子创建；崩溃残留超时的锁可抢占。
     返回锁文件路径（调用方负责 finally 释放），拿不到返回 None。"""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    lock = _lock_file(platform_mc)
+    lock = _lock_file()
     for _attempt in range(2):
         try:
             fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
@@ -1000,6 +1066,33 @@ def _acquire_crawl_lock(platform_mc: str) -> Path | None:
     return None
 
 
+def _check_volume_caps(mode: str, keywords: str, ids: list[str] | None) -> None:
+    """单次 run 体量硬上限。超了直接拒绝并说明出路（分天 / 走 TikHub），
+    而不是靠 agent 自觉遵守 SKILL.md 里的数字。"""
+    if mode == "search":
+        count = len([k for k in keywords.split(",") if k.strip()])
+        if count > MAX_KEYWORDS_PER_RUN:
+            raise McError(
+                f"单次 search 最多 {MAX_KEYWORDS_PER_RUN} 个关键词（当前 {count}）——"
+                "体量是风控的首要信号。要更多数据分天抓或改走 TikHub；"
+                "确有特殊需要时设 MC_MAX_KEYWORDS 提高上限（自担风险）。"
+            )
+    elif mode == "detail":
+        if len(ids or []) > MAX_DETAIL_IDS_PER_RUN:
+            raise McError(
+                f"单次 detail 最多 {MAX_DETAIL_IDS_PER_RUN} 条作品（当前 {len(ids)}）——"
+                "先让用户从 find 结果里勾选真正要拆的 3-5 条；"
+                "确有特殊需要时设 MC_MAX_DETAIL_IDS（自担风险）。"
+            )
+    elif mode == "creator":
+        if len(ids or []) > MAX_CREATOR_IDS_PER_RUN:
+            raise McError(
+                f"单次 creator 最多 {MAX_CREATOR_IDS_PER_RUN} 个账号（当前 {len(ids)}）——"
+                "账号诊断逐个跑，别一次拉一堆；"
+                "确有特殊需要时设 MC_MAX_CREATOR_IDS（自担风险）。"
+            )
+
+
 def crawl(
     mode: str,
     platform: str,
@@ -1016,7 +1109,7 @@ def crawl(
     force: bool = False,
     log: Callable[[str], None] = _log,
 ) -> dict:
-    """End-to-end: lock → cooldown check → run crawler → parse output."""
+    """End-to-end: lock → volume caps → cooldown check → run crawler → parse output."""
     platform_mc = normalize_platform(platform)
     # 评论默认按模式定：detail/creator（crack 拆解、账号诊断）真用评论内容；
     # search（find 找对标）只用互动计数——comment_count 笔记详情自带，逐条翻
@@ -1024,14 +1117,19 @@ def crawl(
     # --comments/--no-comments 永远优先。
     if comments is None:
         comments = mode != "search"
-    # 同平台文件锁（--force 也不绕过锁：锁保护的是浏览器 profile，不是频率）
-    lock = _acquire_crawl_lock(platform_mc)
+    # 体量硬上限（风控看长期总量；拆多次跑会被冷却拦住，别绕）
+    _check_volume_caps(mode, keywords, ids)
+    # 全局单实例锁（--force 也不绕过锁：锁保护的是浏览器 profile，不是频率）
+    lock = _acquire_crawl_lock()
     if lock is None:
         raise McError(
-            f"同平台（{platform_mc}）已有另一个 mc 抓取进程在跑——并行会抢同一个"
-            "浏览器登录 profile，可能损坏登录态。等它跑完再试；确认是残留锁时删除 "
-            f"{_lock_file(platform_mc)} 后重试。"
+            "已有另一个 mc 抓取进程在跑（全机单实例锁，跨平台也算并行）——并行会抢"
+            "浏览器登录 profile、可能损坏登录态。等它跑完再试；确认是残留锁时删除 "
+            f"{_lock_file()} 后重试。"
         )
+    if not pacing_patched():
+        log("[mc] 警告：请求节奏未打抖动补丁（固定间隔是典型机器特征），"
+            "建议重跑 mc --setup 应用补丁")
     run_started = time.time()
     try:
         if not force:

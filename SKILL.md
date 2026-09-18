@@ -588,7 +588,9 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 
 **频率控制铁律（保护用户账号，必须遵守）**——用户登录的是自己的账号，抓太密会触发平台风控甚至封号：
 - **能合并就合并**：多个搜索词合成一次 `--keywords "词1,词2"`；多条作品合成一次 `--ids "url1,url2"`（≤5 条）。禁止一个词一次调用连环跑
-- **单次上限**：search ≤ 3 个关键词；detail ≤ 5 条；creator ≤ 2 个账号；并发固定 1，**同平台并行会被 mc 的文件锁直接拒绝**（并行会抢浏览器登录 profile，不要绕）
+- **单次上限（mc 硬性拒绝，不是建议）**：search ≤ 3 个关键词、detail ≤ 5 条、creator ≤ 2 个账号——超了 mc 直接报错，**不要拆多次跑绕**（冷却会拦），要更多数据分天抓或改走 TikHub
+- **全机单实例**：任何时刻只允许一个抓取进程，**跨平台并行也算并行**，mc 的全局锁会直接拒绝（并行会抢浏览器登录 profile）；并发固定 1，请求间隔已打随机抖动补丁（3-6s，固定间隔是典型机器特征，`mc --status` 的 `pacing_patched` 可查）
+- **只走 mc CLI**：禁止直接跑 `vendor/MediaCrawler/main.py` 或 `vendor/mc-venv/bin/python`——那会绕过冷却、失败退避、单实例锁、体量上限和数据脱敏的全部保护
 - **同平台冷却**：mc 内置同平台 30 分钟冷却；**抓取失败也自动退避 10 分钟**——连续失败通常是登录失效或风控信号（先 `mc --status` 查登录态），不要拿 `--force` 硬闯；agent 侧遵守同平台两次抓取间隔 ≥ 30 分钟，`--force` 只在用户明确要求时用
 - **每日预算**：同账号同平台每天 ≤ 4-6 次 run（风控看的是长期总量，不是单次频率）；当天额度用完就改走 TikHub 或改天再跑
 - **先复用再抓**：`vendor/mc-data/{平台}/json/` 里 24 小时内已抓过的同关键词/同账号数据先复用（直接读 `*_contents_*.json`，或 `python3 mediacrawler/lib/mc_client.py` 里的 `parse_results` 重新归一化），不重复抓

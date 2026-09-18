@@ -33,8 +33,9 @@ Env:
     MC_GIT_URL      --setup 用指定的 URL 克隆 MediaCrawler（gh 代理/企业镜像等）
 
 频率保护（内置，无需配置）：同平台 30 分钟冷却、失败后退避 10 分钟、
-同平台文件锁拒绝并行（防浏览器 profile 损坏）；MC_COOLDOWN_SECONDS /
-MC_FAILURE_COOLDOWN_SECONDS 可调时长。
+全机单实例锁拒绝一切并行（跨平台也算）、单次体量硬上限（3 词 / 5 条 /
+2 账号）、请求间隔随机抖动补丁；MC_COOLDOWN_SECONDS /
+MC_FAILURE_COOLDOWN_SECONDS / MC_MAX_* 可调。
 """
 
 from __future__ import annotations
