@@ -6,9 +6,10 @@
 
 1. **Clone 仓库**到用户当前工作目录(或 `~/src/` 之类合理位置):
    ```bash
-   git clone https://github.com/JuneYaooo/social-account-doctor.git
+   git clone --depth 1 https://github.com/JuneYaooo/social-account-doctor.git
    cd social-account-doctor
    ```
+   `--depth 1` 只拉最新快照，国内网络下明显更快更稳。
 
 2. **按 agent 宿主跑安装脚本**:
    ```bash
@@ -54,6 +55,27 @@
 ## 如果用户已经装过
 
 `install_as_skill.sh` 会检测目标 Skill 目录是否存在并询问是否覆盖。覆盖不会丢 `.env`（脚本会保留）。
+
+## 慢网（中国大陆直连）加速
+
+安装链路的所有下载源都会**自动探测选最快**，正常情况下你不需要做任何事：
+
+| 下载内容 | 自动择优策略 |
+|---|---|
+| pip 依赖（`install_as_skill.sh` 和 `mc --setup`） | 官方 PyPI / 清华 / 阿里镜像探测选最快 |
+| MediaCrawler 克隆 | github 直连（重试 2 次）→ gh 代理镜像回退 |
+| Playwright Chromium（约 200MB） | 官方 CDN vs npmmirror 镜像，镜像明显更快才启用 |
+
+用户环境变量永远优先于自动探测；有代理时 `export HTTPS_PROXY=...` 对 git/pip/playwright 全部生效。遇到特殊网络想强制指定时：
+
+```bash
+PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple   # 强制 pip 源
+PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright  # 强制 Chromium 源
+MC_GIT_URL=https://gh-proxy.com/https://github.com/NanmiCoder/MediaCrawler.git  # 强制克隆地址
+mc --setup --no-mirror                                    # 或整体禁用镜像，全部直连官方源
+```
+
+`mc --setup` 的依赖装的是裁剪版 `mediacrawler/requirements-lean.txt`（砍掉 webui/测试/迁移类包），自检不过会自动回退上游全量 requirements，无需干预。
 
 ## 不要做的事
 

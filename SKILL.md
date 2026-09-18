@@ -581,7 +581,7 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 | **find Step 3 关键词搜** | `mc search --platform xiaohongshu --keywords "词1,词2"` | 多词逗号分隔一次跑完；`--max-notes` 是每词上限（小红书强制 ≥20） |
 | **crack 作品详情** | `mc detail --platform douyin --ids "作品URL"` | 支持分享短链 / 纯 ID；`--ids` 逗号分隔批量 |
 | **账号诊断作品列表** | `mc creator --platform xhs --ids "主页URL"` | 抓该创作者全部作品 + 评论 |
-| **评论** | search/detail 自带 `--comments`（默认开） | 每条上限 `--max-comments 20` |
+| **评论** | detail/creator 默认抓；**search 默认不抓**（find 只用互动计数，评论计数详情自带） | 每条上限 `--max-comments 10`；search 要评论需显式 `--comments`，慎用 |
 | **状态检查** | `mc --status` | 已装？已 patch？哪些平台已登录 |
 
 平台：`xiaohongshu/xhs`、`douyin/dy`、`kuaishou/ks`、`bilibili/bili`。**视频号不支持**（继续走 TikHub wechat_* 或本地视频）。**抖音需要本机 Node.js ≥ 16**（`mc --status` 会报 node_found）。
@@ -589,7 +589,8 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 **频率控制铁律（保护用户账号，必须遵守）**——用户登录的是自己的账号，抓太密会触发平台风控甚至封号：
 - **能合并就合并**：多个搜索词合成一次 `--keywords "词1,词2"`；多条作品合成一次 `--ids "url1,url2"`（≤5 条）。禁止一个词一次调用连环跑
 - **单次上限**：search ≤ 3 个关键词；detail ≤ 5 条；creator ≤ 2 个账号；并发固定 1，**禁止并行跑多个 mc 进程**
-- **同平台冷却**：mc 内置同平台 5 分钟冷却（连续抓取直接拒绝，报错会提示）；agent 侧遵守同平台两次抓取间隔 ≥ 5 分钟，`--force` 只在用户明确要求时用
+- **同平台冷却**：mc 内置同平台 30 分钟冷却（连续抓取直接拒绝，报错会提示）；agent 侧遵守同平台两次抓取间隔 ≥ 30 分钟，`--force` 只在用户明确要求时用
+- **每日预算**：同账号同平台每天 ≤ 4-6 次 run（风控看的是长期总量，不是单次频率）；当天额度用完就改走 TikHub 或改天再跑
 - **先复用再抓**：`vendor/mc-data/{平台}/json/` 里 24 小时内已抓过的同关键词/同账号数据先复用（直接读 `*_contents_*.json`，或 `python3 mediacrawler/lib/mc_client.py` 里的 `parse_results` 重新归一化），不重复抓
 - **风控信号立即停手**：出现验证码、登录失效、连续空结果 → 停止重试，告知用户过段时间再试或改走 TikHub 路径
 - 任务结束提醒用户：数据来自本人账号登录抓取，请控制频率

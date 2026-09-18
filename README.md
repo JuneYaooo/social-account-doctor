@@ -80,6 +80,8 @@ P0(5 分钟内):把第 3 张设为封面 + 正文补关键信息 + 标题按"数
 https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/install.md
 ```
 
+> 💡 国内网络慢？安装器和 `mc --setup` 会自动在官方源和镜像源（PyPI 清华/阿里、Chromium npmmirror、GitHub gh 代理）里探测选最快的，通常无需任何配置；想强制指定或了解细节看 [docs/install.md](./docs/install.md) 的「慢网加速」。
+
 ## ⚙ 配置
 
 安装脚本会引导你填这些，也可以编辑安装后的 `social-account-doctor/.env`：

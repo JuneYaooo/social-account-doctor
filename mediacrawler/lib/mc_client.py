@@ -11,11 +11,19 @@
 Playwright chromium，并把 ENABLE_CDP_MODE 补丁为 False（走标准 Playwright
 模式，登录态落在 vendor/MediaCrawler/browser_data/，扫码一次长期复用）。
 
+setup 的下载源会自动择优：pip 在官方 PyPI / 清华 / 阿里镜像里探测选最快，
+Chromium 走 npmmirror 镜像（仅当明显更快），GitHub 克隆失败时回退 gh 代理。
+用户已设 PIP_INDEX_URL / PLAYWRIGHT_DOWNLOAD_HOST / MC_GIT_URL 时一律尊重
+不覆盖；``MC_NO_MIRROR=1``（或 CLI ``--no-mirror``）可整体禁用。依赖先装
+requirements-lean.txt（mc 路径够用的裁剪版），smoke test 失败自动回退上游
+全量 requirements.txt。
+
 所有机器可读结果以 JSON 打到 stdout；人类可读进度走 stderr。
 """
 
 from __future__ import annotations
 
+import concurrent.futures
 import json
 import os
 import re
@@ -25,6 +33,9 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
+import urllib.request
+from collections import deque
 from pathlib import Path
 from typing import Any, Callable
 
@@ -40,10 +51,11 @@ MC_GIT_URL = "https://github.com/NanmiCoder/MediaCrawler.git"
 # 适配此 adapter 时的上游 HEAD；setup 优先 fetch 这个 commit，失败则用默认分支
 PINNED_COMMIT = "60e66f2a925816960bbd44af5d6c9b8385d79335"
 
-# 同平台两次抓取的最小间隔（秒）。用户账号登录抓取，抓太密会触发平台风控。
-# 合并关键词（--keywords "词1,词2"）和批量 ID（--ids "url1,url2"）一次跑完，
-# 不要拆成多次调用绕冷却。用户明确要求时可用 --force 覆盖。
-COOLDOWN_SECONDS = int(os.environ.get("MC_COOLDOWN_SECONDS", "300"))
+# 同平台两次抓取的最小间隔（秒）。用户账号登录抓取，抓太密会触发平台风控；
+# 30 分钟对应「同账号同平台每天 ≤ 4-6 次」的安全预算，可用 MC_COOLDOWN_SECONDS
+# 覆盖。合并关键词（--keywords "词1,词2"）和批量 ID（--ids "url1,url2"）一次
+# 跑完，不要拆成多次调用绕冷却。用户明确要求时可用 --force 覆盖。
+COOLDOWN_SECONDS = int(os.environ.get("MC_COOLDOWN_SECONDS", "1800"))
 
 # skill 平台名 → MediaCrawler --platform 值
 PLATFORM_MAP = {
@@ -148,6 +160,176 @@ def _git(args: list[str], cwd: Path | None = None) -> subprocess.CompletedProces
     )
 
 
+# ---------------------------------------------------------------------------
+# setup 网络加速：下载源自动择优（国内裸连 GitHub/PyPI/Playwright CDN 常常只有几十 KB/s，
+# 镜像源能快一到两个数量级）。所有选择都可以被用户环境变量覆盖。
+# ---------------------------------------------------------------------------
+
+PIP_INDEX_CANDIDATES: list[tuple[str, str]] = [
+    ("官方 PyPI", "https://pypi.org/simple"),
+    ("清华 PyPI 镜像", "https://pypi.tuna.tsinghua.edu.cn/simple"),
+    ("阿里 PyPI 镜像", "https://mirrors.aliyun.com/pypi/simple"),
+]
+PLAYWRIGHT_OFFICIAL_HOST = "https://cdn.playwright.dev"
+PLAYWRIGHT_MIRROR_HOST = "https://registry.npmmirror.com/-/binary/playwright"
+GIT_MIRROR_PREFIXES = [
+    "https://gh-proxy.com/",
+    "https://ghfast.top/",
+]
+LEAN_REQUIREMENTS = Path(__file__).resolve().parent.parent / "requirements-lean.txt"
+
+
+def _no_mirror() -> bool:
+    return os.environ.get("MC_NO_MIRROR") == "1"
+
+
+def _probe_ms(url: str, timeout: float = 4.0) -> float | None:
+    """HEAD 探测往返毫秒数；连不上返回 None。
+
+    任何 HTTP 状态码（含 4xx）都算可达——比的是到源站链路的快慢，
+    不是业务路径是否存在（cdn.playwright.dev 根路径就返回 400）。
+    """
+    started = time.time()
+    try:
+        req = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "social-account-doctor"})
+        urllib.request.urlopen(req, timeout=timeout)
+    except urllib.error.HTTPError:
+        pass
+    except Exception:
+        return None
+    return round((time.time() - started) * 1000, 1)
+
+
+def _pick_fastest(candidates: list[tuple[str, str]]) -> tuple[str, str, float | None]:
+    """并发探测候选源，返回 (名字, URL, 最快耗时 ms)；全部不可达时耗时为 None。"""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(candidates)) as pool:
+        latencies = list(pool.map(lambda c: _probe_ms(c[1]), candidates))
+    paired = [(ms if ms is not None else float("inf"), name, url)
+              for (name, url), ms in zip(candidates, latencies)]
+    ms, name, url = min(paired, key=lambda item: item[0])
+    return name, url, (None if ms == float("inf") else ms)
+
+
+def pip_index_args(log: Callable[[str], None] = _log) -> tuple[list[str], str]:
+    """pip install 的额外参数；返回 (args, 源标签)。已设 PIP_INDEX_URL/PIP_INDEX 时尊重 pip 原生行为。"""
+    if os.environ.get("PIP_INDEX_URL") or os.environ.get("PIP_INDEX"):
+        log("[mc] 检测到 PIP_INDEX_URL/PIP_INDEX，pip 源以环境变量为准")
+        return [], "env"
+    if _no_mirror():
+        return [], "direct"
+    name, url, ms = _pick_fastest(PIP_INDEX_CANDIDATES)
+    if ms is None:
+        log("[mc] 所有 pip 源探测失败，回退 pip 默认源")
+        return [], "default"
+    log(f"[mc] pip 源: {name}（探测 {ms:.0f}ms，自动择优）")
+    if url == PIP_INDEX_CANDIDATES[0][1]:
+        return [], name
+    return ["-i", url], name
+
+
+def playwright_mirror_env(log: Callable[[str], None] = _log) -> dict[str, str]:
+    """需要注入 PLAYWRIGHT_DOWNLOAD_HOST 时返回它，否则空 dict（走官方 CDN）。"""
+    if os.environ.get("PLAYWRIGHT_DOWNLOAD_HOST"):
+        log("[mc] 检测到 PLAYWRIGHT_DOWNLOAD_HOST，Chromium 下载源以环境变量为准")
+        return {}
+    if _no_mirror():
+        return {}
+    official = _probe_ms(PLAYWRIGHT_OFFICIAL_HOST)
+    mirror = _probe_ms(PLAYWRIGHT_MIRROR_HOST)
+    if mirror is not None and (official is None or mirror * 2 < official):
+        log(f"[mc] Chromium 下载走 npmmirror 镜像（{mirror:.0f}ms vs 官方 "
+            f"{'不可达' if official is None else f'{official:.0f}ms'}）")
+        return {"PLAYWRIGHT_DOWNLOAD_HOST": PLAYWRIGHT_MIRROR_HOST}
+    return {}
+
+
+def clone_url_candidates(log: Callable[[str], None] = _log) -> list[tuple[str, str]]:
+    """按尝试顺序返回 (URL, 标签)。MC_GIT_URL 一票优先；github 可达时直连优先、镜像垫后。"""
+    env_url = os.environ.get("MC_GIT_URL")
+    if env_url:
+        log(f"[mc] 使用 MC_GIT_URL={env_url}")
+        return [(env_url, "MC_GIT_URL")]
+    direct = (MC_GIT_URL, "github 直连")
+    if _no_mirror():
+        return [direct]
+    mirrors = [(prefix + MC_GIT_URL, f"gh 代理 {prefix}") for prefix in GIT_MIRROR_PREFIXES]
+    if _probe_ms("https://github.com", timeout=5.0) is None:
+        log("[mc] github.com 探测不可达，优先尝试 gh 代理镜像")
+        return mirrors + [direct]
+    return [direct] + mirrors
+
+
+def _run_stream(
+    cmd: list[str],
+    log: Callable[[str], None] = _log,
+    timeout: int = 1800,
+    env: dict[str, str] | None = None,
+    cwd: Path | None = None,
+    tail_lines: int = 25,
+) -> tuple[int, list[str]]:
+    """跑长下载命令（pip / playwright install）：输出逐行转发到 stderr 日志，
+    保持 stdout 纯 JSON 契约；返回 (returncode, 尾部输出) 供错误报告。超时杀进程组。"""
+    started = time.time()
+    proc = subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, encoding="utf-8", errors="replace", bufsize=1,
+        env=env, cwd=cwd, start_new_session=True,
+    )
+    tail: deque[str] = deque(maxlen=tail_lines)
+    done = threading.Event()
+
+    def _pump() -> None:
+        assert proc.stdout is not None
+        for line in proc.stdout:
+            line = line.rstrip()
+            if line:
+                tail.append(line)
+                log(f"    {line}")
+        done.set()
+
+    threading.Thread(target=_pump, daemon=True).start()
+    deadline = started + timeout
+    while not done.wait(timeout=1.0) and time.time() < deadline:
+        pass
+    if not done.is_set():
+        log(f"[mc] 超过 {timeout}s，终止下载进程")
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            pass
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+            proc.wait(timeout=30)
+        done.wait(timeout=5)
+    else:
+        try:
+            proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            pass
+    log(f"[mc] 完成（{time.time() - started:.0f}s，exit {proc.returncode}）")
+    return proc.returncode, list(tail)
+
+
+def _smoke_test(vpy: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [str(vpy), "main.py", "--help"], cwd=MC_DIR, capture_output=True, text=True, timeout=120,
+    )
+
+
+def _pip_install(vpy: Path, req_file: Path, index_args: list[str],
+                 log: Callable[[str], None] = _log) -> None:
+    cmd = [str(vpy), "-m", "pip", "install", "--timeout", "60", "--disable-pip-version-check",
+           *index_args, "-r", str(req_file)]
+    rc, tail = _run_stream(cmd, log=log, timeout=1800)
+    if rc != 0:
+        raise McError(f"pip install 失败（{req_file.name}）: {' | '.join(tail[-3:])}")
+
+
 def patch_config(mc_dir: Path | None = None) -> bool:
     """Disable CDP mode so runs use the bundled Playwright chromium.
 
@@ -217,7 +399,7 @@ def status() -> dict:
 
 
 def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
-    """Clone MediaCrawler, build venv, install Playwright chromium, patch config."""
+    """Clone MediaCrawler, build venv, install deps + Playwright chromium（下载源自动择优）."""
     VENDOR_DIR.mkdir(parents=True, exist_ok=True)
     steps: dict[str, Any] = {}
 
@@ -229,7 +411,7 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
         )
     steps["python"] = str(py)
 
-    # 1. clone（GitHub 直连经常抖，带重试；失败清掉半成品目录）
+    # 1. clone（MC_GIT_URL > 直连（重试 2 次）> gh 代理镜像，全部失败才报错）
     if (MC_DIR / "main.py").is_file() and not force:
         steps["clone"] = "skipped (already cloned)"
     else:
@@ -237,32 +419,38 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
             log(f"[mc] 移除已有目录 {MC_DIR}")
             shutil.rmtree(MC_DIR)
         last_err = ""
+        cloned_from = ""
         cloned = False
-        for attempt in range(1, 4):
-            log(f"[mc] 克隆 MediaCrawler → {MC_DIR}（第 {attempt}/3 次）")
-            result = _git(["clone", "--depth", "1", MC_GIT_URL, str(MC_DIR)])
-            if result.returncode == 0:
-                cloned = True
+        for url, label in clone_url_candidates(log):
+            tries = 2 if url == MC_GIT_URL else 1
+            for attempt in range(1, tries + 1):
+                log(f"[mc] 克隆 MediaCrawler ← {label}（第 {attempt}/{tries} 次）")
+                result = _git(["clone", "--depth", "1", url, str(MC_DIR)])
+                if result.returncode == 0:
+                    cloned, cloned_from = True, label
+                    break
+                last_err = result.stderr.strip()[:300]
+                if MC_DIR.exists():
+                    shutil.rmtree(MC_DIR, ignore_errors=True)
+                time.sleep(2 * attempt)
+            if cloned:
                 break
-            last_err = result.stderr.strip()[:300]
-            if MC_DIR.exists():
-                shutil.rmtree(MC_DIR, ignore_errors=True)
-            time.sleep(2 * attempt)
         if not cloned:
             raise McError(
-                f"git clone 失败（重试 3 次）: {last_err}。"
-                "检查到 github.com 的网络；或手动克隆后放到 vendor/MediaCrawler 再重跑 mc --setup"
+                f"git clone 失败: {last_err}。可任选其一：设 MC_GIT_URL 指向可达的克隆地址；"
+                "手动克隆后放到 vendor/MediaCrawler 再重跑 mc --setup；或配置 HTTPS_PROXY 后重试"
             )
+        steps["clone"] = f"ok via {cloned_from}"
         # pin 到适配时的 commit；HEAD 已是目标或上游漂移导致 fetch 失败则保留原样
         actual_sha = _git(["rev-parse", "HEAD"], cwd=MC_DIR).stdout.strip()
         if actual_sha != PINNED_COMMIT:
             pin = _git(["fetch", "--depth", "1", "origin", PINNED_COMMIT], cwd=MC_DIR)
             if pin.returncode == 0 and _git(["checkout", "--quiet", PINNED_COMMIT], cwd=MC_DIR).returncode == 0:
-                steps["clone"] = f"pinned {PINNED_COMMIT[:12]}"
+                steps["clone"] += f", pinned {PINNED_COMMIT[:12]}"
             else:
-                steps["clone"] = "default branch (pin failed, upstream may have moved)"
+                steps["clone"] += ", default branch (pin failed, upstream may have moved)"
         else:
-            steps["clone"] = f"pinned {PINNED_COMMIT[:12]}"
+            steps["clone"] += f", pinned {PINNED_COMMIT[:12]}"
 
     actual_sha = _git(["rev-parse", "HEAD"], cwd=MC_DIR).stdout.strip()
 
@@ -276,25 +464,37 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
             raise McError(f"venv 创建失败: {result.stderr.strip()[:300]}")
         steps["venv"] = "created"
 
-    # 3. deps
+    # 3. deps：精简 requirements 优先（mc 的 search/detail/creator + json 落盘路径够用），
+    #    smoke test 不过就回退上游全量安装，保证行为不比原来差
     vpy = venv_python()
-    log("[mc] 安装 MediaCrawler 依赖（首次较慢，几分钟）")
-    result = subprocess.run(
-        [str(vpy), "-m", "pip", "install", "--timeout", "120", "-r", str(MC_DIR / "requirements.txt")],
-        capture_output=True, text=True, timeout=1800,
-    )
-    if result.returncode != 0:
-        raise McError(f"pip install 失败: {result.stderr.strip()[-500:]}")
-    steps["pip"] = "installed"
+    index_args, index_name = pip_index_args(log)
+    if LEAN_REQUIREMENTS.is_file():
+        log(f"[mc] 安装精简依赖（{LEAN_REQUIREMENTS.name}，输出逐行转发在下方）")
+        try:
+            _pip_install(vpy, LEAN_REQUIREMENTS, index_args, log)
+            smoke = _smoke_test(vpy)
+            if smoke.returncode != 0:
+                raise McError(f"精简依赖自检失败: {smoke.stderr.strip()[:200]}")
+            steps["pip"] = f"lean via {index_name}"
+        except McError as exc:
+            log(f"[mc] {exc}；回退上游全量 requirements.txt")
+            _pip_install(vpy, MC_DIR / "requirements.txt", index_args, log)
+            steps["pip"] = f"full via {index_name} (lean fallback)"
+    else:
+        log("[mc] 安装 MediaCrawler 依赖（输出逐行转发在下方）")
+        _pip_install(vpy, MC_DIR / "requirements.txt", index_args, log)
+        steps["pip"] = f"full via {index_name}"
 
-    # 4. playwright chromium
-    log("[mc] 安装 Playwright chromium")
-    result = subprocess.run(
+    # 4. playwright chromium（约 200MB，走择优后的下载源）
+    log("[mc] 安装 Playwright chromium（约 200MB，取决于网速需要几分钟）")
+    pw_env = os.environ.copy()
+    pw_env.update(playwright_mirror_env(log))
+    rc, tail = _run_stream(
         [str(vpy), "-m", "playwright", "install", "chromium"],
-        capture_output=True, text=True, timeout=1200,
+        log=log, timeout=1800, env=pw_env,
     )
-    if result.returncode != 0:
-        raise McError(f"playwright install 失败: {result.stderr.strip()[-300:]}")
+    if rc != 0:
+        raise McError(f"playwright install 失败: {' | '.join(tail[-3:])}")
     steps["playwright"] = "chromium installed"
 
     # 5. patch config + 版本记录
@@ -306,9 +506,7 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # 6. smoke test
-    result = subprocess.run(
-        [str(vpy), "main.py", "--help"], cwd=MC_DIR, capture_output=True, text=True, timeout=120,
-    )
+    result = _smoke_test(vpy)
     if result.returncode != 0:
         raise McError(f"main.py --help 自检失败: {result.stderr.strip()[:300]}")
     steps["smoke_test"] = "main.py --help OK"
@@ -340,7 +538,7 @@ def build_crawler_args(
     max_notes: int = 20,
     start_page: int = 1,
     comments: bool = True,
-    max_comments_per_note: int = 20,
+    max_comments_per_note: int = 10,
     login: str = "qrcode",
     cookies: str = "",
     headless: bool = False,
@@ -719,7 +917,8 @@ def crawl(
     keywords: str = "",
     ids: list[str] | None = None,
     max_notes: int = 20,
-    comments: bool = True,
+    max_comments: int = 10,
+    comments: bool | None = None,
     login: str = "qrcode",
     cookies: str = "",
     headless: bool = False,
@@ -730,12 +929,19 @@ def crawl(
 ) -> dict:
     """End-to-end: validate install → cooldown check → run crawler → parse output."""
     platform_mc = normalize_platform(platform)
+    # 评论默认按模式定：detail/creator（crack 拆解、账号诊断）真用评论内容；
+    # search（find 找对标）只用互动计数——comment_count 笔记详情自带，逐条翻
+    # 评论页会让单次 run 的请求数翻三倍，是最容易触发风控的行为。显式
+    # --comments/--no-comments 永远优先。
+    if comments is None:
+        comments = mode != "search"
     if not force:
         _check_cooldown(platform_mc)
     run = run_crawl(
         build_crawler_args(mode, platform_mc, keywords, ids, max_notes,
                            comments=comments, login=login, cookies=cookies,
-                           headless=headless, out_dir=out_dir),
+                           headless=headless, out_dir=out_dir,
+                           max_comments_per_note=max_comments),
         timeout=timeout, log=log,
     )
     result = parse_results(mode, platform_mc, out_dir)

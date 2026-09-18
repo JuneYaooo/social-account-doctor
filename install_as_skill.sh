@@ -8,6 +8,9 @@
 #
 # 用法：bash install_as_skill.sh [--target claude|codex|cursor|openclaw] [--skip-deps]
 #       bash install_as_skill.sh --skill-dir /absolute/path [--skip-deps]
+#
+# pip 源会在官方 / 清华 / 阿里里探测选最快（国内裸连 pypi.org 常常只有几十 KB/s，
+# 镜像能快一到两个数量级）；设 PIP_INDEX_URL 环境变量可强制指定，不探测。
 ##############################################################################
 
 set -e
@@ -25,6 +28,55 @@ print_error()   { echo -e "${RED}[X] $1${NC}"; }
 print_header()  { echo ""; echo "========================================"; echo "$1"; echo "========================================"; echo ""; }
 
 command_exists() { command -v "$1" >/dev/null 2>&1; }
+
+# 选最快的 pip 源：官方 / 清华 / 阿里逐个 HEAD 探测（各 4s 上限）。
+# 结果写进 PIP_INDEX_ARGS；用户已设 PIP_INDEX_URL / PIP_INDEX 时不干预。
+PIP_INDEX_ARGS=""
+pick_pip_index() {
+    if [ -n "${PIP_INDEX_URL:-}" ] || [ -n "${PIP_INDEX:-}" ]; then
+        print_info "pip 源：使用环境变量 PIP_INDEX_URL/PIP_INDEX（不覆盖）"
+        return
+    fi
+    command_exists curl || { print_info "pip 源：无 curl 不探测，用默认源"; return; }
+    local best_url="" best_t="" url t
+    for url in "https://pypi.org/simple/" "https://pypi.tuna.tsinghua.edu.cn/simple/" "https://mirrors.aliyun.com/pypi/simple/"; do
+        t="$(curl -o /dev/null -sk -m 4 -w '%{time_total}' "$url" 2>/dev/null)" || continue
+        [ -n "$t" ] || continue
+        if [ -z "$best_t" ] || awk -v a="$t" -v b="$best_t" 'BEGIN{exit !(a<b)}'; then
+            best_t="$t"
+            best_url="$url"
+        fi
+    done
+    if [ -z "$best_url" ]; then
+        print_warning "pip 源探测全部失败，使用 pip 默认源"
+        return
+    fi
+    case "$best_url" in
+        https://pypi.org/*) print_info "pip 源：官方 PyPI（探测最快，${best_t}s）" ;;
+        *) PIP_INDEX_ARGS="-i $best_url"
+           print_info "pip 源：$best_url（探测最快，${best_t}s；设 PIP_INDEX_URL 可覆盖）" ;;
+    esac
+}
+
+# 装 Python 依赖的三级回退：
+#   直装（venv/conda/CLT Python 直接成功）→ --user → --user --break-system-packages
+# 第三级是 PEP 668（externally-managed-environment，新 Debian/Ubuntu/Homebrew Python）
+# 的标准解法，只写用户目录 ~/.local（mac 上是 ~/Library/Python），不动系统包。
+pip_install_reqs() {
+    local pip_bin
+    if command_exists pip3; then pip_bin="pip3"; else pip_bin="pip"; fi
+    local req="$1"
+    local common="--timeout 60 --disable-pip-version-check"
+    # shellcheck disable=SC2086
+    if $pip_bin install $common $PIP_INDEX_ARGS -r "$req"; then return 0; fi
+    print_warning "直接安装失败，改用 --user 重试"
+    # shellcheck disable=SC2086
+    if $pip_bin install $common $PIP_INDEX_ARGS --user -r "$req"; then return 0; fi
+    print_warning "--user 也被拒（多为 externally-managed-environment），尝试 --break-system-packages"
+    # shellcheck disable=SC2086
+    if $pip_bin install $common $PIP_INDEX_ARGS --user --break-system-packages -r "$req"; then return 0; fi
+    return 1
+}
 
 ENV_BACKUP=""
 cleanup() {
@@ -142,13 +194,17 @@ main() {
     if [ "$SKIP_DEPS" -eq 1 ]; then
         print_warning "已按 --skip-deps 跳过 Python 依赖安装"
     else
-        print_info "安装 Python 依赖..."
-        if command_exists pip3; then
-            pip3 install -q -r "$SKILL_DIR/requirements.txt"
+        print_info "安装 Python 依赖（进度逐行输出，首次视网速几分钟）..."
+        pick_pip_index
+        if pip_install_reqs "$SKILL_DIR/requirements.txt"; then
+            print_success "依赖安装完成"
         else
-            pip install -q -r "$SKILL_DIR/requirements.txt"
+            print_warning "Python 依赖自动安装失败。skill 文件已就位，请稍后手动执行："
+            print_info "  pip3 install -r $SKILL_DIR/requirements.txt"
+            if [ -n "$PIP_INDEX_ARGS" ]; then
+                print_info "  （国内加速：pip3 $PIP_INDEX_ARGS -r $SKILL_DIR/requirements.txt）"
+            fi
         fi
-        print_success "依赖安装完成"
     fi
 
     print_header "配置 tikhub CLI"

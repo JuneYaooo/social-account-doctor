@@ -312,6 +312,186 @@ def test_find_python_returns_310_plus():
 
 
 # ---------------------------------------------------------------------------
+# setup download-source selection (probes monkeypatched — no network)
+# ---------------------------------------------------------------------------
+
+def _clear_mirror_env(monkeypatch):
+    for var in ("PIP_INDEX_URL", "PIP_INDEX", "PLAYWRIGHT_DOWNLOAD_HOST", "MC_GIT_URL", "MC_NO_MIRROR"):
+        monkeypatch.delenv(var, raising=False)
+
+
+def test_pip_index_respects_user_env(monkeypatch):
+    monkeypatch.setenv("PIP_INDEX_URL", "https://example.com/simple")
+    args, label = mc.pip_index_args(log=lambda m: None)
+    assert args == []
+    assert label == "env"
+
+
+def test_pip_index_picks_fastest_mirror(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    speeds = {
+        "https://pypi.org/simple": 800.0,
+        "https://pypi.tuna.tsinghua.edu.cn/simple": 50.0,
+        "https://mirrors.aliyun.com/pypi/simple": 60.0,
+    }
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: speeds[url])
+    args, label = mc.pip_index_args(log=lambda m: None)
+    assert args == ["-i", "https://pypi.tuna.tsinghua.edu.cn/simple"]
+    assert label == "清华 PyPI 镜像"
+
+
+def test_pip_index_prefers_official_when_fastest(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    speeds = {
+        "https://pypi.org/simple": 40.0,
+        "https://pypi.tuna.tsinghua.edu.cn/simple": 500.0,
+        "https://mirrors.aliyun.com/pypi/simple": 600.0,
+    }
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: speeds[url])
+    args, label = mc.pip_index_args(log=lambda m: None)
+    assert args == []
+    assert label == "官方 PyPI"
+
+
+def test_pip_index_all_unreachable_falls_back_to_default(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: None)
+    args, label = mc.pip_index_args(log=lambda m: None)
+    assert args == []
+    assert label == "default"
+
+
+def test_pip_index_disabled_by_no_mirror_env(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    monkeypatch.setenv("MC_NO_MIRROR", "1")
+    assert mc.pip_index_args(log=lambda m: None) == ([], "direct")
+
+
+def test_playwright_mirror_only_when_clearly_faster(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    speeds = {mc.PLAYWRIGHT_OFFICIAL_HOST: 500.0, mc.PLAYWRIGHT_MIRROR_HOST: 400.0}
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: speeds[url])
+    # 快 20% 不够，必须显著快（2 倍）才切镜像
+    assert mc.playwright_mirror_env(log=lambda m: None) == {}
+    speeds[mc.PLAYWRIGHT_MIRROR_HOST] = 100.0
+    assert mc.playwright_mirror_env(log=lambda m: None) == {
+        "PLAYWRIGHT_DOWNLOAD_HOST": mc.PLAYWRIGHT_MIRROR_HOST
+    }
+
+
+def test_playwright_mirror_used_when_official_unreachable(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    speeds = {mc.PLAYWRIGHT_OFFICIAL_HOST: None, mc.PLAYWRIGHT_MIRROR_HOST: 300.0}
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: speeds[url])
+    env = mc.playwright_mirror_env(log=lambda m: None)
+    assert env["PLAYWRIGHT_DOWNLOAD_HOST"] == mc.PLAYWRIGHT_MIRROR_HOST
+
+
+def test_playwright_mirror_respects_user_env(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    monkeypatch.setenv("PLAYWRIGHT_DOWNLOAD_HOST", "https://my-host.example")
+    assert mc.playwright_mirror_env(log=lambda m: None) == {}
+
+
+def test_clone_candidates_env_url_wins(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    monkeypatch.setenv("MC_GIT_URL", "https://mirror.example/MediaCrawler.git")
+    assert mc.clone_url_candidates(log=lambda m: None) == [
+        ("https://mirror.example/MediaCrawler.git", "MC_GIT_URL")
+    ]
+
+
+def test_clone_candidates_direct_first_when_github_reachable(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    probes = {"https://github.com": 300.0}
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: probes.get(url))
+    plan = mc.clone_url_candidates(log=lambda m: None)
+    assert plan[0] == (mc.MC_GIT_URL, "github 直连")
+    assert len(plan) == 3  # 直连 + 两个 gh 代理垫后
+
+
+def test_clone_candidates_mirrors_first_when_github_down(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    probes = {"https://github.com": None}
+    monkeypatch.setattr(mc, "_probe_ms", lambda url, timeout=4.0: probes.get(url))
+    plan = mc.clone_url_candidates(log=lambda m: None)
+    assert len(plan) == 3
+    assert plan[-1] == (mc.MC_GIT_URL, "github 直连")
+    assert plan[0][1].startswith("gh 代理")
+
+
+def test_clone_candidates_no_mirror_env(monkeypatch):
+    _clear_mirror_env(monkeypatch)
+    monkeypatch.setenv("MC_NO_MIRROR", "1")
+    assert mc.clone_url_candidates(log=lambda m: None) == [(mc.MC_GIT_URL, "github 直连")]
+
+
+def test_run_stream_captures_tail_and_exit_code():
+    rc, tail = mc._run_stream(["sh", "-c", "echo line1; echo line2; exit 3"], log=lambda m: None, timeout=30)
+    assert rc == 3
+    assert tail[-2:] == ["line1", "line2"]
+
+
+# ---------------------------------------------------------------------------
+# crawl-level rate-control policy (comment defaults / volume caps / cooldown)
+# ---------------------------------------------------------------------------
+
+def _capture_crawl_args(monkeypatch, tmp_path):
+    """Wire crawl() to a fake runner so we can assert the args it would send."""
+    captured = {}
+
+    def fake_run(args, timeout=900, log=None):
+        captured["args"] = args
+        return {"returncode": 0, "timed_out": False, "elapsed_seconds": 0.1}
+
+    monkeypatch.setattr(mc, "run_crawl", fake_run)
+    monkeypatch.setattr(mc, "parse_results",
+                        lambda mode, p, out_dir=None: {"ok": True, "count": 1, "items": [{"id": "x"}]})
+    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
+    return captured
+
+
+def test_crawl_search_defaults_comments_off(monkeypatch, tmp_path):
+    """find（search）不消费评论内容 —— 默认不翻评论页，省掉单次 run 约 2/3 的请求。"""
+    captured = _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("search", "xhs", keywords="测试", log=lambda m: None)
+    assert "--get_comment false" in " ".join(captured["args"])
+
+
+def test_crawl_detail_and_creator_default_comments_on(monkeypatch, tmp_path):
+    captured = _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("detail", "xhs", ids=["http://x/1"], log=lambda m: None)
+    assert "--get_comment true" in " ".join(captured["args"])
+    # 换平台测 creator：同平台连跑会撞 30 分钟冷却（这正是冷却该拦的场景）
+    mc.crawl("creator", "douyin", ids=["http://x/user/1"], log=lambda m: None)
+    assert "--get_comment true" in " ".join(captured["args"])
+
+
+def test_crawl_explicit_comments_overrides_mode_default(monkeypatch, tmp_path):
+    captured = _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("search", "xhs", keywords="测试", comments=True, log=lambda m: None)
+    assert "--get_comment true" in " ".join(captured["args"])
+
+
+def test_crawl_comment_cap_defaults_to_upstream_ten(monkeypatch, tmp_path):
+    captured = _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("detail", "xhs", ids=["http://x/1"], log=lambda m: None)
+    assert "--max_comments_count_singlenotes 10" in " ".join(captured["args"])
+
+
+def test_crawl_max_comments_propagates(monkeypatch, tmp_path):
+    captured = _capture_crawl_args(monkeypatch, tmp_path)
+    mc.crawl("detail", "xhs", ids=["http://x/1"], max_comments=5, log=lambda m: None)
+    assert "--max_comments_count_singlenotes 5" in " ".join(captured["args"])
+
+
+def test_cooldown_default_is_thirty_minutes(monkeypatch):
+    monkeypatch.delenv("MC_COOLDOWN_SECONDS", raising=False)
+    fresh = load_mc_client()
+    assert fresh.COOLDOWN_SECONDS == 1800
+
+
+# ---------------------------------------------------------------------------
 # run_crawl timeout enforcement
 # ---------------------------------------------------------------------------
 

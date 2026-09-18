@@ -22,11 +22,22 @@ mc --setup          # 或 python3 mediacrawler/bin/mc --setup
 ```
 
 做五件事（全部落在 `vendor/`，已在 `.gitignore`）：
-1. 克隆 MediaCrawler 到 `vendor/MediaCrawler`（优先 pin 到适配过的 commit）
+1. 克隆 MediaCrawler 到 `vendor/MediaCrawler`（优先 pin 到适配过的 commit；github 直连失败自动回退 gh 代理镜像）
 2. 用系统 Python ≥ 3.10 建独立 venv `vendor/mc-venv`（不污染主环境）
-3. 安装 MediaCrawler 依赖
-4. 安装 Playwright chromium
+3. 安装依赖 —— 优先装裁剪版 `requirements-lean.txt`（砍掉 webui/测试/迁移类包，省下载），自检不过自动回退上游全量 requirements
+4. 安装 Playwright chromium（约 200MB；官方 CDN 明显更慢时自动切 npmmirror 镜像）
 5. 把 `ENABLE_CDP_MODE` 补丁为 `False`（走标准 Playwright 模式，登录态可持久化）
+
+所有下载源（pip / Chromium / git）在安装时**自动探测选最快**——国内裸连 GitHub/PyPI/Playwright CDN 常常只有几十 KB/s，镜像源能快一到两个数量级。用户环境变量永远优先，也可强制指定：
+
+```bash
+PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple          # 强制 pip 源
+PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright  # 强制 Chromium 源
+MC_GIT_URL=https://gh-proxy.com/https://github.com/NanmiCoder/MediaCrawler.git  # 强制克隆地址
+mc --setup --no-mirror                                           # 整体禁用镜像，全部直连官方源
+```
+
+pip 和 Playwright 的安装进度会逐行转发到 stderr，stdout 始终是纯 JSON。
 
 系统要求：Python ≥ 3.10、git、可访问 GitHub 和 PyPI 的网络；**抖音还需要本机 Node.js ≥ 16**（签名用，`brew install node`），小红书 / 快手 / B 站不需要。没装 mc 命令时可以直接 `ln -sf "$(pwd)/mediacrawler/bin/mc" ~/.local/bin/mc`。
 
@@ -54,7 +65,9 @@ mc search  --platform <平台> --keywords "词1,词2" [--max-notes N]   # find�
 mc detail  --platform <平台> --ids "作品URL或ID, ..."               # crack：作品详情（支持分享短链）
 mc creator --platform <平台> --ids "主页URL或ID, ..."               # 账号诊断：抓创作者作品列表
 
-通用：--comments/--no-comments（默认抓一级评论，每条上限 --max-comments 20）
+通用：--comments/--no-comments（detail/creator 默认抓；search 默认不抓 —— find 只用
+      互动计数，评论计数详情自带；要评论显式加 --comments）
+      --max-comments N（每条上限，默认 10，对齐上游）
       --timeout 秒（默认 900）  --out 目录（默认 vendor/mc-data）
 ```
 
@@ -101,12 +114,13 @@ mc creator --platform <平台> --ids "主页URL或ID, ..."               # 账�
 
 MediaCrawler 采用 NON-COMMERCIAL LEARNING LICENSE：仅供学习研究，不得商用、不得大规模爬取。
 
-登录的是**用户自己的账号**，抓太密会触发平台风控（验证码、限流甚至封号）。mc 的默认参数已经是保守档（并发 1、每次请求间隔 ≥2s、单次几十条），在此之上还有一条**同平台 5 分钟冷却**：同一平台两次抓取间隔不足 5 分钟会直接拒绝，报错里提示合并关键词或用 `--force` 覆盖。
+登录的是**用户自己的账号**，抓太密会触发平台风控（验证码、限流甚至封号）。mc 的默认参数已经是保守档（并发 1、每次请求间隔 ≥2s、评论仅 detail/creator 默认抓且每条 ≤10、单次几十条），在此之上还有一条**同平台 30 分钟冷却**：同一平台两次抓取间隔不足 30 分钟会直接拒绝，报错里提示合并关键词或用 `--force` 覆盖。
 
 人工使用时同样遵守：
 
 1. **合并请求**：多个关键词合成一次 `--keywords "词1,词2"`，多条链接合成一次 `--ids`，不要拆成多次调用
 2. **单次上限**：search ≤ 3 词、detail ≤ 5 条、creator ≤ 2 个账号；不要并行跑多个 mc
-3. **先复用再抓**：`vendor/mc-data/` 24 小时内的同关键词/同账号数据先复用，不重复抓
-4. **见好就收**：出现验证码、登录失效、连续空结果立即停手，换时间再试
-5. 确有必要立即重抓时才用 `--force`；冷却时长可用 `MC_COOLDOWN_SECONDS` 环境变量调整
+3. **每日预算**：同账号同平台每天 ≤ 4-6 次 run——风控看的是长期总量，不是单次频率；额度用完改走 TikHub 或改天再跑
+4. **先复用再抓**：`vendor/mc-data/` 24 小时内的同关键词/同账号数据先复用，不重复抓
+5. **见好就收**：出现验证码、登录失效、连续空结果立即停手，换时间再试
+6. 确有必要立即重抓时才用 `--force`；冷却时长可用 `MC_COOLDOWN_SECONDS` 环境变量调整

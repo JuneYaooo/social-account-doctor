@@ -3,15 +3,16 @@
 
 Usage:
     mc --status                                  # 安装 / 登录态检查（JSON）
-    mc --setup [--force]                         # 克隆 MediaCrawler + venv + chromium
+    mc --setup [--force] [--no-mirror]           # 克隆 MediaCrawler + venv + chromium
 
     mc search  --platform xiaohongshu --keywords "词1,词2" [--max-notes 20]
     mc detail  --platform douyin --ids "url1,url2"
     mc creator --platform xhs --ids "profile_url"
 
 Common options:
-    --comments / --no-comments      抓一级评论（默认抓）
-    --max-comments N                每条作品最多抓 N 条一级评论（默认 20）
+    --comments / --no-comments      抓一级评论（detail/creator 默认抓；search 默认
+                                    不抓 —— find 只用互动计数，评论计数详情自带）
+    --max-comments N                每条作品最多抓 N 条一级评论（默认 10，对齐上游）
     --login qrcode|phone|cookie     登录方式（默认 qrcode，弹浏览器扫码）
     --cookies STRING                cookie 登录时的 cookie 串
     --headless                      无头模式（扫码登录时不要用）
@@ -28,12 +29,15 @@ Env:
     MC_DEBUG=1      透传更多调试日志
     MC_PYTHON       指定建 venv 用的 Python (>=3.10)
     MC_VENDOR_DIR   覆盖 vendor 目录（默认 <skill>/vendor）
+    MC_NO_MIRROR=1  --setup 禁用镜像加速（pip/Chromium/GitHub 全部直连官方源）
+    MC_GIT_URL      --setup 用指定的 URL 克隆 MediaCrawler（gh 代理/企业镜像等）
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -62,14 +66,15 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--status", action="store_true", help="check install & login state, print JSON")
     parser.add_argument("--setup", action="store_true", help="clone MediaCrawler, build venv, install chromium")
     parser.add_argument("--force", action="store_true", help="--setup: re-install; crawl: skip same-platform cooldown")
+    parser.add_argument("--no-mirror", action="store_true", help="--setup: 禁用镜像加速，pip/Chromium/GitHub 全部直连官方源")
     parser.add_argument("mode", nargs="?", choices=("search", "detail", "creator"), help="crawl mode")
     parser.add_argument("--platform", help="xiaohongshu | douyin | kuaishou | bilibili")
     parser.add_argument("--keywords", default="", help="search keywords, comma-separated")
     parser.add_argument("--ids", default="", help="note/video/creator URLs or IDs, comma-separated")
     parser.add_argument("--max-notes", type=int, default=20, help="max notes per keyword (default 20)")
-    parser.add_argument("--max-comments", type=int, default=20, help="max first-level comments per note")
-    parser.add_argument("--comments", dest="comments", action="store_true", default=True)
-    parser.add_argument("--no-comments", dest="comments", action="store_false")
+    parser.add_argument("--max-comments", type=int, default=10, help="max first-level comments per note (default 10, upstream default)")
+    parser.add_argument("--comments", dest="comments", action="store_true", default=None, help="fetch first-level comments (detail/creator default on, search default off)")
+    parser.add_argument("--no-comments", dest="comments", action="store_false", help="skip comment fetching")
     parser.add_argument("--login", default="qrcode", choices=mc_client.LOGIN_TYPES)
     parser.add_argument("--cookies", default="", help="cookie string for --login cookie")
     parser.add_argument("--headless", action="store_true", help="run browser headless (not for first login)")
@@ -80,6 +85,8 @@ def main(argv: list[str] | None = None) -> None:
     if args.status:
         _emit(mc_client.status())
     if args.setup:
+        if args.no_mirror:
+            os.environ["MC_NO_MIRROR"] = "1"
         try:
             _emit(mc_client.setup(force=args.force))
         except mc_client.McError as e:
@@ -100,6 +107,7 @@ def main(argv: list[str] | None = None) -> None:
             keywords=args.keywords,
             ids=ids,
             max_notes=args.max_notes,
+            max_comments=args.max_comments,
             comments=args.comments,
             login=args.login,
             cookies=args.cookies,
