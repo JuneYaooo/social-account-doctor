@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,10 @@ def load_client():
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
+    # 默认缓存落在 cwd 的 ./output/cache/tikhub —— 测试模块一律指到临时目录并
+    # 关闭，防止假响应写进真实缓存、污染下一次运行（缓存相关用例会显式打开）
+    module._CACHE_DIR = Path(tempfile.mkdtemp(prefix="sad-tikhub-cache-")) / "cache"
+    module._cache_enabled = False
     return module
 
 
@@ -196,3 +201,89 @@ def test_client_contains_no_legacy_transport_endpoint():
     assert "mcp.tikhub.io" not in source
     assert "jsonrpc" not in source
     assert "mcp-session-id" not in source
+
+
+# ---------------------------------------------------------------------------
+# 24h response cache (./output/cache/tikhub/) — same link shouldn't be paid twice
+# ---------------------------------------------------------------------------
+
+def _client_with_fake_request(client_module, tmp_path, responses=None):
+    """Build a TikhubClient whose catalog + _request are faked; cache dir -> tmp."""
+    client_module._CACHE_DIR = tmp_path / "cache"
+    client_module._cache_enabled = True
+    calls = {"count": 0}
+
+    def fake_request(self, method, path, arguments, query_names, path_names):
+        calls["count"] += 1
+        return {"data": responses[0] if responses else f"resp-{calls['count']}"}
+
+    client_module.TikhubClient._request = fake_request
+
+    def fake_tool(self, name):
+        return {"path": f"/api/v1/test/{name}", "method": "GET",
+                "queryParameters": [], "pathParameters": []}
+
+    client_module.TikhubClient._tool = fake_tool
+    return client_module.TikhubClient(platform="xiaohongshu"), calls
+
+
+def test_call_caches_response_for_24h(tmp_path):
+    mod = load_client()
+    client, calls = _client_with_fake_request(mod, tmp_path)
+
+    first = client.call("search", {"kw": "低卡便当"})
+    second = client.call("search", {"kw": "低卡便当"})
+
+    assert first == second
+    assert calls["count"] == 1  # 第二次走缓存，不再打 API
+    assert len(list((tmp_path / "cache").glob("*.json"))) == 1
+
+
+def test_cache_keyed_by_arguments(tmp_path):
+    mod = load_client()
+    client, calls = _client_with_fake_request(mod, tmp_path)
+
+    client.call("search", {"kw": "a"})
+    client.call("search", {"kw": "b"})
+
+    assert calls["count"] == 2  # 不同参数不共享缓存
+
+
+def test_cache_disabled_bypasses(tmp_path):
+    mod = load_client()
+    client, calls = _client_with_fake_request(mod, tmp_path)
+    mod.set_cache_enabled(False)
+
+    client.call("search", {"kw": "a"})
+    client.call("search", {"kw": "a"})
+
+    assert calls["count"] == 2
+    mod.set_cache_enabled(True)  # 还原，避免影响其他用例
+
+
+def test_expired_cache_entry_is_refetched(tmp_path):
+    mod = load_client()
+    client, calls = _client_with_fake_request(mod, tmp_path)
+
+    client.call("search", {"kw": "a"})
+    # 把缓存时间改成过期
+    for entry in (tmp_path / "cache").glob("*.json"):
+        data = json.loads(entry.read_text(encoding="utf-8"))
+        data["cached_at"] = -1  # epoch 0 → 远超 TTL
+        entry.write_text(json.dumps(data), encoding="utf-8")
+
+    client.call("search", {"kw": "a"})
+    assert calls["count"] == 2
+
+
+def test_corrupt_cache_entry_falls_through(tmp_path):
+    mod = load_client()
+    client, calls = _client_with_fake_request(mod, tmp_path)
+
+    client.call("search", {"kw": "a"})
+    for entry in (tmp_path / "cache").glob("*.json"):
+        entry.write_text("{not json", encoding="utf-8")
+
+    result = client.call("search", {"kw": "a"})
+    assert calls["count"] == 2
+    assert result == {"data": "resp-2"}  # 缓存坏了不影响拿到新结果

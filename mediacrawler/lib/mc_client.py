@@ -44,7 +44,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 VENDOR_DIR = Path(os.environ.get("MC_VENDOR_DIR", REPO_ROOT / "vendor"))
 MC_DIR = VENDOR_DIR / "MediaCrawler"
 VENV_DIR = VENDOR_DIR / "mc-venv"
-DATA_DIR = VENDOR_DIR / "mc-data"
+# 抓取数据落盘：跟随统一输出根 ./output/cache/mc-data（当前工作目录下），
+# 24h 复用窗口读这里。MC_DATA_DIR 可覆盖。
+DATA_DIR = Path(os.environ.get("MC_DATA_DIR", Path.cwd() / "output" / "cache" / "mc-data"))
+# 锁和冷却标记是「全机状态」而不是项目数据，必须留在 skill 安装目录里 ——
+# 否则两个不同项目目录并行抓取会各自持锁，绕开单实例保护。
+STATE_DIR = Path(os.environ.get("MC_STATE_DIR", VENDOR_DIR / "mc-state"))
+LEGACY_DATA_DIR = VENDOR_DIR / "mc-data"  # 旧版数据/标记位置，只读回退
 VERSION_FILE = VENDOR_DIR / "mc-version.txt"
 
 MC_GIT_URL = "https://github.com/NanmiCoder/MediaCrawler.git"
@@ -551,6 +557,8 @@ def status() -> dict:
         "ok": False,
         "repo_root": str(REPO_ROOT),
         "vendor_dir": str(VENDOR_DIR),
+        "data_dir": str(DATA_DIR),
+        "state_dir": str(STATE_DIR),
         "mediacrawler_dir": str(MC_DIR),
         "cloned": (MC_DIR / "main.py").is_file(),
         "venv_ready": venv_python().is_file(),
@@ -1112,18 +1120,24 @@ def parse_results(mode: str, platform_mc: str, out_dir: Path | str | None = None
 
 
 def _cooldown_file(platform_mc: str) -> Path:
-    return DATA_DIR / f".last-run-{platform_mc}"
+    return STATE_DIR / f".last-run-{platform_mc}"
 
 
 def _cooldown_expiry(platform_mc: str) -> float | None:
-    """读冷却标记里存的「到期时间戳」（epoch 秒）；无标记 / 损坏返回 None。"""
-    marker = _cooldown_file(platform_mc)
-    if not marker.is_file():
-        return None
-    try:
-        return float(marker.read_text(encoding="utf-8").strip())
-    except (OSError, ValueError):
-        return None
+    """读冷却标记里存的「到期时间戳」（epoch 秒）；无标记 / 损坏返回 None。
+
+    兼容旧安装：STATE_DIR 没有标记时回退读旧 vendor/mc-data 里的标记（只读），
+    升级后不会漏放一次本该冷却的抓取。
+    """
+    for base in (STATE_DIR, LEGACY_DATA_DIR):
+        marker = base / f".last-run-{platform_mc}"
+        if not marker.is_file():
+            continue
+        try:
+            return float(marker.read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            continue
+    return None
 
 
 def _check_cooldown(platform_mc: str) -> None:
@@ -1156,14 +1170,15 @@ def _mark_cooldown(platform_mc: str, seconds: int | None = None) -> None:
 def _lock_file() -> Path:
     """全局单实例锁：同一时间全机只允许一个抓取进程。跨平台并行同样拒绝——
     虽然各平台风控相互独立，但单实例最简单也最稳：不会出现两个 chromium、
-    agent 也不会同时盯多个扫码窗口。"""
-    return DATA_DIR / "crawl.lock"
+    agent 也不会同时盯多个扫码窗口。放 STATE_DIR（skill 安装目录）而不是
+    项目数据目录：两个项目目录必须抢同一把锁。"""
+    return STATE_DIR / "crawl.lock"
 
 
 def _acquire_crawl_lock() -> Path | None:
     """O_CREAT|O_EXCL 原子创建；崩溃残留超时的锁可抢占。
     返回锁文件路径（调用方负责 finally 释放），拿不到返回 None。"""
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
     lock = _lock_file()
     for _attempt in range(2):
         try:

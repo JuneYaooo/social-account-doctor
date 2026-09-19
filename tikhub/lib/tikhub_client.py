@@ -6,6 +6,7 @@ documented REST endpoints under ``/api/v1`` with Bearer authentication.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -198,7 +199,12 @@ class TikhubClient:
         raise TikhubError(f"REST call failed after retries: {path}")
 
     def call(self, tool_name: str, arguments: dict | None = None) -> Any:
-        """Call one cached REST endpoint using query/body metadata from OpenAPI."""
+        """Call one cached REST endpoint using query/body metadata from OpenAPI.
+
+        成功响应会进 24 小时磁盘缓存（./output/cache/tikhub/，与统一输出根对齐）：
+        TikHub 按调用计费，同一链接在 find 和 crack 里出现不该花两次钱。
+        失败永不缓存；``--no-cache`` / ``TIKHUB_CACHE=0`` 可整体关闭。
+        """
         tool = self._tool(tool_name)
         path = str(tool.get("path") or "")
         method = str(tool.get("method") or "GET")
@@ -206,7 +212,63 @@ class TikhubClient:
             raise TikhubError(f"refusing non-REST endpoint path: {path!r}")
         query_names = {str(name) for name in tool.get("queryParameters", [])}
         path_names = {str(name) for name in tool.get("pathParameters", [])}
-        return self._request(method, path, arguments or {}, query_names, path_names)
+
+        cache_key = _cache_key(self.base_url, method, path, arguments or {})
+        hit = _cache_get(cache_key)
+        if hit is not None:
+            _debug(f"cache hit: {method} {path} key={cache_key[:12]}")
+            return hit
+        result = self._request(method, path, arguments or {}, query_names, path_names)
+        _cache_put(cache_key, result)
+        return result
+
+
+# ---------------------------------------------------------------------------
+# 响应缓存（24h）：目录跟随统一输出根 ./output/cache/tikhub/
+# ---------------------------------------------------------------------------
+
+CACHE_TTL_SECONDS = int(os.environ.get("TIKHUB_CACHE_TTL", "86400"))
+_CACHE_DIR = Path(os.environ.get("TIKHUB_CACHE_DIR", Path.cwd() / "output" / "cache" / "tikhub"))
+_cache_enabled = os.environ.get("TIKHUB_CACHE", "1").lower() not in {"0", "false", "no"}
+
+
+def set_cache_enabled(enabled: bool) -> None:
+    global _cache_enabled
+    _cache_enabled = enabled
+
+
+def _cache_key(base_url: str, method: str, path: str, arguments: dict) -> str:
+    canonical = json.dumps(arguments, ensure_ascii=False, sort_keys=True, default=str)
+    raw = f"{base_url}|{method}|{path}|{canonical}"
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+
+def _cache_path(key: str) -> Path:
+    return _CACHE_DIR / f"{key}.json"
+
+
+def _cache_get(key: str) -> Any | None:
+    if not _cache_enabled:
+        return None
+    try:
+        entry = json.loads(_cache_path(key).read_text(encoding="utf-8"))
+        if time.time() - float(entry["cached_at"]) > CACHE_TTL_SECONDS:
+            return None
+        return entry["response"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def _cache_put(key: str, response: Any) -> None:
+    if not _cache_enabled:
+        return
+    try:
+        _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        _cache_path(key).write_text(
+            json.dumps({"cached_at": time.time(), "response": response}, ensure_ascii=False),
+            encoding="utf-8")
+    except (OSError, TypeError):
+        pass  # 缓存写失败不影响业务调用
 
 
 def _get_public_json(path: str, label: str) -> Any:

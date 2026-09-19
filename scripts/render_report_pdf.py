@@ -304,6 +304,9 @@ def sanitize_markdown_for_export(markdown: str) -> str:
     text = text.replace(repo_root, "")
     text = re.sub(r"/Users/[^/\s]+/code/data/tmp/baokuan/", "本地素材/", text)
     text = re.sub(r"output/video_distillation/[^/\s`]+/", "本次蒸馏产物/", text)
+    # 统一输出根下的 cache 是内部数据缓存，不出现在对外 PDF 里
+    text = re.sub(r"\.?/?output/cache/tikhub/[^\s`|;)]+", "平台数据缓存（TikHub）", text)
+    text = re.sub(r"\.?/?output/cache/mc-data/[^\s`|;)]+", "平台数据缓存（mc）", text)
     text = re.sub(r"/tmp/", "临时产物/", text)
     text = re.sub(r"临时产物/[^\s`|;)]+", "临时分析文件（不随报告分发）", text)
     text = re.sub(r"/Users/[^/\s]+/", "本地文件/", text)

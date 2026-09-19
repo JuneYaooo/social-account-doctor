@@ -111,12 +111,14 @@ https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/inst
 
 ## 📂 输出在哪
 
-跑完之后,当前目录下会出现:
+跑完之后，当前目录下的 **`./output/`** 是统一输出根，所有产物收在一棵树里：
 
-- `reports/` —— 本次的对标扫描 / 爆款拆解 / 仿写初稿,markdown 可直接看,按需可导出 PDF(思源字体 + A4 打印版)
-- `assets/` —— 钩子库、标题库,跨任务累积复用
+- `output/reports/` —— 本次的对标扫描 / 爆款拆解 / 仿写初稿,markdown 可直接看,按需可导出 PDF(思源字体 + A4 打印版)
+- `output/assets/` —— 钩子库、标题库,跨任务累积复用
+- `output/cache/` —— 平台数据缓存（mc 原始 JSON / TikHub 响应,24 小时复用——同一链接不重复花钱、不重复抓）
+- `output/media/` —— 下载的视频和封面,按 `平台-作品ID` 命名,重复任务直接复用
 
-> 💡 `reports/` 通常含账号和选题信息,建议加进 `.gitignore` 别公开;`assets/` 是长期资产,建议 commit。
+> 💡 `output/` 已内置 gitignore 建议（含账号与选题信息,别公开提交）;`cache/` 和 `media/` 是可再生的加速缓存,磁盘紧张时可随时清空。
 
 ## ⚠ 关于内置的平台数据
 

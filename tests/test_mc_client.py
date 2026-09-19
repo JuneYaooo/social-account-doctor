@@ -24,6 +24,14 @@ def load_mc_client():
 mc = load_mc_client()
 
 
+@pytest.fixture(autouse=True)
+def _isolate_mc_state(tmp_path, monkeypatch):
+    """锁和冷却标记是全机状态（默认在 skill 安装目录），测试必须拦到临时目录，
+    否则会写到真实安装里（历史上真的发生过：一次跑测试把 MediaCrawler 拉起来）。"""
+    monkeypatch.setattr(mc, "STATE_DIR", tmp_path / "mc-state")
+    monkeypatch.setattr(mc, "LEGACY_DATA_DIR", tmp_path / "legacy-mc-data")
+
+
 # ---------------------------------------------------------------------------
 # platform mapping
 # ---------------------------------------------------------------------------
@@ -227,7 +235,6 @@ def test_parse_results_no_output_is_structured(tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_cooldown_blocks_rapid_same_platform_crawl(monkeypatch, tmp_path):
-    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
     # no marker → allowed
     mc._check_cooldown("xhs")
     # fresh marker → rejected
@@ -238,21 +245,29 @@ def test_cooldown_blocks_rapid_same_platform_crawl(monkeypatch, tmp_path):
     mc._check_cooldown("dy")
 
 
-def test_cooldown_expires(monkeypatch, tmp_path):
-    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    stale = tmp_path / ".last-run-xhs"
+def test_cooldown_expires(tmp_path):
+    stale = mc.STATE_DIR / ".last-run-xhs"
+    stale.parent.mkdir(parents=True, exist_ok=True)
     stale.write_text(str(1.0), encoding="utf-8")  # epoch → long past
     mc._check_cooldown("xhs")
 
 
-def test_cooldown_corrupt_marker_is_ignored(monkeypatch, tmp_path):
-    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    (tmp_path / ".last-run-ks").write_text("not-a-number", encoding="utf-8")
+def test_cooldown_corrupt_marker_is_ignored(tmp_path):
+    mc.STATE_DIR.mkdir(parents=True, exist_ok=True)
+    (mc.STATE_DIR / ".last-run-ks").write_text("not-a-number", encoding="utf-8")
     mc._check_cooldown("ks")
 
 
+def test_cooldown_reads_legacy_vendor_markers(tmp_path):
+    """升级兼容：旧 vendor/mc-data 里的冷却标记仍会被读到，不会漏放一次抓取。"""
+    legacy = mc.LEGACY_DATA_DIR / ".last-run-xhs"
+    legacy.parent.mkdir(parents=True, exist_ok=True)
+    legacy.write_text(str(time.time() + 999_999), encoding="utf-8")  # 很久之后到期
+    with pytest.raises(mc.McError, match="冷却"):
+        mc._check_cooldown("xhs")
+
+
 def test_cooldown_respects_env_override(monkeypatch, tmp_path):
-    monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
     monkeypatch.setattr(mc, "COOLDOWN_SECONDS", 1)
     mc._mark_cooldown("xhs")
     import time as _time
@@ -539,7 +554,7 @@ def test_crawl_reports_stale_when_run_wrote_nothing(monkeypatch, tmp_path):
     assert result["count"] == 0
     assert result["stale_files"][0]["age_minutes"] > 1000
     assert mc._cooldown_expiry("dy") is not None  # 失败退避生效
-    assert not (tmp_path / "crawl.lock").exists()  # 锁已释放
+    assert not (mc.STATE_DIR / "crawl.lock").exists()  # 锁已释放
 
 
 def test_parse_results_since_filters_stale_files(tmp_path):
@@ -576,7 +591,8 @@ def test_parse_results_accepts_files_written_after_since(tmp_path):
 
 def test_crawl_rejects_concurrent_run(monkeypatch, tmp_path):
     monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    lock = tmp_path / "crawl.lock"
+    mc.STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lock = mc.STATE_DIR / "crawl.lock"
     lock.write_text("999999 123", encoding="utf-8")
     with pytest.raises(mc.McError, match="另一个|并行"):
         mc.crawl("search", "xhs", keywords="t", log=lambda m: None)
@@ -585,7 +601,8 @@ def test_crawl_rejects_concurrent_run(monkeypatch, tmp_path):
 def test_global_lock_blocks_other_platforms_too(monkeypatch, tmp_path):
     """跨平台并行同样拒绝——全机同一时间只允许一个抓取进程。"""
     monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    lock = tmp_path / "crawl.lock"
+    mc.STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lock = mc.STATE_DIR / "crawl.lock"
     lock.write_text("999999 123", encoding="utf-8")
     with pytest.raises(mc.McError, match="单实例|并行"):
         mc.crawl("detail", "bilibili", ids=["http://x/1"], log=lambda m: None)
@@ -594,13 +611,14 @@ def test_global_lock_blocks_other_platforms_too(monkeypatch, tmp_path):
 def test_crawl_lock_released_after_run(monkeypatch, tmp_path):
     _capture_crawl_args(monkeypatch, tmp_path)
     mc.crawl("search", "dy", keywords="t", log=lambda m: None)
-    assert not (tmp_path / "crawl.lock").exists()
+    assert not (mc.STATE_DIR / "crawl.lock").exists()
 
 
 def test_crawl_steals_stale_lock(tmp_path, monkeypatch):
     """崩溃残留的陈旧锁可被抢占，不会把用户永久卡死。"""
     monkeypatch.setattr(mc, "DATA_DIR", tmp_path)
-    lock = tmp_path / "crawl.lock"
+    mc.STATE_DIR.mkdir(parents=True, exist_ok=True)
+    lock = mc.STATE_DIR / "crawl.lock"
     lock.write_text("999999 123", encoding="utf-8")
     stale = time.time() - mc.CRAWL_LOCK_STALE_SECONDS - 60
     os.utime(lock, (stale, stale))
@@ -857,3 +875,22 @@ def test_patch_optional_wordcloud_leaves_drifted_files_alone(tmp_path):
     _fake_words_py(tmp_path, content="import asyncio\nprint('upstream changed')\n")
     assert mc.patch_optional_wordcloud(tmp_path) is False
     assert (tmp_path / "tools" / "words.py").read_text(encoding="utf-8") == "import asyncio\nprint('upstream changed')\n"
+
+
+# ---------------------------------------------------------------------------
+# unified output-root conventions (./output/cache/mc-data under CWD)
+# ---------------------------------------------------------------------------
+
+def test_data_dir_defaults_to_unified_output_root(monkeypatch, tmp_path):
+    monkeypatch.delenv("MC_DATA_DIR", raising=False)
+    monkeypatch.chdir(tmp_path)
+    fresh = load_mc_client()
+    assert fresh.DATA_DIR == tmp_path / "output" / "cache" / "mc-data"
+    # 锁和冷却标记仍然在 skill 安装目录（全机状态，不跟项目目录走）
+    assert fresh.STATE_DIR == fresh.VENDOR_DIR / "mc-state"
+
+
+def test_data_dir_env_override(monkeypatch, tmp_path):
+    monkeypatch.setenv("MC_DATA_DIR", str(tmp_path / "custom-data"))
+    fresh = load_mc_client()
+    assert fresh.DATA_DIR == tmp_path / "custom-data"

@@ -70,7 +70,7 @@ mc creator --platform <平台> --ids "主页URL或ID, ..."               # 账�
 通用：--comments/--no-comments（detail/creator 默认抓；search 默认不抓 —— find 只用
       互动计数，评论计数详情自带；要评论显式加 --comments）
       --max-comments N（每条上限，默认 10，对齐上游）
-      --timeout 秒（默认 900）  --out 目录（默认 vendor/mc-data）
+      --timeout 秒（默认 900）  --out 目录（默认 ./output/cache/mc-data，跟随统一输出根）
 ```
 
 平台名接受 `xiaohongshu/douyin/kuaishou/bilibili` 或 `xhs/dy/ks/bili`。
@@ -131,7 +131,7 @@ MediaCrawler 采用 NON-COMMERCIAL LEARNING LICENSE：仅供学习研究，不�
 1. **合并请求**：多个关键词合成一次 `--keywords "词1,词2"`，多条链接合成一次 `--ids`，不要拆成多次调用
 2. **单次上限**：search ≤ 3 词、detail ≤ 5 条、creator ≤ 2 个账号；不要并行跑多个 mc
 3. **每日预算**：同账号同平台每天 ≤ 4-6 次 run——风控看的是长期总量，不是单次频率；额度用完改走 TikHub 或改天再跑
-4. **先复用再抓**：`vendor/mc-data/` 24 小时内的同关键词/同账号数据先复用，不重复抓
+4. **先复用再抓**：`./output/cache/mc-data/` 24 小时内的同关键词/同账号数据先复用，不重复抓
 5. **见好就收**：出现验证码、登录失效、连续空结果、`stale_data` 立即停手，换时间再试
 6. 确有必要立即重抓时才用 `--force`；冷却时长可用 `MC_COOLDOWN_SECONDS` / `MC_FAILURE_COOLDOWN_SECONDS` 环境变量调整
 

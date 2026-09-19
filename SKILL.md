@@ -77,7 +77,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 [3 标题 + 3 封面大字 + 1 段首段 + 1 个 CTA]  → 可发
 ```
 
-**副产品（可选，必须问）**：crack 跑完后**主动问**用户「要把这些钩子积累到 `./assets/hooks-{platform}.md` 吗？」 — 用户答 yes 才追加。**不会自动写**。库的质量由你把关，跑多了自然形成弹药库。
+**副产品（可选，必须问）**：crack 跑完后**主动问**用户「要把这些钩子积累到 `./output/assets/hooks-{platform}.md` 吗？」 — 用户答 yes 才追加。**不会自动写**。库的质量由你把关，跑多了自然形成弹药库。
 
 ---
 
@@ -141,7 +141,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 
 ### compose 的输出
 
-落盘到 `./reports/{YYYYMMDD-HHMM}-compose-{素材短码}.md`，含：
+落盘到 `./output/reports/{YYYYMMDD-HHMM}-compose-{素材短码}.md`，含：
 - 素材清单（文件名 + 字/帧/时长）
 - 5 维本质 + 形容词三元组
 - 独家要素清单（编号）
@@ -200,7 +200,7 @@ description: 小红书 / 抖音 / 快手 / 视频号 自媒体「(compose 素材
 
 ### commerce-review：视频链接/本地视频 + 对标审查
 
-先读取 `references/commerce-analysis-template.md`。如果输入是平台视频链接，按 §7 的通用 `crack` 工具表解析分享链接、获取详情和媒体地址，下载到临时目录；输入已经是本地文件时直接进入多模态。媒体拿不到时不得只读标题和互动数据冒充完整内容分析。
+先读取 `references/commerce-analysis-template.md`。如果输入是平台视频链接，按 §7 的通用 `crack` 工具表解析分享链接、获取详情和媒体地址，按 §5 的 media 规则下载到 `./output/media/{平台}-{作品ID}.{ext}`（已存在直接复用）；输入已经是本地文件时直接进入多模态。媒体拿不到时不得只读标题和互动数据冒充完整内容分析。
 
 1. 对目标视频运行 `scripts/analyze_video.py`，完成 4 维钩子与电商维度拆解。
 2. 从目标视频提取品类、目标人群、载体形态、情绪锚点、内容结构、利益点与证明方式。
@@ -303,7 +303,7 @@ ProductFactCard（adapt 的前置输入）：
 commerce 模式跑完，落盘到：
 
 ```
-./reports/
+./output/reports/
   commerce-diagnostic-{YYYYMMDD-HHMM}.md # 带货账号三层诊断 + 对标差距
   commerce-review-{YYYYMMDD-HHMM}.md     # 视频链接/本地视频拆解；诊断型请求含对标差距
   commerce-adapt-{YYYYMMDD-HHMM}.md      # 带货文案+分镜+风险标注
@@ -432,13 +432,13 @@ crack 跑完所有对标后，把**完整 4 维钩子单元**（不是单句）�
   2. @yyy「比熊求职」(13k 赞, 共鸣型反差钩, 主驱动力=文字 0.7)
   ...
 
-要积累到 ./assets/hooks-{platform}.md 吗？
+要积累到 ./output/assets/hooks-{platform}.md 吗？
   - yes：4 维拆解格式全存
   - "1,3"：只存指定条
   - no：本次不存（默认）
 ```
 
-**只有用户明确说要存**，才 `mkdir -p ./assets` + 追加（按**情绪锚点**分类，再按**主驱动力**二级索引；追加不覆盖；首次创建时建好"索引 + 速查"骨架）。
+**只有用户明确说要存**，才 `mkdir -p ./output/assets` + 追加（按**情绪锚点**分类，再按**主驱动力**二级索引；追加不覆盖；首次创建时建好"索引 + 速查"骨架）。
 **不要默认存** — 自动堆出来的钩子库都是垃圾，库的价值在于人工把关。
 
 ### crack 用到的术语
@@ -483,24 +483,33 @@ CTA（命中互动钩子模板）：
 
 ## 5. 输出位置铁律
 
-完整闭环（find → crack → adapt）跑完，**必须**落盘到当前工作目录：
+**统一输出根：当前工作目录下的 `./output/`，所有产物都收在这一棵树里**（已内置 gitignore；写盘前 `mkdir -p ./output/reports ./output/assets`）：
 
 ```
-./reports/
-  {YYYYMMDD-HHMM}-compose-{素材短码}.md        # compose 模式才有：素材画像 + 5 维 + 缺口清单
-  {YYYYMMDD-HHMM}-find-{我的账号末8位}.md      # 5-10 对标 + 为什么是真对标
-  {YYYYMMDD-HHMM}-crack-{对标末8位}.md         # 每条 4 行清单
-  {YYYYMMDD-HHMM}-adapt-{选题短码}.md          # 标题 + 封面 + 首段 + CTA（compose 模式必须含"素材溯源列"）
-  commerce-diagnostic-{YYYYMMDD-HHMM}.md       # commerce 模式：带货账号诊断 + 对标差距
-  commerce-review-{YYYYMMDD-HHMM}.md           # commerce 模式：视频链接/本地视频 + 对标审查
-  commerce-adapt-{YYYYMMDD-HHMM}.md            # commerce 模式：带货文案+分镜+风险标注
-  product-fact-{YYYYMMDD-HHMM}.md              # commerce 模式：商品事实卡
-
-./assets/                                     # 副产品，跨任务累积
-  hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md
+./output/
+  reports/                                     # 交付物（人看的报告，md 为主）
+    {YYYYMMDD-HHMM}-compose-{素材短码}.md      # compose 模式才有：素材画像 + 5 维 + 缺口清单
+    {YYYYMMDD-HHMM}-find-{我的账号末8位}.md    # 5-10 对标 + 为什么是真对标
+    {YYYYMMDD-HHMM}-crack-{对标末8位}.md       # 每条 4 行清单
+    {YYYYMMDD-HHMM}-adapt-{选题短码}.md        # 标题 + 封面 + 首段 + CTA（compose 模式必须含"素材溯源列"）
+    commerce-diagnostic-{YYYYMMDD-HHMM}.md     # commerce 模式：带货账号诊断 + 对标差距
+    commerce-review-{YYYYMMDD-HHMM}.md         # commerce 模式：视频链接/本地视频 + 对标审查
+    commerce-adapt-{YYYYMMDD-HHMM}.md          # commerce 模式：带货文案+分镜+风险标注
+    product-fact-{YYYYMMDD-HHMM}.md            # commerce 模式：商品事实卡
+  assets/                                      # 副产品，跨任务累积
+    hooks-xhs.md / hooks-douyin.md / hooks-kuaishou.md
+  cache/                                       # 平台数据缓存（24h 复用；可随时清空，会再生）
+    mc-data/{平台}/json/                       # mc 抓取原始 JSON（默认自动落这里）
+    tikhub/*.json                              # TikHub 响应缓存（默认开启，--no-cache / TIKHUB_CACHE=0 关）
+  media/                                       # 下载的平台媒体
+    {平台}-{作品ID}.{mp4|webp|jpg}             # 例：douyin-7428xxxx.mp4、xhs-661fxxxx-0.webp
 ```
 
-写盘前 `mkdir -p ./reports ./assets`。**只跑了 1 个命令、半成品、接口失败 → 不写盘**，只在对话里说。
+**media 落盘规则**：下载视频/封面时按 `{平台}-{作品ID}.{ext}` 命名写进 `./output/media/`；文件已存在就直接复用，**不要重复下载**。多图笔记用 `-0/-1/-2` 后缀。分析中间产物（视频切片/关键帧/音频）继续走系统临时目录用完即删，不进 `./output/`。
+
+旧版位置（`./reports/`、`./assets/`、`vendor/mc-data`）的存量不自动迁移；用户问到时提示可手动挪进 `./output/` 对应子目录。
+
+**只跑了 1 个命令、半成品、接口失败 → 不写盘**，只在对话里说。
 
 ### 5.1 PDF 输出（按需，不默认）
 
@@ -508,8 +517,8 @@ CTA（命中互动钩子模板）：
 
 ```bash
 python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
-  ./reports/{report}.md
-# 输出 ./reports/{report}.pdf （同名同位）
+  ./output/reports/{report}.md
+# 输出 ./output/reports/{report}.pdf （同名同位）
 ```
 
 脚本特性：
@@ -594,7 +603,7 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 - **只走 mc CLI**：禁止直接跑 `vendor/MediaCrawler/main.py` 或 `vendor/mc-venv/bin/python`——那会绕过冷却、失败退避、单实例锁、体量上限和数据脱敏的全部保护
 - **同平台冷却**：mc 内置同平台 30 分钟冷却；**抓取失败也自动退避 10 分钟**——连续失败通常是登录失效或风控信号（先 `mc --status` 查登录态），不要拿 `--force` 硬闯；agent 侧遵守同平台两次抓取间隔 ≥ 30 分钟，`--force` 只在用户明确要求时用
 - **每日预算**：同账号同平台每天 ≤ 4-6 次 run（风控看的是长期总量，不是单次频率）；当天额度用完就改走 TikHub 或改天再跑
-- **先复用再抓**：`vendor/mc-data/{平台}/json/` 里 24 小时内已抓过的同关键词/同账号数据先复用（直接读 `*_contents_*.json`，或 `python3 mediacrawler/lib/mc_client.py` 里的 `parse_results` 重新归一化），不重复抓
+- **先复用再抓**：`./output/cache/mc-data/{平台}/json/` 里 24 小时内已抓过的同关键词/同账号数据先复用（直接读 `*_contents_*.json`，或 `python3 mediacrawler/lib/mc_client.py` 里的 `parse_results` 重新归一化），不重复抓
 - **风控信号立即停手**：出现验证码、登录失效、连续空结果、`stale_data`（本次没产出新数据）→ 停止重试，告知用户过段时间再试或改走 TikHub 路径
 - 任务结束提醒用户：数据来自本人账号登录抓取，请控制频率
 
@@ -772,7 +781,7 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
 7. **multimodal 不省**：find Step 1 看我的、find Step 4 看候选 — 都要调。token 贵但不能省。
    - 退化兜底：媒体 URL 不可用时，只能用详情返回的标题、描述、标签做文本层推断，**必须明文标注“未完成视觉验证”**，不能输出封面模板结论。
 8. **完整闭环跑完才落盘**，半成品只在对话里说。
-9. **钩子库要问过用户才追加**。crack 完成后主动问"要存吗"，用户答 yes 才写 `assets/hooks-{platform}.md`，按 4 维拆解格式存（不是单句）。**禁止自动追加**。
+9. **钩子库要问过用户才追加**。crack 完成后主动问"要存吗"，用户答 yes 才写 `./output/assets/hooks-{platform}.md`，按 4 维拆解格式存（不是单句）。**禁止自动追加**。
 10. **环境自检 + 缺失透明**（最重要的一条 — 防"伪装完成"）：
 
    **开干前必做**：列出本次任务依赖的工具，逐个 ping。
@@ -825,7 +834,7 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    **禁止偷工**：
    - 跑了 1/3 不能说"诊断完成"
    - 跑完后必须明文标注：「本次只完成 Layer X，因为 Y 工具不可用 / Y 数据缺失」
-   - **半成品不写盘**（不污染 reports/ 目录）
+   - **半成品不写盘**（不污染 ./output/reports/ 目录）
    - 接口连续 3 次 retry 失败 → 视同工具不可用 → 进入上面的话术
 
 11. **TikHub 只走直接 REST API，不走 MCP**：所有数据抓取通过 `tikhub <platform> <endpoint> --args` CLI 调用；CLI 直接请求 `https://api.tikhub.io/api/v1/...`，使用 Bearer API key。**禁止请求 `mcp.tikhub.io`，禁止 `claude mcp add tikhub-*`，禁止任何 TikHub MCP 工具调用**。

@@ -17,7 +17,8 @@ Common options:
     --cookies STRING                cookie 登录时的 cookie 串
     --headless                      无头模式（扫码登录时不要用）
     --timeout SECONDS               爬取超时（默认 900）
-    --out DIR                       数据落盘目录（默认 <skill>/vendor/mc-data）
+    --out DIR                       数据落盘目录（默认 ./output/cache/mc-data，
+                                    跟随统一输出根；MC_DATA_DIR 可改默认）
     --force                         跳过同平台 5 分钟冷却（默认两次抓取要间隔）
 
 Output:
@@ -29,6 +30,7 @@ Env:
     MC_DEBUG=1      透传更多调试日志
     MC_PYTHON       指定建 venv 用的 Python (>=3.10)
     MC_VENDOR_DIR   覆盖 vendor 目录（默认 <skill>/vendor）
+    MC_DATA_DIR     覆盖抓取数据目录（默认 ./output/cache/mc-data）
     MC_NO_MIRROR=1  --setup 禁用镜像加速（pip/Chromium/GitHub 全部直连官方源）
     MC_GIT_URL      --setup 用指定的 URL 克隆 MediaCrawler（gh 代理/企业镜像等）
 

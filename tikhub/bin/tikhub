@@ -33,7 +33,13 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "lib"))
 
-from tikhub_client import TikhubClient, TikhubError, health, platforms  # noqa: E402
+from tikhub_client import (  # noqa: E402
+    TikhubClient,
+    TikhubError,
+    health,
+    platforms,
+    set_cache_enabled,
+)
 
 REFERENCES_DIR = HERE.parent / "references"
 SUPPORTED_PLATFORMS = (
@@ -210,10 +216,14 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument("--health", action="store_true", help="check tikhub health and exit")
     parser.add_argument("--platforms", action="store_true", help="list available platforms and exit")
+    parser.add_argument("--no-cache", action="store_true", help="bypass the 24h response cache (./output/cache/tikhub)")
     parser.add_argument("--json", help="raw JSON arguments object (overrides --key val)")
     parser.add_argument("positional", nargs="*", help="see usage in module docstring")
 
     args, extras = parser.parse_known_args(argv)
+
+    if args.no_cache:
+        set_cache_enabled(False)
 
     if args.health:
         try:
