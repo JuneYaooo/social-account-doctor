@@ -572,8 +572,9 @@ python3 ~/.claude/skills/social-account-doctor/scripts/render_report_pdf.py \
 | **B 站独家：弹幕** | — | — | — | `bilibili_web_fetch_video_danmaku`（4 类信号见 platforms/bilibili.md §3） |
 | **解析分享链接** | `xiaohongshu_web_v3_fetch_note_detail`（支持分享文本时直接传） | `douyin_app_v3_fetch_one_video_by_share_url` | `kuaishou_web_fetch_one_video_by_url` | `bilibili_web_bv_to_aid`（bv ↔ aid 转换） |
 
-### mc CLI — 登录自己账号的数据源（免 TikHub key，MediaCrawler 适配层）
+### mc CLI — 最后手段的数据源（MediaCrawler 适配层，上游反爬加剧）
 
+> ⚠️ **定位：五选一里的最后一档**。上游 MediaCrawler 近期被平台反爬重点盯防（用户报告出现验证码、限流甚至账号风控），只在 agent 自带 computer use / 浏览器工具、opencli、TikHub 都不可用时才用；用前必须过一遍下方频率铁律。
 > 位置 `mediacrawler/bin/mc`，文档 `mediacrawler/README.md`。原理：本机 Playwright 真实浏览器 + 用户自己平台的登录态，**不需要 TIKHUB_API_KEY**。首次用 `mc --setup` 安装（克隆 MediaCrawler 到 `vendor/` + 独立 venv + chromium，需 Python ≥ 3.10 + git）。何时走这条路径见 §10「数据源确认」。
 
 | 任务 | 命令 | 说明 |
@@ -780,32 +781,45 @@ tikhub kuaishou kuaishou_app_search_video_v2 --keyword Cursor --page 1
    - `adapt` 依赖：纯 LLM（无外部依赖）
    - L2 完整诊断依赖：数据源（搜对标 + 账号作品）+ multimodal
 
-   **数据源确认（首次使用 / 实时搜索场景必须先问）**：
-   - 用户**刚装好 skill 后第一次**需要平台数据，或本次需要**实时搜索/实时抓取**（find、crack 链接解析、账号作品列表）时，**先用一句话和用户确认走哪条路径**，不要自己默默选：
+   **数据源确认（按优先级自上而下，先自检再问人）**：
+   - 平台数据取法按固定优先级选，**越高越像真人、越安全**：
      ```
-     平台数据有两种取法：
-     ① mc 扫码登录（推荐）—— 免费，用你自己的小红书/抖音/快手/B站账号，弹浏览器
-        扫码一次，之后免扫码；小量使用（每天几次）完全够用；不支持视频号
-     ② TikHub API —— 按调用计费，快、稳，五平台全支持（含视频号），适合量大场景
-     用哪种？（也可以直接说"以后都用 ①/②"，我记住不再问）
+     ① agent 自带 computer use —— 用宿主的屏幕/浏览器操控能力，像真人一样打开
+        平台页面读搜索结果/作品详情（最安全：真实交互浏览器，无额外工具和账号风险）
+     ② agent 自带浏览器工具（browser use / MCP 浏览器等宿主内置能力）
+     ③ opencli
+     ④ TikHub API —— 付费但稳定，结构化 JSON，五平台全支持（含视频号）
+     ⑤ mc 扫码登录（MediaCrawler）—— 最后手段：上游被反爬重点盯防，账号风控
+        风险最高；只有 ①-④ 都不可用时才用（见 mediacrawler 章节的频率铁律）
      ```
-   - 用户已表达过明确偏好（说过"没有 key"“别用我账号”“以后都用 X”）→ 不再重复问，直接走对应路径
-   - 只有一条路可用（如 TikHub key 没配且用户不想装 mc；或目标是视频号只有 TikHub 能走）→ 不问，直接用可用的并告知
+   - **自检优先，不打扰用户**：①② 是宿主自带能力，agent 自己就知道有没有——有就直接用并告知用户一句"我用自带浏览器去看平台页面"；用 ①② 抓到的页面数据（标题/互动数/作者/封面截图）直接进 find/crack 流程，字段不够时结合页面目测补齐
+   - 宿主没有 ①②（或平台页面结构读不出来）→ **这时才问用户**，在 ③④⑤ 和手动给材料里选：
+     ```
+     我这边的浏览器能力抓不到平台数据，几个选择：
+     ③ opencli（如果装了）
+     ④ TikHub API（付费，稳定，五平台全支持含视频号；已有 key 的话我直接用）
+     ⑤ mc 扫码登录（免费但最后手段：用你自己的账号，上游反爬加剧有风控风险）
+     ⑥ 你直接给我 N 个对标链接 / 截图，我跳过搜索从 crack 开始
+     （也可以直接说"以后都用 X"，我记住不再问）
+     ```
+   - 涉及花钱（TikHub 按调用计费）必须先征得用户同意再用
+   - 用户已表达过明确偏好（"没有 key"“别用我账号”“以后都用 X"）→ 不再重复问，直接走对应路径
    - 用户给了本地视频 / 截图 / 自己上传的材料时不需要任何数据源 → 不问
 
    **缺哪个明说哪个**（在第一句话就说，不要默默缩范围）：
 
    ```
-   ⚠️ 本次需要平台数据，环境检查发现：
-      - 已配的数据源不可用（tikhub --health 不通 / TIKHUB_API_KEY 没配；
-        或 mc 未安装 / 登录失效，mc --status 可查）
+   ⚠️ 本次需要平台数据，当前路径不可用（说明具体原因：
+      宿主无浏览器能力 / 页面读不出 / opencli 未装 / tikhub --health 不通 /
+      mc 登录失效等）
 
-   三个选择：
-   ① 免费路径（推荐）：登录自己账号的 mc（首次 `mc --setup`，之后弹浏览器扫码一次即可；
-      支持小红书/抖音/快手/B站，不支持视频号，详见 `mediacrawler/README.md`）
-   ② 修复 TikHub（量大 / 需要视频号时）：配 TIKHUB_API_KEY 或 PATH
-      （详见仓库 `tikhub/README.md`），再来一次
-   ③ 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
+   按优先级还能选：
+   ① 换用 agent 自带 computer use / 浏览器工具直接访问平台页面（如果刚才没用）
+   ② opencli（未装时给出安装提示）
+   ③ TikHub：配 TIKHUB_API_KEY（详见仓库 `tikhub/README.md`）——付费，需视频号
+      或批量结构化数据时最稳
+   ④ mc：`mc --setup` + 扫码登录（最后手段，上游反爬加剧，先读频率铁律）
+   ⑤ 你直接给我 N 个对标链接 / 截图 — 我跳过搜索阶段，从 crack 开始
    ```
 
    **禁止偷工**：

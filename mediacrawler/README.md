@@ -1,7 +1,7 @@
-# mediacrawler/ — 用自己账号登录的数据源（免 TikHub key）
+# mediacrawler/ — 最后手段的数据源（MediaCrawler 适配层）
 
-> 对接 [NanmiCoder/MediaCrawler](https://github.com/NanmiCoder/MediaCrawler)（Playwright 真实浏览器爬虫）。
-> 没有 TikHub API key 时，用**自己的小红书 / 抖音 / 快手 / B 站账号**扫码登录，就能跑 find / crack / 账号诊断的数据获取。
+> ⚠️ **定位：数据源五档里的最后一档**。上游 MediaCrawler 近期被平台反爬重点盯防（用户报告验证码、限流、账号风控），**只在 agent 自带 computer use / 浏览器工具、opencli、TikHub 都不可用时才用本路径**。平台数据优先级：agent 自带 computer use > agent 自带浏览器 > opencli > TikHub（付费）> **本路径**。
+> 对接 [NanmiCoder/MediaCrawler](https://github.com/NanmiCoder/MediaCrawler)（Playwright 真实浏览器爬虫）。用自己的小红书 / 抖音 / 快手 / B 站账号扫码登录跑数据。
 
 ## 它解决什么
 
@@ -13,7 +13,7 @@
 | 稳定性 | 平台接口有版本波动 | 受登录风控影响，适合小批量（几十条/次） |
 | 成本 | 计费 | 免费 |
 
-两条路径输出同一套分析链路（find/crack/adapt 不变）。**推荐先用本路径**：免费、小量使用（同账号同平台每天几次）完全够用，且不依赖任何第三方 key；要**视频号**或**大批量**抓取时再上 TikHub。首次需要平台数据时 agent 会问你用哪种，答一次就记住偏好。
+两条路径输出同一套分析链路（find/crack/adapt 不变）。使用顺序：**TikHub 在前、本路径殿后**——本路径仅当 agent 自带 computer use / 浏览器工具、opencli、TikHub 都不可用时启用；上游反爬加剧的背景下，用自己账号跑数据要把下方频率铁律当硬约束执行。
 
 ## 安装（一次性）
 

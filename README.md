@@ -87,14 +87,16 @@ https://raw.githubusercontent.com/JuneYaooo/social-account-doctor/main/docs/inst
 安装脚本会引导你填这些，也可以编辑安装后的 `social-account-doctor/.env`：
 
 1. **一个会看图 / 看视频的大模型 key + 端点** —— 推荐 Gemini 3.1 Pro,OpenAI 协议兼容的服务都行（OpenAI / SiliconFlow / Gemini 官方兼容端点 / 可信代理站）。`VIDEO_ANALYSIS_BASE_URL` **必填**：脚本不内置任何默认端点，没填会直接报错——这是防止 key 和素材发到意外域名的保护
-2. **平台数据源，二选一（或都配）**：
-   - **推荐先用自己账号（免费）**：`mc --setup` 一次安装，之后抓数据时弹浏览器扫码登录自己的小红书 / 抖音 / 快手 / B 站账号。小量使用（每天几次）完全够用，内置频率保护；不支持视频号。详见 [mediacrawler/README.md](./mediacrawler/README.md)
-   - **量大或需要视频号？** [tikhub.io](https://tikhub.io/) 的 API key —— 一个 key 通吃五平台（含视频号），按调用计费
+2. **平台数据源，按优先级自上而下**（越高越像真人、越安全）：
+   - **① agent 自带 computer use / 浏览器工具（首选）** —— 装完 skill 直接让 agent 用宿主自带的浏览器能力访问平台页面，像真人一样浏览读数，无需任何配置
+   - **② opencli**
+   - **③ [tikhub.io](https://tikhub.io/) 的 API key** —— 付费但稳定，结构化 JSON，一个 key 通吃五平台（含视频号），适合批量场景
+   - **④ mc 扫码登录（最后手段）** —— 用自己的小红书 / 抖音 / 快手 / B 站账号登录抓取；上游 MediaCrawler 反爬加剧、账号风控风险最高，仅当以上都不可用时使用。详见 [mediacrawler/README.md](./mediacrawler/README.md)
 3. **一个语音转写 key**(可选) —— 只有当你要拆"真人口播"类视频时才需要(SenseVoice / Whisper 均可)
 
 > 🔒 脚本优先读当前进程环境变量，再读安装后的 Skill `.env`；仅为兼容旧安装回退读取 `~/.claude/.env`。
 
-> 💡 **两种数据源怎么选？装好后第一次用时 Claude 会先问你**（扫码登录免费、小量够用但无视频号 vs TikHub 计费快稳全平台），你答一次它就记住偏好，之后不再重复问；随时可以直接说「用 TikHub」或「用我自己账号」切换。系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
+> 💡 **数据源怎么选？** 优先级是 agent 自带 computer use / 浏览器（装完即可用，最像真人）> opencli > TikHub（付费稳定全平台）> mc（最后手段）。宿主没有浏览器能力时 Claude 会先问你，答一次就记住偏好；随时可以直接说「用 TikHub」「用我自己账号」切换。系统依赖:Python 3.10+,ffmpeg(`apt install ffmpeg` / `brew install ffmpeg`)。
 
 安装器支持 `--target claude|codex|cursor|openclaw`；完整命令见 `docs/install.md`。带货视频链接复用通用内容分析链路；链接解析或媒体下载失败时会要求上传本地文件，不会假装已看过视频。商品事实仍只来自用户上传材料。
 

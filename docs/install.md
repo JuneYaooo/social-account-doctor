@@ -38,7 +38,7 @@
 
    key 写到安装后的 `social-account-doctor/.env`（脚本从 `.env.example` 自动创建）。
 
-   **平台数据源推荐顺序**：先走免费的自有账号路径——首次需要平台数据时让 agent 跑 `mc --setup`（安装 MediaCrawler 登录式数据源，需 Python ≥ 3.10 + git），抓取时弹浏览器扫码，用用户自己的小红书 / 抖音 / 快手 / B 站账号；小量使用（同账号同平台每天几次）完全够用，mc 内置频率保护。需要**视频号**或**大批量**抓取时再配 `TIKHUB_API_KEY`（按调用计费），详见 `mediacrawler/README.md`。
+   **平台数据源优先级（越高越像真人、越安全）**：① agent 自带 computer use / 浏览器工具直接访问平台页面（首选，零配置）→ ② opencli → ③ TikHub API（付费、稳定、结构化 JSON，五平台全支持含视频号；要用时配 `TIKHUB_API_KEY`）→ ④ mc 扫码登录（**最后手段**：上游 MediaCrawler 反爬加剧、账号风控风险最高，仅当 ①-③ 都不可用时让 agent 跑 `mc --setup`，详见 `mediacrawler/README.md`）。宿主没有浏览器能力时 agent 会和用户确认用哪档。
 
 4. **确认系统依赖**:
    - Python 3.10+

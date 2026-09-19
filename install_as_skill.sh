@@ -238,9 +238,9 @@ main() {
 
     if ! grep -q "^TIKHUB_API_KEY=" "$SKILL_DIR/.env" 2>/dev/null || \
        grep -q "^TIKHUB_API_KEY=your-tikhub-key$" "$SKILL_DIR/.env" 2>/dev/null; then
-        print_info "未配置 TIKHUB_API_KEY（可选的付费路径，需要视频号或大批量抓取时再申请: https://tikhub.io/ ）"
-        print_info "  推荐先用免费的自己账号路径（小红书/抖音/快手/B站）："
-        print_info "    mc --setup   # 首次使用时安装（需要 Python>=3.10 和 git），抓数据时扫码登录"
+        print_info "未配置 TIKHUB_API_KEY（可选：付费的 TikHub API，需要稳定结构化数据或视频号时用，申请: https://tikhub.io/ ）"
+        print_info "  平台数据源优先级：agent 自带 computer use / 浏览器（首选，零配置）> opencli > TikHub > mc（最后手段）"
+        print_info "  mc 是最后手段（上游反爬加剧）: mc --setup # 仅当其他数据源都不可用时"
     fi
 
     print_header "安装完成"
@@ -249,9 +249,11 @@ main() {
     echo ""
     print_info "下一步："
     print_info "  1. 编辑 .env 填多模态 API key:  nano $SKILL_DIR/.env"
-    print_info "  2. 平台数据源（推荐先用免费的自己账号路径）："
-    print_info "     a. 跑 'mc --setup'，之后抓数据时弹浏览器扫码登录自己的小红书/抖音/快手/B站账号（免费，小量够用）"
-    print_info "     b. 量大或需要视频号: .env 填 TIKHUB_API_KEY（付费，五平台全支持）"
+    print_info "  2. 平台数据源按优先级（越高越像真人、越安全）："
+    print_info "     a. agent 自带 computer use / 浏览器工具（首选，零配置，直接访问平台页面）"
+    print_info "     b. opencli"
+    print_info "     c. TikHub（付费，稳定，五平台含视频号）:.env 填 TIKHUB_API_KEY"
+    print_info "     d. mc --setup（最后手段：上游反爬加剧，账号风控风险最高）"
     print_info "  3. 重启当前 agent 宿主让 skill 生效"
     print_info '  4. 直接对当前 agent 说："找对标 / 拆这条爆款 / 对着这条仿写"'
     echo ""
