@@ -39,6 +39,8 @@ mc --setup --no-mirror                                           # 整体禁用�
 
 pip 和 Playwright 的安装进度会逐行转发到 stderr，stdout 始终是纯 JSON。
 
+> 🔧 **依赖装到一半报「临时目录冲突 / 解压失败」？** 多半是 pip 的 HTTP 缓存（`~/.cache/pip`）里存了损坏的源码包——它跨 pip 版本和 TMPDIR 共享，换版本/换临时目录都无效。`mc --setup` 现在会自动逐包重试（默认 → 清缓存 `--no-cache-dir` → 关构建隔离 `--no-build-isolation`，兼容 jieba / pyexecjs 这类没有 wheel 的老源码包），通常无需人工干预；个别包仍失败时，错误信息会点名具体包并给出手动修复命令。
+
 系统要求：Python ≥ 3.10、git、可访问 GitHub 和 PyPI 的网络；**抖音还需要本机 Node.js ≥ 16**（签名用，`brew install node`），小红书 / 快手 / B 站不需要。没装 mc 命令时可以直接 `ln -sf "$(pwd)/mediacrawler/bin/mc" ~/.local/bin/mc`。
 
 ## 登录

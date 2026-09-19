@@ -331,13 +331,66 @@ def _smoke_test(vpy: Path) -> subprocess.CompletedProcess:
     )
 
 
+def _parse_requirements(req_file: Path) -> list[str]:
+    """把 requirements 文件拆成逐包 spec 列表（跳过注释和空行）。"""
+    specs = []
+    for line in req_file.read_text(encoding="utf-8").splitlines():
+        spec = line.split("#", 1)[0].strip()
+        if spec and not spec.startswith("-"):
+            specs.append(spec)
+    return specs
+
+
+def _pip_install_specs(
+    vpy: Path, specs: list[str], index_args: list[str],
+    log: Callable[[str], None] = _log, extra_flags: tuple[str, ...] = (),
+) -> bool:
+    cmd = [str(vpy), "-m", "pip", "install", "--timeout", "60", "--disable-pip-version-check",
+           *extra_flags, *index_args, *specs]
+    rc, _tail = _run_stream(cmd, log=log, timeout=1800)
+    return rc == 0
+
+
+def _pip_install_one(vpy: Path, spec: str, index_args: list[str],
+                     log: Callable[[str], None] = _log) -> bool:
+    """单包三级重试。
+
+    ① 默认安装失败 → ② ``--no-cache-dir``：pip 的 HTTP 缓存（~/.cache/pip）里
+    可能存着损坏的 tarball——它跨 pip 版本和 TMPDIR 共享，换版本/换临时目录都
+    治不了，只有绕开缓存重新下载（真实案例：用户端 jieba/pyexecjs 反复
+    「临时目录冲突」，手动下载解压能装，就是缓存损坏的特征）→
+    ③ ``--no-build-isolation``：jieba 0.42.1 / pyexecjs 1.5.1 这类没有 wheel
+    的老源码包，用 venv 自带 setuptools 直接装，绕开隔离构建的临时目录流程。
+    """
+    for attempt, flags in enumerate((
+        (),
+        ("--no-cache-dir",),
+        ("--no-cache-dir", "--no-build-isolation"),
+    ), start=1):
+        reason = {1: "默认", 2: "清缓存", 3: "关构建隔离"}[attempt]
+        log(f"[mc] 装包 {spec}（第 {attempt}/3 次，{reason}）")
+        if "--no-build-isolation" in flags:
+            # Python 3.12 的 venv 不再自带 setuptools，关隔离构建前先补齐
+            _pip_install_specs(vpy, ["setuptools", "wheel"], index_args, log)
+        if _pip_install_specs(vpy, [spec], index_args, log, extra_flags=flags):
+            return True
+    return False
+
+
 def _pip_install(vpy: Path, req_file: Path, index_args: list[str],
                  log: Callable[[str], None] = _log) -> None:
-    cmd = [str(vpy), "-m", "pip", "install", "--timeout", "60", "--disable-pip-version-check",
-           *index_args, "-r", str(req_file)]
-    rc, tail = _run_stream(cmd, log=log, timeout=1800)
-    if rc != 0:
-        raise McError(f"pip install 失败（{req_file.name}）: {' | '.join(tail[-3:])}")
+    if _pip_install_specs(vpy, ["-r", str(req_file)], index_args, log):
+        return
+    # 整体装失败 → 逐包装 + 单包三级重试，把「一个包坏拖死全部依赖」变成
+    # 「坏包自动恢复或被精确点名」，不再需要 agent 手动逐个救
+    specs = _parse_requirements(req_file)
+    log(f"[mc] 整体安装失败，改为逐包安装（{len(specs)} 个包，每包默认→清缓存→关构建隔离三级重试）")
+    failed = [spec for spec in specs if not _pip_install_one(vpy, spec, index_args, log)]
+    if failed:
+        raise McError(
+            f"依赖安装失败（{req_file.name}）: {', '.join(failed)}。"
+            f"手动修复：{vpy} -m pip install --no-cache-dir --no-build-isolation {' '.join(failed)}"
+        )
 
 
 def patch_config(mc_dir: Path | None = None) -> bool:

@@ -733,3 +733,78 @@ def test_run_crawl_kills_on_timeout(monkeypatch, tmp_path):
     import subprocess as sp
     pgrep = sp.run(["pgrep", "-f", "sleep 60"], capture_output=True, text=True)
     assert pgrep.returncode != 0
+
+
+# ---------------------------------------------------------------------------
+# pip install resilience (bulk failure -> per-package three-tier retry)
+# ---------------------------------------------------------------------------
+
+def _fake_pip_runner(monkeypatch, fail_bulk=True, always_fail=()):
+    calls = []
+
+    def fake_run_stream(cmd, log=None, timeout=1800, env=None, cwd=None, tail_lines=25):
+        joined = " ".join(cmd)
+        calls.append(joined)
+        if fail_bulk and " -r " in joined:
+            return 2, ["bulk install failed"]
+        for bad in always_fail:
+            if bad in joined:
+                return 1, [f"{bad} failed"]
+        return 0, ["ok"]
+
+    monkeypatch.setattr(mc, "_run_stream", fake_run_stream)
+    return calls
+
+
+def test_parse_requirements_strips_comments_and_options(tmp_path):
+    req = tmp_path / "requirements.txt"
+    req.write_text(
+        "# header comment\n"
+        "httpx==0.28.1\n"
+        "\n"
+        "aiofiles~=23.2.1  # inline comment\n"
+        "-r other.txt\n"
+        "--index-url https://example.com\n",
+        encoding="utf-8",
+    )
+    assert mc._parse_requirements(req) == ["httpx==0.28.1", "aiofiles~=23.2.1"]
+
+
+def test_pip_install_recovers_via_per_package_fallback(tmp_path, monkeypatch):
+    """整体装失败时逐包救回，不再需要 agent 手动逐个处理。"""
+    req = tmp_path / "requirements.txt"
+    req.write_text("httpx==1.0\njieba==0.42.1\n", encoding="utf-8")
+    calls = _fake_pip_runner(monkeypatch, fail_bulk=True)
+
+    mc._pip_install(Path("/fake/venv/bin/python"), req, [], log=lambda m: None)  # 不抛
+
+    assert " -r " in calls[0]  # 先尝试整体安装
+    assert any("httpx==1.0" in c for c in calls)
+    assert any("jieba==0.42.1" in c for c in calls)
+
+
+def test_pip_install_escalates_retry_flags_for_stubborn_package(tmp_path, monkeypatch):
+    """顽固包走完三级重试（默认→清缓存→关构建隔离），失败时精确点名并给手动命令。"""
+    req = tmp_path / "requirements.txt"
+    req.write_text("boom==1.0\n", encoding="utf-8")
+    calls = _fake_pip_runner(monkeypatch, fail_bulk=True, always_fail=("boom==1.0",))
+
+    with pytest.raises(mc.McError, match="boom==1.0"):
+        mc._pip_install(Path("/fake/venv/bin/python"), req, [], log=lambda m: None)
+
+    boom_calls = [c for c in calls if "boom==1.0" in c]
+    assert len(boom_calls) == 3
+    assert any("--no-cache-dir" in c for c in boom_calls)
+    assert any("--no-build-isolation" in c for c in boom_calls)
+    # 关构建隔离前先补齐 setuptools/wheel（Python 3.12 venv 不自带）
+    assert any("setuptools" in c and "wheel" in c for c in calls)
+
+
+def test_pip_install_bulk_success_skips_fallback(tmp_path, monkeypatch):
+    req = tmp_path / "requirements.txt"
+    req.write_text("httpx==1.0\n", encoding="utf-8")
+    calls = _fake_pip_runner(monkeypatch, fail_bulk=False)
+
+    mc._pip_install(Path("/fake/venv/bin/python"), req, [], log=lambda m: None)
+
+    assert len(calls) == 1  # 整体一次成功，不进逐包流程
