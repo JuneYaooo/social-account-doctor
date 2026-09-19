@@ -1,8 +1,14 @@
 # MediaCrawler 精简依赖 —— 只保留 mc search/detail/creator（xhs/dy/ks/bili + json 落盘）必需的包。
-# 与上游 requirements.txt 的差异：砍掉 webui/API 服务（fastapi/uvicorn）、Excel 导出（openpyxl）、
-# 测试（pytest/pytest-asyncio）、数据库迁移（alembic）、未使用的驱动（asyncmy/aiosqlite）和
-# python-dotenv。redis 虽然只当缓存用，但 proxy_ip_pool 在 import 期就实例化 IpCache，砍不掉。
-# 仅适配 mc_client.py 里的 PINNED_COMMIT；setup 时 smoke test 失败会自动回退上游全量 requirements。
+# 与上游 requirements.txt 的差异：
+#   - 砍掉词云三件套（jieba/wordcloud/matplotlib）——只被默认关闭的词云功能使用，
+#     mc --setup 会给 tools/words.py 打可选化补丁；jieba 0.42.1 无 wheel、wordcloud
+#     带 C 扩展，是用户环境源码构建故障的重灾区，不配挡在关键路径上
+#   - 砍掉 webui/API 服务（fastapi/uvicorn）、Excel 导出（openpyxl）、测试
+#     （pytest/pytest-asyncio）、数据库迁移（alembic）、未使用的驱动（asyncmy/aiosqlite）
+#     和 python-dotenv。redis 虽然只当缓存用，但 proxy_ip_pool 在 import 期就实例化
+#     IpCache，砍不掉。
+# 仅适配 mc_client.py 里的 PINNED_COMMIT；setup 时 smoke test 失败会自动回退上游全量
+# requirements（全量含词云三件套，配 patch 后的 words.py 也能正常 import）。
 httpx==0.28.1
 pillow>=12.2.0
 playwright>=1.61.0
@@ -13,9 +19,6 @@ aiomysql==0.2.0
 redis~=4.6.0
 pydantic>=2.13.4
 aiofiles~=23.2.1
-jieba==0.42.1
-wordcloud>=1.9.6
-matplotlib>=3.11.0
 requests==2.32.3
 parsel==1.9.1
 pyexecjs==1.5.1

@@ -58,7 +58,8 @@ pick_pip_index() {
     esac
 }
 
-# 装 Python 依赖的三级回退：
+# 装 Python 依赖的三级回退（重试自动 --no-cache-dir：首次失败后缓存即嫌疑对象，
+# pip 缓存跨版本共享，换 pip 版本治不了缓存损坏）：
 #   直装（venv/conda/CLT Python 直接成功）→ --user → --user --break-system-packages
 # 第三级是 PEP 668（externally-managed-environment，新 Debian/Ubuntu/Homebrew Python）
 # 的标准解法，只写用户目录 ~/.local（mac 上是 ~/Library/Python），不动系统包。
@@ -69,12 +70,12 @@ pip_install_reqs() {
     local common="--timeout 60 --disable-pip-version-check"
     # shellcheck disable=SC2086
     if $pip_bin install $common $PIP_INDEX_ARGS -r "$req"; then return 0; fi
-    print_warning "直接安装失败，改用 --user 重试"
+    print_warning "直接安装失败，改用 --user --no-cache-dir 重试"
     # shellcheck disable=SC2086
-    if $pip_bin install $common $PIP_INDEX_ARGS --user -r "$req"; then return 0; fi
+    if $pip_bin install $common --no-cache-dir $PIP_INDEX_ARGS --user -r "$req"; then return 0; fi
     print_warning "--user 也被拒（多为 externally-managed-environment），尝试 --break-system-packages"
     # shellcheck disable=SC2086
-    if $pip_bin install $common $PIP_INDEX_ARGS --user --break-system-packages -r "$req"; then return 0; fi
+    if $pip_bin install $common --no-cache-dir $PIP_INDEX_ARGS --user --break-system-packages -r "$req"; then return 0; fi
     return 1
 }
 

@@ -24,7 +24,7 @@ mc --setup          # 或 python3 mediacrawler/bin/mc --setup
 做五件事（全部落在 `vendor/`，已在 `.gitignore`）：
 1. 克隆 MediaCrawler 到 `vendor/MediaCrawler`（优先 pin 到适配过的 commit；github 直连失败自动回退 gh 代理镜像）
 2. 用系统 Python ≥ 3.10 建独立 venv `vendor/mc-venv`（不污染主环境）
-3. 安装依赖 —— 优先装裁剪版 `requirements-lean.txt`（砍掉 webui/测试/迁移类包，省下载），自检不过自动回退上游全量 requirements
+3. 安装依赖 —— 优先装裁剪版 `requirements-lean.txt`（砍掉词云三件套 jieba/wordcloud/matplotlib、webui/测试/迁移类包，省下载），自检不过自动回退上游全量 requirements
 4. 安装 Playwright chromium（约 200MB；官方 CDN 明显更慢时自动切 npmmirror 镜像）
 5. 把 `ENABLE_CDP_MODE` 补丁为 `False`（走标准 Playwright 模式，登录态可持久化）
 
@@ -39,7 +39,7 @@ mc --setup --no-mirror                                           # 整体禁用�
 
 pip 和 Playwright 的安装进度会逐行转发到 stderr，stdout 始终是纯 JSON。
 
-> 🔧 **依赖装到一半报「临时目录冲突 / 解压失败」？** 多半是 pip 的 HTTP 缓存（`~/.cache/pip`）里存了损坏的源码包——它跨 pip 版本和 TMPDIR 共享，换版本/换临时目录都无效。`mc --setup` 现在会自动逐包重试（默认 → 清缓存 `--no-cache-dir` → 关构建隔离 `--no-build-isolation`，兼容 jieba / pyexecjs 这类没有 wheel 的老源码包），通常无需人工干预；个别包仍失败时，错误信息会点名具体包并给出手动修复命令。
+> 🔧 **依赖装到一半报「临时目录冲突 / 解压失败」？** 老源码包（无 wheel）在部分用户环境里容易触发这类问题，其中 jieba / wordcloud / matplotlib 只被默认关闭的词云功能使用——`mc --setup` 已把它们移出必装路径（给 `tools/words.py` 打可选化补丁，`mc --status` 的 `wordcloud_optional` 可查）。真要开词云时单独装：`vendor/mc-venv/bin/pip install jieba wordcloud matplotlib`。其余包若仍报「临时目录冲突」，多半是 pip 的 HTTP 缓存（`~/.cache/pip`）存了损坏的源码包——它跨 pip 版本和 TMPDIR 共享，换版本/换临时目录都无效；`mc --setup` 会自动逐包重试（默认 → 清缓存 `--no-cache-dir` → 关构建隔离 `--no-build-isolation`），个别包仍失败时错误信息会点名具体包并给出手动修复命令。
 
 系统要求：Python ≥ 3.10、git、可访问 GitHub 和 PyPI 的网络；**抖音还需要本机 Node.js ≥ 16**（签名用，`brew install node`），小红书 / 快手 / B 站不需要。没装 mc 命令时可以直接 `ln -sf "$(pwd)/mediacrawler/bin/mc" ~/.local/bin/mc`。
 

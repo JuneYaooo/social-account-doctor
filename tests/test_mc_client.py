@@ -808,3 +808,52 @@ def test_pip_install_bulk_success_skips_fallback(tmp_path, monkeypatch):
     mc._pip_install(Path("/fake/venv/bin/python"), req, [], log=lambda m: None)
 
     assert len(calls) == 1  # 整体一次成功，不进逐包流程
+
+
+# ---------------------------------------------------------------------------
+# optional wordcloud patch (drops wheel-less sdists from the critical path)
+# ---------------------------------------------------------------------------
+
+def _fake_words_py(tmp_path, content=None):
+    words = tmp_path / "tools" / "words.py"
+    words.parent.mkdir(parents=True)
+    if content is None:
+        content = (
+            "import asyncio\nimport json\n\n"
+            "import aiofiles\n"
+            "import jieba\n"
+            "import matplotlib.pyplot as plt\n"
+            "from wordcloud import WordCloud\n\n"
+            "import config\n\n\n"
+            "class AsyncWordCloudGenerator:\n"
+            "    def __init__(self):\n"
+            "        logging.getLogger('jieba').setLevel(logging.WARNING)\n"
+        )
+    words.write_text(content, encoding="utf-8")
+    return words
+
+
+def test_patch_optional_wordcloud_wraps_imports_and_guards_init(tmp_path):
+    words = _fake_words_py(tmp_path)
+    assert mc.patch_optional_wordcloud(tmp_path) is True
+    text = words.read_text(encoding="utf-8")
+    assert "WORDCLOUD_DEPS_READY = True" in text
+    assert "except ImportError" in text
+    # 开词云但缺可选依赖时给明确报错，而不是 NameError
+    assert "raise RuntimeError('词云功能需要可选依赖" in text
+    # import 成功的分支里三件套仍然可见
+    assert "    import jieba" in text
+
+
+def test_patch_optional_wordcloud_is_idempotent(tmp_path):
+    _fake_words_py(tmp_path)
+    assert mc.patch_optional_wordcloud(tmp_path) is True
+    first = (tmp_path / "tools" / "words.py").read_text(encoding="utf-8")
+    assert mc.patch_optional_wordcloud(tmp_path) is False
+    assert (tmp_path / "tools" / "words.py").read_text(encoding="utf-8") == first
+
+
+def test_patch_optional_wordcloud_leaves_drifted_files_alone(tmp_path):
+    _fake_words_py(tmp_path, content="import asyncio\nprint('upstream changed')\n")
+    assert mc.patch_optional_wordcloud(tmp_path) is False
+    assert (tmp_path / "tools" / "words.py").read_text(encoding="utf-8") == "import asyncio\nprint('upstream changed')\n"

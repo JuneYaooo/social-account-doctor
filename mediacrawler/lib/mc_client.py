@@ -305,14 +305,14 @@ def _run_stream(
         log(f"[mc] 超过 {timeout}s，终止下载进程")
         try:
             os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-        except (ProcessLookupError, PermissionError):
+        except (ProcessLookupError, PermissionError, AttributeError):  # AttributeError: os.killpg Windows 不存在
             pass
         try:
             proc.wait(timeout=10)
         except subprocess.TimeoutExpired:
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
+            except (ProcessLookupError, PermissionError, AttributeError):  # AttributeError: os.killpg Windows 不存在
                 pass
             proc.wait(timeout=30)
         done.wait(timeout=5)
@@ -468,6 +468,66 @@ def pacing_patched(mc_dir: Path | None = None) -> bool:
     )
 
 
+# ---------------------------------------------------------------------------
+# 词云可选化：jieba 0.42.1（2020 年后无更新、无 wheel）和 wordcloud（带 C 扩展）
+# 是用户环境里源码构建故障的重灾区，但只被词云功能用到，而 mc 从不启用词云
+# （ENABLE_GET_WORDCLOUD 默认 False）。补丁后这三个包从必装变成可选，
+# 安装关键路径上只剩有 wheel 的包。
+# ---------------------------------------------------------------------------
+
+_WORDS_PY = "tools/words.py"
+
+
+def _patch_optional_wordcloud_text(text: str) -> str:
+    if "WORDCLOUD_DEPS_READY" in text:
+        return text  # 已打过
+    old_imports = (
+        "import aiofiles\n"
+        "import jieba\n"
+        "import matplotlib.pyplot as plt\n"
+        "from wordcloud import WordCloud\n"
+    )
+    if old_imports not in text:
+        return text  # 上游结构变了，保持原样（词云三件套退回必装）
+    patched = text.replace(
+        old_imports,
+        "import aiofiles\n"
+        "try:\n"
+        "    import jieba\n"
+        "    import matplotlib.pyplot as plt\n"
+        "    from wordcloud import WordCloud\n"
+        "    WORDCLOUD_DEPS_READY = True\n"
+        "except ImportError:  # 词云是可选功能（ENABLE_GET_WORDCLOUD 默认 False）\n"
+        "    WORDCLOUD_DEPS_READY = False\n",
+        1,
+    )
+    old_init = "    def __init__(self):\n        logging.getLogger('jieba').setLevel(logging.WARNING)"
+    new_init = (
+        "    def __init__(self):\n"
+        "        if not WORDCLOUD_DEPS_READY:\n"
+        "            raise RuntimeError('词云功能需要可选依赖 jieba/matplotlib/wordcloud；"
+        "安装后再开启 ENABLE_GET_WORDCLOUD')\n"
+        "        logging.getLogger('jieba').setLevel(logging.WARNING)"
+    )
+    if old_init in patched:
+        patched = patched.replace(old_init, new_init, 1)
+    return patched
+
+
+def patch_optional_wordcloud(mc_dir: Path | None = None) -> bool:
+    """幂等、非致命：上游结构不匹配时返回 False，词云三件套退回必装路径。"""
+    mc_dir = mc_dir or MC_DIR
+    path = mc_dir / _WORDS_PY
+    if not path.is_file():
+        return False
+    text = path.read_text(encoding="utf-8")
+    patched = _patch_optional_wordcloud_text(text)
+    if patched == text:
+        return False
+    path.write_text(patched, encoding="utf-8")
+    return True
+
+
 def login_state_platforms() -> list[str]:
     """Platforms that already have a saved login (browser_data profile dir)."""
     browser_data = MC_DIR / "browser_data"
@@ -514,6 +574,9 @@ def status() -> dict:
         if cfg.is_file():
             info["config_patched"] = "ENABLE_CDP_MODE = False" in cfg.read_text(encoding="utf-8")
         info["pacing_patched"] = pacing_patched()
+        words_py = MC_DIR / _WORDS_PY
+        if words_py.is_file():
+            info["wordcloud_optional"] = "WORDCLOUD_DEPS_READY" in words_py.read_text(encoding="utf-8")
         info["ok"] = info["config_patched"]
     info["version"] = _read_version_file()
     return info
@@ -575,7 +638,13 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
 
     actual_sha = _git(["rev-parse", "HEAD"], cwd=MC_DIR).stdout.strip()
 
-    # 2. venv
+    # 2. vendor 补丁（在装依赖前打，smoke test 跑的才是补丁后的代码）：
+    #    CDP 关闭 / 节奏抖动 / 词云三件套可选化
+    steps["config_patch"] = "applied" if patch_config() else "already patched"
+    steps["pacing_patch"] = patch_pacing()
+    steps["wordcloud_patch"] = "applied" if patch_optional_wordcloud() else "not needed"
+
+    # 3. venv
     if venv_python().is_file() and not force:
         steps["venv"] = "skipped (already exists)"
     else:
@@ -585,7 +654,7 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
             raise McError(f"venv 创建失败: {result.stderr.strip()[:300]}")
         steps["venv"] = "created"
 
-    # 3. deps：精简 requirements 优先（mc 的 search/detail/creator + json 落盘路径够用），
+    # 4. deps：精简 requirements 优先（mc 的 search/detail/creator + json 落盘路径够用），
     #    smoke test 不过就回退上游全量安装，保证行为不比原来差
     vpy = venv_python()
     index_args, index_name = pip_index_args(log)
@@ -606,7 +675,7 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
         _pip_install(vpy, MC_DIR / "requirements.txt", index_args, log)
         steps["pip"] = f"full via {index_name}"
 
-    # 4. playwright chromium（约 200MB，走择优后的下载源）
+    # 5. playwright chromium（约 200MB，走择优后的下载源）
     log("[mc] 安装 Playwright chromium（约 200MB，取决于网速需要几分钟）")
     pw_env = os.environ.copy()
     pw_env.update(playwright_mirror_env(log))
@@ -618,16 +687,14 @@ def setup(force: bool = False, log: Callable[[str], None] = _log) -> dict:
         raise McError(f"playwright install 失败: {' | '.join(tail[-3:])}")
     steps["playwright"] = "chromium installed"
 
-    # 5. patch config + 节奏抖动 + 版本记录
-    steps["config_patch"] = "applied" if patch_config() else "already patched"
-    steps["pacing_patch"] = patch_pacing()
+    # 6. 版本记录 + smoke test
     VERSION_FILE.write_text(json.dumps({
         "pinned_commit": PINNED_COMMIT,
         "actual_commit": actual_sha,
         "setup_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    # 6. smoke test
+    # smoke test
     result = _smoke_test(vpy)
     if result.returncode != 0:
         raise McError(f"main.py --help 自检失败: {result.stderr.strip()[:300]}")
@@ -763,14 +830,14 @@ def run_crawl(
         log(f"[mc] 超过 {timeout}s，终止爬取（已抓到的数据仍会解析）")
         try:
             os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
-        except (ProcessLookupError, PermissionError):
+        except (ProcessLookupError, PermissionError, AttributeError):  # AttributeError: os.killpg Windows 不存在
             pass
         try:
             proc.wait(timeout=10)
         except subprocess.TimeoutExpired:
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
+            except (ProcessLookupError, PermissionError, AttributeError):  # AttributeError: os.killpg Windows 不存在
                 pass
             proc.wait(timeout=30)
         pump.join(timeout=5)
